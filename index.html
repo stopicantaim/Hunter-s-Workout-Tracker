@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#080a10"/>
-<title>GAINZ</title>
+<title>STOPICANTGROW</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -202,21 +202,17 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060;--p
 .set-hdr{display:grid;grid-template-columns:28px 1fr 1fr 38px;gap:6px;margin-bottom:4px}
 .set-hdr span{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--sub);text-align:center;text-transform:uppercase}
 
-/* ── rest timer overlay ── */
-.timer-overlay{position:fixed;inset:0;background:rgba(8,10,16,.92);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
-.timer-overlay.hidden{display:none}
-.timer-lift{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
-.timer-next{font-size:12px;color:var(--sub);margin-bottom:28px}
-.timer-ring{position:relative;width:200px;height:200px;margin-bottom:28px}
-.timer-svg{transform:rotate(-90deg)}
-.timer-bg{fill:none;stroke:var(--mute);stroke-width:8}
-.timer-arc{fill:none;stroke:var(--ph);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s}
-.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--text)}
-.timer-num.low{color:var(--ph)}
-.timer-btns{display:flex;gap:10px}
-.timer-btn{padding:13px 28px;border-radius:var(--rs);border:none;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:.02em}
-.timer-btn.skip{background:var(--card2);color:var(--sub);border:1px solid var(--border2)}
-.timer-btn.stop{background:var(--ph);color:#fff}
+/* ── inline rest timer bar ── */
+.rest-bar-wrap{background:var(--bg2);border-top:1px solid var(--border);padding:8px 13px 10px;display:none}
+.rest-bar-wrap.active{display:block}
+.rest-bar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.rest-bar-label{font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.05em}
+.rest-bar-time{font-size:13px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--ph)}
+.rest-bar-time.low{color:#ef4444}
+.rest-bar-track{height:4px;background:var(--mute);border-radius:99px;overflow:hidden}
+.rest-bar-fill{height:100%;background:var(--ph);border-radius:99px;transition:width .9s linear,background .3s}
+.rest-bar-fill.low{background:#ef4444}
+.rest-bar-skip{background:none;border:none;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer;padding:0;letter-spacing:.04em;margin-top:5px;display:block}
 
 /* ── leaderboard points ── */
 .lb-header{padding:4px 0 12px}
@@ -272,7 +268,7 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060;--p
 <header class="hdr">
   <div class="hdr-inner">
     <div class="hdr-left">
-      <div class="app-logo">GAINZ</div>
+      <div class="app-logo">STOPICANTGROW</div>
       <div class="phase-pill" id="phase-pill">CUT</div>
     </div>
     <div class="hdr-badge" id="day-badge">Day — / 60</div>
@@ -486,24 +482,6 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060;--p
 </section>
 
 </main>
-</div>
-
-<!-- REST TIMER OVERLAY -->
-<div class="timer-overlay hidden" id="timer-overlay">
-  <div class="timer-lift" id="timer-lift-name"></div>
-  <div class="timer-next" id="timer-next-set"></div>
-  <div class="timer-ring">
-    <svg class="timer-svg" width="200" height="200" viewBox="0 0 200 200">
-      <circle class="timer-bg" cx="100" cy="100" r="88"/>
-      <circle class="timer-arc" id="timer-arc" cx="100" cy="100" r="88"
-        stroke-dasharray="553" stroke-dashoffset="0"/>
-    </svg>
-    <div class="timer-num" id="timer-num">2:00</div>
-  </div>
-  <div class="timer-btns">
-    <button class="timer-btn skip" id="timer-skip">Skip</button>
-    <button class="timer-btn stop" id="timer-stop">Done resting</button>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1077,70 +1055,62 @@ document.getElementById("reset-btn").addEventListener("click",()=>{
 });
 
 
-// ─── REST TIMER ──────────────────────────────────────
-let timerInterval=null;
-let timerSeconds=120;
+// ─── INLINE REST TIMER BAR ───────────────────────────
 const TOTAL=120;
-const circumference=2*Math.PI*88; // 553
-const arc=document.getElementById("timer-arc");
-const numEl=document.getElementById("timer-num");
-const overlay=document.getElementById("timer-overlay");
-
-function startTimer(liftName, setsDone, totalSets){
-  // cancel any running timer first
-  if(timerInterval) clearInterval(timerInterval);
-  timerSeconds=TOTAL;
-  document.getElementById("timer-lift-name").textContent=liftName;
-  document.getElementById("timer-next-set").textContent=
-    setsDone<totalSets?`Next: Set ${setsDone+1} of ${totalSets}`:"Last set done";
-  overlay.classList.remove("hidden");
-  updateTimerDisplay();
-  timerInterval=setInterval(()=>{
-    timerSeconds--;
-    updateTimerDisplay();
-    if(timerSeconds<=0){
-      clearInterval(timerInterval);timerInterval=null;
-      playDone();
-      setTimeout(()=>overlay.classList.add("hidden"),600);
-    }
-  },1000);
-  // vibrate on start if available
-  if(navigator.vibrate) navigator.vibrate(60);
-}
-
-function updateTimerDisplay(){
-  const m=Math.floor(timerSeconds/60),s=timerSeconds%60;
-  numEl.textContent=`${m}:${s.toString().padStart(2,"0")}`;
-  numEl.className="timer-num"+(timerSeconds<=10?" low":"");
-  const pct=timerSeconds/TOTAL;
-  arc.style.strokeDashoffset=circumference*(1-pct);
-  arc.style.stroke=timerSeconds<=10?"#ef4444":"var(--ph)";
-}
+let timerInterval=null;
+let activeBarWrap=null;
 
 function playDone(){
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    // two-tone chime: 880Hz then 1100Hz
     [[880,0],[1100,0.18]].forEach(([freq,delay])=>{
       const osc=ctx.createOscillator(),gain=ctx.createGain();
       osc.connect(gain);gain.connect(ctx.destination);
       osc.type="sine";osc.frequency.value=freq;
       gain.gain.setValueAtTime(0,ctx.currentTime+delay);
-      gain.gain.linearRampToValueAtTime(0.4,ctx.currentTime+delay+0.01);
+      gain.gain.linearRampToValueAtTime(0.35,ctx.currentTime+delay+0.01);
       gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.5);
       osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.55);
     });
   }catch(e){}
-  if(navigator.vibrate) navigator.vibrate([200,100,200]);
+  if(navigator.vibrate) navigator.vibrate([150,80,150]);
 }
 
 function stopTimer(){
   if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-  overlay.classList.add("hidden");
+  if(activeBarWrap){activeBarWrap.classList.remove("active");activeBarWrap=null;}
 }
 
-document.getElementById("timer-skip").addEventListener("click",stopTimer);
-document.getElementById("timer-stop").addEventListener("click",stopTimer);
+function startTimer(barWrap, setsDone, totalSets){
+  // stop any running timer
+  stopTimer();
+  let secs=TOTAL;
+  activeBarWrap=barWrap;
+  barWrap.classList.add("active");
+  const timeEl=barWrap.querySelector(".rest-bar-time");
+  const fillEl=barWrap.querySelector(".rest-bar-fill");
+  const labelEl=barWrap.querySelector(".rest-bar-label");
+  labelEl.textContent=setsDone<totalSets?`Rest — Set ${setsDone+1} of ${totalSets} up next`:"Last set done — rest up";
+
+  function tick(){
+    const m=Math.floor(secs/60),s=secs%60;
+    timeEl.textContent=`${m}:${s.toString().padStart(2,"0")}`;
+    const low=secs<=10;
+    timeEl.className="rest-bar-time"+(low?" low":"");
+    fillEl.style.width=((secs/TOTAL)*100)+"%";
+    fillEl.className="rest-bar-fill"+(low?" low":"");
+    if(secs<=0){
+      clearInterval(timerInterval);timerInterval=null;
+      playDone();
+      setTimeout(()=>{barWrap.classList.remove("active");activeBarWrap=null;},800);
+      return;
+    }
+    secs--;
+  }
+  tick();
+  timerInterval=setInterval(tick,1000);
+  if(navigator.vibrate) navigator.vibrate(40);
+}
 
 // ─── SET LOGGER ──────────────────────────────────────
 // setLogs: { "wk1-push-0": [{w:95,r:6,done:true},{w:95,r:8,done:true},...] }
@@ -1159,9 +1129,8 @@ function renderSetLogger(ex, ck, dayKey, exIdx){
   const numSets=getSetCount(ex.s);
   const defReps=getDefaultReps(ex.s);
   const defWt=parseFloat(ex.l)||0;
-  const logKey=`${ck}`;
+  const logKey=ck;
   const existing=setLogs[logKey]||[];
-  // pad / init
   while(existing.length<numSets) existing.push({w:defWt||"",r:defReps,done:false});
   setLogs[logKey]=existing;
 
@@ -1177,10 +1146,30 @@ function renderSetLogger(ex, ck, dayKey, exIdx){
     const row=document.createElement("div");row.className="set-row";
     row.innerHTML=`
       <div class="set-num">${si+1}</div>
-      <input class="set-input" type="number" step="2.5" placeholder="lb" value="${st.w}" data-si="${si}" data-field="w"/>
-      <input class="set-input" type="number" placeholder="reps" value="${st.r}" data-si="${si}" data-field="r"/>
+      <input class="set-input" type="number" step="2.5" placeholder="lb" value="${st.w||""}" data-si="${si}" data-field="w"/>
+      <input class="set-input" type="number" placeholder="reps" value="${st.r||""}" data-si="${si}" data-field="r"/>
       <button class="set-done-btn${st.done?" done":""}" data-si="${si}">✓</button>`;
-    rows.appendChild(row);
+
+    // rest bar lives inside each set row, shown after that set is ticked
+    const restBar=document.createElement("div");
+    restBar.className="rest-bar-wrap";
+    restBar.innerHTML=`
+      <div class="rest-bar-top">
+        <div class="rest-bar-label">Rest</div>
+        <div class="rest-bar-time">2:00</div>
+      </div>
+      <div class="rest-bar-track"><div class="rest-bar-fill" style="width:100%"></div></div>
+      <button class="rest-bar-skip">Skip rest</button>`;
+    restBar.querySelector(".rest-bar-skip").addEventListener("click",stopTimer);
+
+    // append rest bar after the set row (as sibling, inside a fragment)
+    const frag=document.createDocumentFragment();
+    frag.appendChild(row);
+    frag.appendChild(restBar);
+    rows.appendChild(frag);
+
+    // store ref on row for easy access
+    row._restBar=restBar;
   });
 
   wrap.appendChild(rows);
@@ -1195,6 +1184,7 @@ function renderSetLogger(ex, ck, dayKey, exIdx){
   });
 
   // set done buttons
+  const allSetRows=[...rows.querySelectorAll(".set-row")];
   wrap.querySelectorAll(".set-done-btn").forEach(btn=>{
     btn.addEventListener("click",()=>{
       const si=+btn.dataset.si;
@@ -1203,15 +1193,22 @@ function renderSetLogger(ex, ck, dayKey, exIdx){
       btn.classList.toggle("done",setLogs[logKey][si].done);
       if(setLogs[logKey][si].done){
         const doneCount=setLogs[logKey].filter(s=>s.done).length;
-        startTimer(ex.n, doneCount, numSets);
-        // if all sets done, also check off the exercise
-        if(doneCount===numSets && !checks[ck]){
+        // show rest bar on the NEXT set row (or current if last)
+        const targetRow=allSetRows[si];
+        if(targetRow&&targetRow._restBar){
+          startTimer(targetRow._restBar, doneCount, numSets);
+        }
+        // auto-complete exercise when all sets done
+        if(doneCount===numSets&&!checks[ck]){
           checks[ck]=true;sv("checks",checks);
-          // update the parent check button
           const parentChk=wrap.closest(".ex-row")?.querySelector(".ex-chk");
           if(parentChk){parentChk.classList.add("done");parentChk.textContent="✓";}
           renderDash();
         }
+      } else {
+        // un-tick: hide rest bar for that row
+        const targetRow=allSetRows[si];
+        if(targetRow?._restBar) targetRow._restBar.classList.remove("active");
       }
     });
   });
