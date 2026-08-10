@@ -90,8 +90,6 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060;--p
 .gh-dot.dn{background:#1c0505;border-color:#7c0505;color:#ef4444}
 
 /* leaderboard */
-.lb-lift-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:12px}
-.lb-lift-tabs::-webkit-scrollbar{display:none}
 .lb-tab{background:var(--card);border:1px solid var(--border);border-radius:99px;padding:6px 13px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;flex-shrink:0}
 .lb-tab.on{background:var(--ph-bg);border-color:var(--ph-border);color:var(--ph)}
 .lb-row{display:grid;grid-template-columns:30px 1fr auto auto;gap:8px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;margin-bottom:8px}
@@ -191,6 +189,81 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060;--p
 .empty{text-align:center;padding:36px 20px;color:var(--sub);font-size:13px;line-height:1.6}
 .empty-icon{font-size:34px;margin-bottom:10px}
 .divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ── set logger ── */
+.set-logger{background:var(--bg2);border-top:1px solid var(--border);padding:10px 13px}
+.set-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.set-row{display:grid;grid-template-columns:28px 1fr 1fr 38px;gap:6px;align-items:center}
+.set-num{font-size:11px;font-weight:800;color:var(--sub);text-align:center}
+.set-input{background:var(--card);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-size:15px;font-weight:700;padding:7px 8px;text-align:center;width:100%;outline:none;-webkit-appearance:none;font-variant-numeric:tabular-nums}
+.set-input:focus{border-color:var(--ph)}
+.set-done-btn{width:34px;height:34px;border-radius:8px;border:2px solid var(--border2);background:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;color:transparent;flex-shrink:0}
+.set-done-btn.done{background:var(--ph-bg);border-color:var(--ph);color:var(--ph)}
+.set-hdr{display:grid;grid-template-columns:28px 1fr 1fr 38px;gap:6px;margin-bottom:4px}
+.set-hdr span{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--sub);text-align:center;text-transform:uppercase}
+
+/* ── rest timer overlay ── */
+.timer-overlay{position:fixed;inset:0;background:rgba(8,10,16,.92);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.timer-overlay.hidden{display:none}
+.timer-lift{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.timer-next{font-size:12px;color:var(--sub);margin-bottom:28px}
+.timer-ring{position:relative;width:200px;height:200px;margin-bottom:28px}
+.timer-svg{transform:rotate(-90deg)}
+.timer-bg{fill:none;stroke:var(--mute);stroke-width:8}
+.timer-arc{fill:none;stroke:var(--ph);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--text)}
+.timer-num.low{color:var(--ph)}
+.timer-btns{display:flex;gap:10px}
+.timer-btn{padding:13px 28px;border-radius:var(--rs);border:none;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:.02em}
+.timer-btn.skip{background:var(--card2);color:var(--sub);border:1px solid var(--border2)}
+.timer-btn.stop{background:var(--ph);color:#fff}
+
+/* ── leaderboard points ── */
+.lb-header{padding:4px 0 12px}
+.lb-title{font-size:20px;font-weight:900;letter-spacing:.04em}
+.lb-sub{font-size:12px;color:var(--sub);margin-top:3px}
+.lb-legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs)}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--sub)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-dot.sess{background:var(--ph)}
+.legend-dot.pr{background:#f59f00}
+.legend-dot.streak{background:#a78bfa}
+.legend-dot.band{background:#60a5fa}
+
+.lb-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px;transition:transform .15s}
+.lb-card.you{border-color:var(--ph)}
+.lb-card.r1{border-color:#fbbf24}
+.lb-card-top{display:grid;grid-template-columns:44px 1fr auto;align-items:center;padding:13px 14px;gap:10px}
+.lb-rank-block{text-align:center}
+.lb-rank-num{font-size:22px;font-weight:900}
+.lb-rank-num.r1{color:#fbbf24}.lb-rank-num.r2{color:#94a3b8}.lb-rank-num.r3{color:#b45309}
+.lb-rank-badge{font-size:9px;font-weight:800;letter-spacing:.06em;color:var(--sub);text-transform:uppercase}
+.lb-name-block .lb-pname{font-size:15px;font-weight:800}
+.lb-name-block .lb-pname.you{color:var(--ph)}
+.lb-name-block .lb-ptags{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap}
+.lb-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px}
+.lb-tag.sess{background:#0a2e20;color:var(--ph)}
+.lb-tag.pr{background:#1c1200;color:#f59f00}
+.lb-tag.streak{background:#1a0a3d;color:#a78bfa}
+.lb-tag.band{background:#071428;color:#60a5fa}
+.lb-score-block{text-align:right}
+.lb-score{font-size:28px;font-weight:900;color:var(--ph);font-variant-numeric:tabular-nums;line-height:1}
+.lb-score-lbl{font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--sub);text-transform:uppercase;margin-top:2px}
+.lb-card.you .lb-score{color:var(--ph)}
+.lb-card.r1 .lb-score{color:#fbbf24}
+
+.lb-bar-row{padding:0 14px 12px;display:flex;align-items:center;gap:8px}
+.lb-bar-track{flex:1;height:5px;background:var(--mute);border-radius:99px;overflow:hidden}
+.lb-bar-fill{height:100%;border-radius:99px;transition:width .5s ease}
+.lb-bar-fill.you{background:linear-gradient(90deg,var(--ph2),var(--ph))}
+.lb-bar-fill.r1{background:linear-gradient(90deg,#d97706,#fbbf24)}
+.lb-bar-fill.other{background:var(--mute)}
+.lb-bar-pct{font-size:11px;font-weight:700;color:var(--sub);width:34px;text-align:right;flex-shrink:0}
+
+.lb-update-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:11px 13px;margin-bottom:7px;gap:8px}
+.lb-update-name{font-size:13px;font-weight:700}
+.lb-update-score{font-size:13px;font-weight:800;color:var(--ph)}
+.lb-edit-btn{background:var(--card2);border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer}
 </style>
 </head>
 <body class="cut">
@@ -283,23 +356,30 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060;--p
 
 <!-- LEADERBOARD -->
 <section id="tab-lb" class="page">
-  <div class="lb-lift-tabs" id="lb-tabs"></div>
+  <div class="lb-header">
+    <div class="lb-title">Leaderboard</div>
+    <div class="lb-sub">Points reset weekly. Consistency wins.</div>
+  </div>
+  <div class="lb-legend">
+    <div class="legend-item"><span class="legend-dot sess"></span>Session +10</div>
+    <div class="legend-item"><span class="legend-dot pr"></span>PR +25</div>
+    <div class="legend-item"><span class="legend-dot streak"></span>Week streak +15</div>
+    <div class="legend-item"><span class="legend-dot band"></span>On-band +10</div>
+  </div>
   <div id="lb-board"></div>
   <div class="sh">Add a Friend</div>
-  <div class="lb-add-form">
+  <div class="fcard">
     <div class="frow"><label>Name</label><input type="text" id="lbf-name" placeholder="e.g. Marcus"/></div>
-    <div class="frow">
-      <label>Lift</label>
-      <select id="lbf-lift">
-        <option>Bench Press</option><option>Overhead Press</option>
-        <option>Lat Pulldown</option><option>Assisted Pull-up</option>
-        <option>Seated Row</option><option>T-Bar Row</option>
-      </select>
+    <div class="frow"><label>Sessions this week (0–7)</label><input type="number" min="0" max="7" id="lbf-sess" placeholder="4"/></div>
+    <div class="frow"><label>PRs hit this week</label><input type="number" min="0" max="6" id="lbf-prs" placeholder="1"/></div>
+    <div class="frow"><label>Week streak</label><input type="number" min="0" id="lbf-streak" placeholder="2"/></div>
+    <div class="frow"><label>On-band this week?</label>
+      <select id="lbf-band"><option value="1">Yes</option><option value="0">No</option></select>
     </div>
-    <div class="frow"><label>Weight (lb)</label><input type="number" id="lbf-wt" placeholder="225"/></div>
-    <div class="frow"><label>Reps</label><input type="number" id="lbf-rp" placeholder="5"/></div>
     <button class="btn" id="lbf-save">Add to Board</button>
   </div>
+  <div class="sh">Update a Friend</div>
+  <div id="lb-update-list"></div>
 </section>
 
 <!-- WORKOUT -->
@@ -353,17 +433,17 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060;--p
   <div class="sh" style="margin-top:4px">Active Phase</div>
   <div class="phase-grid">
     <div class="ph-btn cut on" data-phase="cut">
-      <div class="ph-icon">🔥</div>
+      
       <div class="ph-name">CUT</div>
       <div class="ph-desc">Lose fat, hold muscle</div>
     </div>
     <div class="ph-btn bulk" data-phase="bulk">
-      <div class="ph-icon">📈</div>
+      
       <div class="ph-name">BULK</div>
       <div class="ph-desc">Build size, add strength</div>
     </div>
     <div class="ph-btn maintain" data-phase="maintain">
-      <div class="ph-icon">⚖️</div>
+      
       <div class="ph-name">MAINTAIN</div>
       <div class="ph-desc">Hold weight, progress lifts</div>
     </div>
@@ -407,6 +487,25 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060;--p
 
 </main>
 </div>
+
+<!-- REST TIMER OVERLAY -->
+<div class="timer-overlay hidden" id="timer-overlay">
+  <div class="timer-lift" id="timer-lift-name"></div>
+  <div class="timer-next" id="timer-next-set"></div>
+  <div class="timer-ring">
+    <svg class="timer-svg" width="200" height="200" viewBox="0 0 200 200">
+      <circle class="timer-bg" cx="100" cy="100" r="88"/>
+      <circle class="timer-arc" id="timer-arc" cx="100" cy="100" r="88"
+        stroke-dasharray="553" stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-num" id="timer-num">2:00</div>
+  </div>
+  <div class="timer-btns">
+    <button class="timer-btn skip" id="timer-skip">Skip</button>
+    <button class="timer-btn stop" id="timer-stop">Done resting</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -463,9 +562,9 @@ const DAYS=[
   ]},
 ];
 const SESSIONS=[
-  {key:"push",icon:"💪",lbl:"Push"},{key:"pull",icon:"🔙",lbl:"Pull"},
-  {key:"upper",icon:"⬆",lbl:"Upper"},{key:"arms",icon:"🦾",lbl:"Arms"},
-  {key:"run",icon:"🏃",lbl:"Run"},{key:"walk",icon:"🚶",lbl:"Walk"},
+  {key:"push",icon:"",lbl:"Push"},{key:"pull",icon:"",lbl:"Pull"},
+  {key:"upper",icon:"",lbl:"Upper"},{key:"arms",icon:"",lbl:"Arms"},
+  {key:"run",icon:"",lbl:"Run"},{key:"walk",icon:"",lbl:"Walk"},
 ];
 
 // ─── storage ─────────────────────────────────────────
@@ -486,7 +585,7 @@ let goals  =ld("goals")||{};      // {liftName: goalE1rm}
 let friends=ld("friends")||[];    // [{name,lift,w,r}]
 let week   =1;
 let openSwap=null;
-let lbLift =LIFTS[0];
+
 
 // ─── phase apply ─────────────────────────────────────
 function applyPhase(p){
@@ -658,65 +757,141 @@ document.getElementById("g-save").addEventListener("click",()=>{
   renderGoals();toast("Goal set ✓");
 });
 
-// ─── LEADERBOARD ─────────────────────────────────────
-function renderLB(){
-  // lift tabs
-  const tabs=document.getElementById("lb-tabs");tabs.innerHTML="";
-  LIFTS.forEach(l=>{
-    const btn=document.createElement("div");btn.className="lb-tab"+(l===lbLift?" on":"");
-    btn.textContent=l;btn.addEventListener("click",()=>{lbLift=l;renderLB();});
-    tabs.appendChild(btn);
+// ─── LEADERBOARD — POINTS SYSTEM ─────────────────────
+// Points: session=10, PR=25, streak bonus=15/wk, on-band=10
+// friends: [{id,name,sess,prs,streak,band}]
+function calcPoints(sess,prs,streak,band){
+  const sessP=(sess||0)*10;
+  const prP=(prs||0)*25;
+  const streakP=streak>0?(streak-1)*15:0; // bonus per consecutive wk after wk1
+  const bandP=(band?1:0)*10;
+  return sessP+prP+streakP+bandP;
+}
+function myPoints(){
+  const doneSess=SESSIONS.filter(s=>checks[`w${week}-s-${s.key}`]).length;
+  // count PRs this week from liftLogs (simplified: any lift logged this week)
+  const weekStart=new Date(plan.start||today());
+  weekStart.setDate(weekStart.getDate()+(week-1)*7);
+  const ws=weekStart.toISOString().split("T")[0];
+  const we=new Date(weekStart);we.setDate(we.getDate()+6);
+  const weStr=we.toISOString().split("T")[0];
+  const weekLifts=lifts.filter(l=>l.d>=ws&&l.d<=weStr);
+  let prCount=0;
+  LIFTS.forEach(name=>{
+    const wl=weekLifts.filter(l=>l.name===name);
+    const prev=lifts.filter(l=>l.name===name&&l.d<ws);
+    if(wl.length&&prev.length){
+      const bestPrev=Math.max(...prev.map(l=>e1rm(l.w,l.r)));
+      if(Math.max(...wl.map(l=>e1rm(l.w,l.r)))>bestPrev) prCount++;
+    }
   });
+  // streak: count consecutive weeks with 6+ sessions before current
+  let streak=0;
+  for(let wk=week-1;wk>=1;wk--){
+    const wkSess=SESSIONS.filter(s=>checks[`w${wk}-s-${s.key}`]).length;
+    if(wkSess>=6) streak++; else break;
+  }
+  if(doneSess>=6) streak++;
+  // band status
+  const sorted=[...weighins].sort((a,b)=>a.d.localeCompare(b.d));
+  let onBand=false;
+  if(sorted.length>=2){
+    const f=sorted[0],lat=sorted.at(-1);
+    const days=(new Date(lat.d)-new Date(f.d))/864e5;
+    if(days>0){const pw=Math.abs(f.w-lat.w)/(f.w*(days/7));onBand=pw>=0.005&&pw<=0.01;}
+  }
+  return{name:"You",isMe:true,sess:doneSess,prs:prCount,streak,band:onBand,
+    pts:calcPoints(doneSess,prCount,streak,onBand)};
+}
 
-  // build leaderboard for this lift
-  const b=BASELINES[lbLift];
-  const myL=lifts.filter(l=>l.name===lbLift).sort((a,c)=>a.d.localeCompare(c.d));
-  const myLat=myL.at(-1);
-  const myE=myLat?e1rm(myLat.w,myLat.r):e1rm(b.w,b.r);
-  const mySet=myLat?`${myLat.w}×${myLat.r}`:`${b.w}×${b.r} (baseline)`;
-
-  const rows=[{name:"You",e:myE,set:mySet,isMe:true},
-    ...friends.filter(f=>f.lift===lbLift).map(f=>({name:f.name,e:e1rm(f.w,f.r),set:`${f.w}×${f.r}`,isMe:false,id:f.id}))
-  ].sort((a,z)=>z.e-a.e);
+function renderLB(){
+  const me=myPoints();
+  const friendRows=friends.map(f=>({
+    ...f,isMe:false,
+    pts:calcPoints(f.sess,f.prs,f.streak,f.band)
+  }));
+  const all=[me,...friendRows].sort((a,b)=>b.pts-a.pts);
+  const maxPts=Math.max(...all.map(r=>r.pts),1);
 
   const board=document.getElementById("lb-board");board.innerHTML="";
-  if(rows.length===1){
-    board.innerHTML=`<div class="empty"><div class="empty-icon">🏆</div>Add friends below to start competing.</div>`;
-  }
-  rows.forEach((row,i)=>{
+  const rankLabels=["1st","2nd","3rd"];
+  all.forEach((row,i)=>{
     const rankCls=["r1","r2","r3"][i]||"";
-    const medals=["🥇","🥈","🥉"];
-    const item=document.createElement("div");
-    item.className="lb-row"+(row.isMe?" lb-you":"");
-    item.innerHTML=`
-      <div class="lb-rank ${rankCls}">${medals[i]||i+1}</div>
-      <div>
-        <div class="lb-name">${row.name}${row.isMe?" (you)":""}</div>
-        <div class="lb-sub">${row.set}</div>
+    const card=document.createElement("div");
+    card.className=`lb-card${row.isMe?" you":""}${i===0?" r1":""}`;
+
+    const tags=[];
+    if(row.sess) tags.push(`<span class="lb-tag sess">${row.sess} sessions</span>`);
+    if(row.prs) tags.push(`<span class="lb-tag pr">${row.prs} PR${row.prs>1?"s":""}</span>`);
+    if(row.streak>1) tags.push(`<span class="lb-tag streak">${row.streak} wk streak</span>`);
+    if(row.band) tags.push(`<span class="lb-tag band">on band</span>`);
+
+    const pct=Math.round((row.pts/maxPts)*100);
+    const barCls=row.isMe?"you":i===0?"r1":"other";
+    card.innerHTML=`
+      <div class="lb-card-top">
+        <div class="lb-rank-block">
+          <div class="lb-rank-num ${rankCls}">${rankLabels[i]||i+1}</div>
+          <div class="lb-rank-badge">place</div>
+        </div>
+        <div class="lb-name-block">
+          <div class="lb-pname${row.isMe?" you":""}">${row.name}${row.isMe?" (you)":""}</div>
+          <div class="lb-ptags">${tags.join("")||'<span class="lb-tag" style="background:var(--mute);color:var(--sub)">no activity</span>'}</div>
+        </div>
+        <div class="lb-score-block">
+          <div class="lb-score">${row.pts}</div>
+          <div class="lb-score-lbl">pts</div>
+        </div>
       </div>
-      <div>
-        <div class="lb-e1rm">${row.e}</div>
-        <div class="lb-set">e1RM</div>
-      </div>
-      ${!row.isMe?`<button class="del" data-id="${row.id}">×</button>`:"<div></div>"}`;
-    board.appendChild(item);
+      <div class="lb-bar-row">
+        <div class="lb-bar-track"><div class="lb-bar-fill ${barCls}" style="width:${pct}%"></div></div>
+        <div class="lb-bar-pct">${pct}%</div>
+      </div>`;
+    board.appendChild(card);
   });
-  board.querySelectorAll(".del").forEach(b=>b.addEventListener("click",()=>{
+
+  // update list
+  const ul=document.getElementById("lb-update-list");ul.innerHTML="";
+  if(!friends.length){ul.innerHTML='<div class="empty" style="padding:20px">Add friends above to start the competition.</div>';return;}
+  friends.forEach(f=>{
+    const pts=calcPoints(f.sess,f.prs,f.streak,f.band);
+    const row=document.createElement("div");row.className="lb-update-row";
+    row.innerHTML=`<div><div class="lb-update-name">${f.name}</div><div style="font-size:11px;color:var(--sub)">${f.sess||0} sess · ${f.prs||0} PRs · ${f.streak||0} wk streak</div></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="lb-update-score">${pts} pts</div>
+        <button class="lb-edit-btn" data-id="${f.id}">Edit</button>
+        <button class="del" data-id="${f.id}">×</button>
+      </div>`;
+    ul.appendChild(row);
+  });
+  ul.querySelectorAll(".del").forEach(b=>b.addEventListener("click",()=>{
     friends=friends.filter(f=>f.id!==b.dataset.id);sv("friends",friends);renderLB();toast("Removed");
+  }));
+  ul.querySelectorAll(".lb-edit-btn").forEach(b=>b.addEventListener("click",()=>{
+    const f=friends.find(f=>f.id===b.dataset.id);if(!f)return;
+    document.getElementById("lbf-name").value=f.name;
+    document.getElementById("lbf-sess").value=f.sess||0;
+    document.getElementById("lbf-prs").value=f.prs||0;
+    document.getElementById("lbf-streak").value=f.streak||0;
+    document.getElementById("lbf-band").value=f.band?1:0;
+    friends=friends.filter(fr=>fr.id!==f.id);sv("friends",friends);
+    document.getElementById("lbf-name").scrollIntoView({behavior:"smooth"});
   }));
 }
 
 document.getElementById("lbf-save").addEventListener("click",()=>{
   const name=document.getElementById("lbf-name").value.trim();
-  const lift=document.getElementById("lbf-lift").value;
-  const w=parseFloat(document.getElementById("lbf-wt").value);
-  const r=parseInt(document.getElementById("lbf-rp").value);
-  if(!name||!lift||isNaN(w)||isNaN(r))return;
-  friends.push({id:Date.now()+"",name,lift,w,r});sv("friends",friends);
+  const sess=parseInt(document.getElementById("lbf-sess").value)||0;
+  const prs=parseInt(document.getElementById("lbf-prs").value)||0;
+  const streak=parseInt(document.getElementById("lbf-streak").value)||0;
+  const band=document.getElementById("lbf-band").value==="1";
+  if(!name)return;
+  friends.push({id:Date.now()+"",name,sess,prs,streak,band});sv("friends",friends);
   document.getElementById("lbf-name").value="";
-  document.getElementById("lbf-wt").value="";
-  document.getElementById("lbf-rp").value="";
-  renderLB();toast(`${name} added ✓`);
+  document.getElementById("lbf-sess").value="";
+  document.getElementById("lbf-prs").value="";
+  document.getElementById("lbf-streak").value="";
+  renderLB();toast(`${name} added`);
 });
 
 // ─── WORKOUT ─────────────────────────────────────────
@@ -727,7 +902,7 @@ function renderWorkout(){
     const ck=`w${week}-s-${s.key}`,done=!!checks[ck];
     const btn=document.createElement("div");btn.className="sess-btn"+(done?" done":"");
     btn.innerHTML=`<div class="sb-icon">${s.icon}</div><div class="sb-lbl">${s.lbl}</div>`;
-    btn.addEventListener("click",()=>{checks[ck]=!checks[ck];sv("checks",checks);renderWorkout();renderDash();if(checks[ck])toast(s.lbl+" ✓");});
+    btn.addEventListener("click",()=>{checks[ck]=!checks[ck];sv("checks",checks);renderWorkout();renderDash();if(checks[ck])toast(s.lbl+" done");});
     sg.appendChild(btn);
   });
   const host=document.getElementById("workout-days");host.innerHTML="";
@@ -742,13 +917,22 @@ function renderWorkout(){
       const ck=`w${week}-${day.key}-${i}`,isDone=!!checks[ck];
       const sk=`${day.key}-${i}`,isOpen=openSwap===sk;
       const row=document.createElement("div");row.className="ex-row";
+
+      // header row: name + check
       const main=document.createElement("div");main.className="ex-main";
-      main.innerHTML=`<div class="ex-name">${ex.n}</div><div class="ex-meta">${ex.s}<br>${ex.l}</div><button class="ex-chk${isDone?" done":""}" data-ck="${ck}">✓</button>`;
+      main.innerHTML=`<div class="ex-name">${ex.n}</div><div class="ex-meta">${ex.s} · ${ex.l}</div><button class="ex-chk${isDone?" done":""}" data-ck="${ck}">✓</button>`;
       row.appendChild(main);
+
+      // set logger (always visible)
+      if(day.cls!=="cardio"){
+        row.appendChild(renderSetLogger(ex, ck, day.key, i));
+      }
+
+      // swap bar
       if(ex.subs?.length){
         const bar=document.createElement("div");bar.className="swap-bar";
         const sb=document.createElement("button");sb.className="swap-btn"+(isOpen?" active":"");
-        sb.textContent=isOpen?"▲ Hide swaps":"⇄ Machine contested?";
+        sb.textContent=isOpen?"▲ Hide substitutes":"Substitute machines";
         sb.addEventListener("click",()=>{openSwap=isOpen?null:sk;renderWorkout();});
         bar.appendChild(sb);row.appendChild(bar);
         const box=document.createElement("div");box.className="swap-box"+(isOpen?" open":"");
@@ -760,12 +944,13 @@ function renderWorkout(){
     });
     host.appendChild(block);
   });
+
+  // manual ex-chk toggle (if they tap the header check directly)
   host.querySelectorAll(".ex-chk").forEach(btn=>{
     btn.addEventListener("click",()=>{
       const ck=btn.dataset.ck;checks[ck]=!checks[ck];sv("checks",checks);
       btn.classList.toggle("done",checks[ck]);
-      if(checks[ck])toast("✓ done");
-      renderWorkout();renderDash();
+      renderDash();
     });
   });
 }
@@ -777,7 +962,7 @@ function renderWeighins(){
   document.getElementById("wi-d").value||=today();
   const sorted=[...weighins].sort((a,b)=>b.d.localeCompare(a.d));
   const list=document.getElementById("wi-list");list.innerHTML="";
-  if(!sorted.length){list.innerHTML='<div class="empty"><div class="empty-icon">⚖️</div>No weigh-ins yet.</div>';return;}
+  if(!sorted.length){list.innerHTML='<div class="empty">No weigh-ins yet.</div>';return;}
   sorted.forEach((e,i)=>{
     const prev=sorted[i+1],delta=prev?e.w-prev.w:null;
     const item=document.createElement("div");item.className="eitem";
@@ -809,7 +994,7 @@ function renderLifts(){
   });
   const sorted=[...lifts].sort((a,b)=>b.d.localeCompare(a.d));
   const hist=document.getElementById("l-hist");hist.innerHTML="";
-  if(!sorted.length){hist.innerHTML='<div class="empty"><div class="empty-icon">🏋️</div>No lifts logged yet.</div>';return;}
+  if(!sorted.length){hist.innerHTML='<div class="empty">No lifts logged yet.</div>';return;}
   sorted.forEach(e=>{
     const b=BASELINES[e.name];
     const baseE=b?e1rm(b.w,b.r):null,myE=e1rm(e.w,e.r);
@@ -887,9 +1072,152 @@ document.getElementById("nl-save").addEventListener("click",()=>{
 
 document.getElementById("reset-btn").addEventListener("click",()=>{
   if(!confirm("Reset ALL data? This cannot be undone."))return;
-  ["plan","targets","wi","lifts","checks","nutlog","goals","friends"].forEach(k=>localStorage.removeItem(k));
+  ["plan","targets","wi","lifts","checks","nutlog","goals","friends","setLogs"].forEach(k=>localStorage.removeItem(k));
   location.reload();
 });
+
+
+// ─── REST TIMER ──────────────────────────────────────
+let timerInterval=null;
+let timerSeconds=120;
+const TOTAL=120;
+const circumference=2*Math.PI*88; // 553
+const arc=document.getElementById("timer-arc");
+const numEl=document.getElementById("timer-num");
+const overlay=document.getElementById("timer-overlay");
+
+function startTimer(liftName, setsDone, totalSets){
+  // cancel any running timer first
+  if(timerInterval) clearInterval(timerInterval);
+  timerSeconds=TOTAL;
+  document.getElementById("timer-lift-name").textContent=liftName;
+  document.getElementById("timer-next-set").textContent=
+    setsDone<totalSets?`Next: Set ${setsDone+1} of ${totalSets}`:"Last set done";
+  overlay.classList.remove("hidden");
+  updateTimerDisplay();
+  timerInterval=setInterval(()=>{
+    timerSeconds--;
+    updateTimerDisplay();
+    if(timerSeconds<=0){
+      clearInterval(timerInterval);timerInterval=null;
+      playDone();
+      setTimeout(()=>overlay.classList.add("hidden"),600);
+    }
+  },1000);
+  // vibrate on start if available
+  if(navigator.vibrate) navigator.vibrate(60);
+}
+
+function updateTimerDisplay(){
+  const m=Math.floor(timerSeconds/60),s=timerSeconds%60;
+  numEl.textContent=`${m}:${s.toString().padStart(2,"0")}`;
+  numEl.className="timer-num"+(timerSeconds<=10?" low":"");
+  const pct=timerSeconds/TOTAL;
+  arc.style.strokeDashoffset=circumference*(1-pct);
+  arc.style.stroke=timerSeconds<=10?"#ef4444":"var(--ph)";
+}
+
+function playDone(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    // two-tone chime: 880Hz then 1100Hz
+    [[880,0],[1100,0.18]].forEach(([freq,delay])=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.type="sine";osc.frequency.value=freq;
+      gain.gain.setValueAtTime(0,ctx.currentTime+delay);
+      gain.gain.linearRampToValueAtTime(0.4,ctx.currentTime+delay+0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.5);
+      osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.55);
+    });
+  }catch(e){}
+  if(navigator.vibrate) navigator.vibrate([200,100,200]);
+}
+
+function stopTimer(){
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  overlay.classList.add("hidden");
+}
+
+document.getElementById("timer-skip").addEventListener("click",stopTimer);
+document.getElementById("timer-stop").addEventListener("click",stopTimer);
+
+// ─── SET LOGGER ──────────────────────────────────────
+// setLogs: { "wk1-push-0": [{w:95,r:6,done:true},{w:95,r:8,done:true},...] }
+let setLogs=ld("setLogs")||{};
+
+function getSetCount(sets){
+  const m=sets.match(/^(\d+)×/);
+  return m?parseInt(m[1]):3;
+}
+function getDefaultReps(sets){
+  const m=sets.match(/×(\d+)/);
+  return m?parseInt(m[1]):8;
+}
+
+function renderSetLogger(ex, ck, dayKey, exIdx){
+  const numSets=getSetCount(ex.s);
+  const defReps=getDefaultReps(ex.s);
+  const defWt=parseFloat(ex.l)||0;
+  const logKey=`${ck}`;
+  const existing=setLogs[logKey]||[];
+  // pad / init
+  while(existing.length<numSets) existing.push({w:defWt||"",r:defReps,done:false});
+  setLogs[logKey]=existing;
+
+  const wrap=document.createElement("div");wrap.className="set-logger";
+
+  const hdr=document.createElement("div");hdr.className="set-hdr";
+  hdr.innerHTML=`<span>#</span><span>Weight</span><span>Reps</span><span></span>`;
+  wrap.appendChild(hdr);
+
+  const rows=document.createElement("div");rows.className="set-rows";
+
+  existing.forEach((st,si)=>{
+    const row=document.createElement("div");row.className="set-row";
+    row.innerHTML=`
+      <div class="set-num">${si+1}</div>
+      <input class="set-input" type="number" step="2.5" placeholder="lb" value="${st.w}" data-si="${si}" data-field="w"/>
+      <input class="set-input" type="number" placeholder="reps" value="${st.r}" data-si="${si}" data-field="r"/>
+      <button class="set-done-btn${st.done?" done":""}" data-si="${si}">✓</button>`;
+    rows.appendChild(row);
+  });
+
+  wrap.appendChild(rows);
+
+  // input changes → save
+  wrap.querySelectorAll(".set-input").forEach(inp=>{
+    inp.addEventListener("change",()=>{
+      const si=+inp.dataset.si,field=inp.dataset.field;
+      setLogs[logKey][si][field]=field==="w"?parseFloat(inp.value)||0:parseInt(inp.value)||0;
+      sv("setLogs",setLogs);
+    });
+  });
+
+  // set done buttons
+  wrap.querySelectorAll(".set-done-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const si=+btn.dataset.si;
+      setLogs[logKey][si].done=!setLogs[logKey][si].done;
+      sv("setLogs",setLogs);
+      btn.classList.toggle("done",setLogs[logKey][si].done);
+      if(setLogs[logKey][si].done){
+        const doneCount=setLogs[logKey].filter(s=>s.done).length;
+        startTimer(ex.n, doneCount, numSets);
+        // if all sets done, also check off the exercise
+        if(doneCount===numSets && !checks[ck]){
+          checks[ck]=true;sv("checks",checks);
+          // update the parent check button
+          const parentChk=wrap.closest(".ex-row")?.querySelector(".ex-chk");
+          if(parentChk){parentChk.classList.add("done");parentChk.textContent="✓";}
+          renderDash();
+        }
+      }
+    });
+  });
+
+  return wrap;
+}
 
 // ─── INIT ────────────────────────────────────────────
 loadSettings();
