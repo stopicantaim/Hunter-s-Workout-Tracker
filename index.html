@@ -399,6 +399,9 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 
     <!-- SETTINGS -->
     <section id="tab-settings" class="page">
+      <div id="onboard-banner" style="display:none;background:#071f14;border:1px solid #0d3d26;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#34d399;line-height:1.5">
+        Welcome! Set your start weight and target below to get started.
+      </div>
       <div class="sh" style="margin-top:4px">Active Phase</div>
       <div class="phase-grid">
         <div class="ph-btn cut on" data-phase="cut"><div class="ph-name">CUT</div><div class="ph-desc">Lose fat, hold muscle</div></div>
@@ -408,8 +411,8 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       <div class="sh">Phase Anchor</div>
       <div class="fcard">
         <div class="frow2"><label>Start Date</label><input type="date" id="p-start"/></div>
-        <div class="frow2"><label>Start Weight (lb)</label><input type="number" step="0.1" id="p-sw" placeholder="185.4"/></div>
-        <div class="frow2"><label>Target Weight (lb)</label><input type="number" step="0.1" id="p-gw" placeholder="178"/></div>
+        <div class="frow2"><label>Start Weight (lb)</label><input type="number" step="0.1" id="p-sw" placeholder="Start weight"/></div>
+        <div class="frow2"><label>Target Weight (lb)</label><input type="number" step="0.1" id="p-gw" placeholder="Target weight"/></div>
         <div class="frow2"><label>Phase Length (days)</label><input type="number" id="p-len" placeholder="60"/></div>
         <button class="btn" id="p-save">Save Plan</button>
         <div class="saving-indicator" id="plan-saving"></div>
@@ -452,7 +455,7 @@ const sb=supabase.createClient(SB_URL,SB_KEY);
 
 // ── CONSTANTS ─────────────────────────────────────────
 const LIFTS=["Bench Press","Overhead Press","Lat Pulldown","Assisted Pull-up","Seated Row","T-Bar Row"];
-const BASELINES={"Bench Press":{w:205,r:8},"Overhead Press":{w:95,r:8},"Lat Pulldown":{w:160,r:10},"Assisted Pull-up":{w:-85,r:12},"Seated Row":{w:160,r:8},"T-Bar Row":{w:125,r:10}};
+const BASELINES={"Bench Press":null,"Overhead Press":null,"Lat Pulldown":null,"Assisted Pull-up":null,"Seated Row":null,"T-Bar Row":null};
 const SESSIONS=[{key:"push",lbl:"Push"},{key:"pull",lbl:"Pull"},{key:"upper",lbl:"Upper"},{key:"arms",lbl:"Arms"},{key:"run",lbl:"Run"},{key:"walk",lbl:"Walk"}];
 const DAYS=[
   {key:"push",cls:"push",label:"DAY 1 · PUSH",exs:[
@@ -497,7 +500,7 @@ const DAYS=[
 
 // ── STATE ─────────────────────────────────────────────
 let USER=null;
-let plan={phase:"cut",start_date:null,start_weight:185.4,goal_weight:178,phase_length:60};
+let plan={phase:"cut",start_date:null,start_weight:null,goal_weight:null,phase_length:60};
 let targets={cal:2264,pro:199,fat:75,carb:199};
 let weighins=[];
 let liftLogs=[];
@@ -598,6 +601,7 @@ async function loadAllData(){
     sb.from("set_logs").select("*").eq("user_id",uid),
   ]);
   if(planRes.data) plan={...plan,...planRes.data};
+  else { plan={phase:"cut",start_date:null,start_weight:null,goal_weight:null,phase_length:60}; }
   weighins=(wiRes.data||[]).map(r=>({id:r.id,d:r.date,w:r.weight}));
   liftLogs=(liftRes.data||[]).map(r=>({id:r.id,d:r.date,name:r.name,w:r.weight,r:r.reps}));
   goalMap=Object.fromEntries((goalRes.data||[]).map(r=>[r.lift_name,r.goal_e1rm]));
@@ -615,6 +619,7 @@ async function loadAllData(){
   friends=JSON.parse(localStorage.getItem("friends")||"[]");
   applyPhase(plan.phase||"cut");
   loadSettingsForm();
+  if(!plan.start_weight){document.getElementById("onboard-banner").style.display="block";}
 }
 
 // ── APPLY PHASE ───────────────────────────────────────
@@ -638,8 +643,10 @@ document.querySelectorAll(".tab").forEach(b=>{
 
 // ── DASHBOARD ─────────────────────────────────────────
 function renderDash(){
-  const sw=plan.start_weight||185.4,gw=plan.goal_weight||178,phase=plan.phase||"cut";
+  const sw=plan.start_weight||null,gw=plan.goal_weight||null,phase=plan.phase||"cut";
+  if(!sw){document.getElementById("d-wt").textContent="—";document.getElementById("d-goal").textContent="—";document.getElementById("d-lost").textContent="Set your plan in Settings";document.getElementById("d-rate").textContent="";document.getElementById("d-pct").textContent="0%";document.getElementById("d-fill").style.width="0%";document.getElementById("d-ps").textContent="—";document.getElementById("d-pe").textContent="—";document.getElementById("d-band").textContent="—";}
   applyPhase(phase);
+  if(!sw) return;
   const sorted=[...weighins].sort((a,b)=>a.d.localeCompare(b.d));
   const latest=sorted.at(-1);
   const cur=latest?+latest.w:sw;
@@ -669,8 +676,9 @@ function renderDash(){
   document.getElementById("d-sess").textContent=doneSess;
   const el=document.getElementById("d-lifts");el.innerHTML="";
   LIFTS.forEach(name=>{
-    const b=BASELINES[name],myL=liftLogs.filter(l=>l.name===name),lat=myL.at(-1);
-    const baseE=e1rm(b.w,b.r),latE=lat?e1rm(lat.w,lat.r):null;
+    const myL=liftLogs.filter(l=>l.name===name).sort((a,c)=>a.d.localeCompare(c.d));
+    const firstLog=myL[0],lat=myL.at(-1);
+    const baseE=firstLog?e1rm(firstLog.w,firstLog.r):null,latE=lat?e1rm(lat.w,lat.r):null;
     const delta=latE?((latE/baseE)-1)*100:null;
     const item=document.createElement("div");item.className="bitem";
     item.innerHTML=`<div class="bitem-name">${name}</div><div class="bitem-set">${lat?lat.w+"×"+lat.r:"baseline"}</div><div class="bitem-e">${latE??baseE}${delta!==null?` <span style="font-size:10px;color:${delta>=0?"var(--ph)":"#ef4444"}">${delta>=0?"+":""}${delta.toFixed(1)}%</span>`:""}</div>`;
@@ -682,9 +690,10 @@ function renderDash(){
 function renderGoals(){
   const board=document.getElementById("goal-board");board.innerHTML="";
   LIFTS.forEach(name=>{
-    const b=BASELINES[name],baseE=e1rm(b.w,b.r);
-    const myL=liftLogs.filter(l=>l.name===name);
-    const lat=myL.at(-1),latE=lat?e1rm(lat.w,lat.r):baseE;
+    const myL=liftLogs.filter(l=>l.name===name).sort((a,c)=>a.d.localeCompare(c.d));
+    const firstLog=myL[0],lat=myL.at(-1);
+    const baseE=firstLog?e1rm(firstLog.w,firstLog.r):null,latE=lat?e1rm(lat.w,lat.r):null;
+    if(!latE){return;} // skip lifts with no history yet
     const goalE=goalMap[name]||null;
     const pct=goalE?Math.min(100,(latE/goalE)*100):null;
     const sessions=myL.slice(-8);
@@ -697,7 +706,7 @@ function renderGoals(){
           <div class="gn"><div class="gn-val">${goalE??'—'}</div><div class="gn-lbl">Goal</div></div>
           <div class="gn"><div class="gn-val">${baseE}</div><div class="gn-lbl">Baseline</div></div>
         </div>
-        ${goalE?`<div class="goal-track"><div class="goal-fill" style="width:${pct}%"></div></div><div class="goal-ends"><span>${baseE}</span><span>${goalE}</span></div>`:""}
+        ${goalE&&baseE?`<div class="goal-track"><div class="goal-fill" style="width:${pct}%"></div></div><div class="goal-ends"><span>${baseE}</span><span>${goalE}</span></div>`:""}
         ${sessions.length>1?`<div class="goal-history">${sessions.map((s,i)=>{if(!i)return"";const p=sessions[i-1],cur=e1rm(s.w,s.r),prv=e1rm(p.w,p.r);return`<div class="gh-dot ${cur>=prv?"up":"dn"}">${cur>=prv?"↑":"↓"}</div>`;}).join("")}</div>`:""}
       </div>`;
     board.appendChild(card);
@@ -799,9 +808,9 @@ function getSetCount(s){const m=s.match(/^(\d+)×/);return m?parseInt(m[1]):3;}
 function getDefaultReps(s){const m=s.match(/×(\d+)/);return m?parseInt(m[1]):8;}
 
 function renderSetLogger(ex,ck){
-  const numSets=getSetCount(ex.s),defReps=getDefaultReps(ex.s),defWt=parseFloat(ex.l)||0;
+  const numSets=getSetCount(ex.s),defReps=getDefaultReps(ex.s),defWt=0;
   const existing=setLogs[ck]||[];
-  while(existing.length<numSets) existing.push({w:defWt||"",r:defReps,done:false});
+  while(existing.length<numSets) existing.push({w:"",r:"",done:false});
   setLogs[ck]=existing;
   const wrap=document.createElement("div");wrap.className="set-logger";
   const hdr=document.createElement("div");hdr.className="set-hdr";
@@ -948,12 +957,18 @@ document.getElementById("wi-save").addEventListener("click",async()=>{
 // ── LIFTS ─────────────────────────────────────────────
 function renderLifts(){
   const bl=document.getElementById("base-list");bl.innerHTML="";
-  LIFTS.forEach(name=>{const b=BASELINES[name];const item=document.createElement("div");item.className="bitem";item.innerHTML=`<div class="bitem-name">${name}</div><div class="bitem-set">${b.w}×${b.r}</div><div class="bitem-e">${e1rm(b.w,b.r)}</div>`;bl.appendChild(item);});
+  LIFTS.forEach(name=>{
+    const myL=liftLogs.filter(l=>l.name===name).sort((a,c)=>a.d.localeCompare(c.d));
+    const first=myL[0];
+    const item=document.createElement("div");item.className="bitem";
+    item.innerHTML=`<div class="bitem-name">${name}</div><div class="bitem-set">${first?first.w+"×"+first.r:"no baseline"}</div><div class="bitem-e">${first?e1rm(first.w,first.r):"—"}</div>`;
+    bl.appendChild(item);});
   const sorted=[...liftLogs].sort((a,b)=>b.d.localeCompare(a.d));
   const hist=document.getElementById("l-hist");hist.innerHTML="";
   if(!sorted.length){hist.innerHTML='<div class="empty">No lifts logged yet.</div>';return;}
   sorted.forEach(e=>{
-    const b=BASELINES[e.name],baseE=b?e1rm(b.w,b.r):null,myE=e1rm(e.w,e.r);
+    const firstLog=liftLogs.filter(l=>l.name===e.name).sort((a,c)=>a.d.localeCompare(c.d))[0];
+    const baseE=firstLog?e1rm(firstLog.w,firstLog.r):null,myE=e1rm(e.w,e.r);
     const delta=baseE?((myE/baseE)-1)*100:null;
     const item=document.createElement("div");item.className="eitem";
     item.innerHTML=`<div><div class="eitem-main">${e.name}</div><div class="eitem-sub">${fmtD(e.d)} · ${e.w}×${e.r}</div></div>
@@ -974,8 +989,9 @@ document.getElementById("l-save").addEventListener("click",async()=>{
   if(data) liftLogs.push({id:data.id,d:data.date,name:data.name,w:data.weight,r:data.reps});
   document.getElementById("l-wt").value="";document.getElementById("l-rp").value="";
   renderLifts();renderDash();renderGoals();
-  const all=liftLogs.filter(l=>l.name===name),newE=e1rm(w,r),prev=Math.max(...all.slice(0,-1).map(l=>e1rm(l.w,l.r)),0);
-  toast(newE>prev?"New PR — "+newE+" e1RM":"Saved");
+  const allForLift=liftLogs.filter(l=>l.name===name),newE=e1rm(w,r);
+  const prevBest=allForLift.length>1?Math.max(...allForLift.slice(0,-1).map(l=>e1rm(l.w,l.r))):0;
+  toast(newE>prevBest&&prevBest>0?"New PR — "+newE+" e1RM":"Saved");
 });
 
 // ── SETTINGS ──────────────────────────────────────────
