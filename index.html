@@ -356,6 +356,13 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .dash-wi-btn:active{opacity:.8}
 /* ── dashboard workout nav ── */
 .dash-workout-nav{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:10px}
+
+/* ── collapsible day blocks ── */
+.day-hdr{cursor:pointer;user-select:none}
+.day-hdr .day-chevron{font-size:14px;color:rgba(255,255,255,.5);transition:transform .22s}
+.day-block.open .day-hdr .day-chevron{transform:rotate(90deg)}
+.day-body{display:none}
+.day-block.open .day-body{display:block}
 </style>
 </head>
 <body class="cut">
@@ -1328,8 +1335,13 @@ function renderWorkout(){
     const total=day.exs.length,done=day.exs.filter((_,i)=>checks[`w${week}-${day.key}-${i}`]).length;
     const block=document.createElement("div");block.className="day-block";
     const hdr=document.createElement("div");hdr.className=`day-hdr ${day.cls}`;
-    hdr.innerHTML=`<span>${day.label}</span><span class="day-done">${done}/${total}</span>`;
+    hdr.innerHTML=`<span>${day.label}</span><div style="display:flex;align-items:center;gap:8px"><span class="day-done">${done}/${total}</span><span class="day-chevron">›</span></div>`;
+    hdr.addEventListener("click",()=>{
+      host.querySelectorAll(".day-block.open").forEach(b=>{if(b!==block)b.classList.remove("open");});
+      block.classList.toggle("open");
+    });
     block.appendChild(hdr);
+    const body=document.createElement("div");body.className="day-body";
     day.exs.forEach((ex,i)=>{
       const ck=`w${week}-${day.key}-${i}`,isDone=!!checks[ck],sk=`${day.key}-${i}`,isOpen=openSwap===sk;
       const row=document.createElement("div");row.className="ex-row";
@@ -1347,8 +1359,9 @@ function renderWorkout(){
         box.innerHTML=`<div class="swap-title">Substitute Options</div>`+ex.subs.map(s=>`<div class="sub-item"><div><div class="sub-name">${s.n}</div><div class="sub-why">${s.w}</div></div><div class="sub-meta">${s.s}<br>${s.l}</div></div>`).join("");
         row.appendChild(box);
       }
-      block.appendChild(row);
+      body.appendChild(row);
     });
+    block.appendChild(body);
     host.appendChild(block);
   });
   host.querySelectorAll(".ex-chk").forEach(btn=>{
@@ -1710,15 +1723,27 @@ function renderDashWorkout() {
     sg.appendChild(btn);
   });
 
-  // exercise days — same full renderer, just targeting dash-workout-days
+  // exercise days — collapsible, only one open at a time
   const host = document.getElementById("dash-workout-days"); host.innerHTML = "";
   getDays().forEach(day => {
     const total = day.exs.length;
     const done = day.exs.filter((_, i) => checks["w" + week + "-" + day.key + "-" + i]).length;
-    const block = document.createElement("div"); block.className = "day-block";
-    const hdr = document.createElement("div"); hdr.className = "day-hdr " + day.cls;
-    hdr.innerHTML = "<span>" + day.label + "</span><span class='day-done'>" + done + "/" + total + "</span>";
+    const allDone = done === total && total > 0;
+    const block = document.createElement("div");
+    block.className = "day-block" + (allDone ? " open" : ""); // auto-open completed days? no — start all closed
+    block.className = "day-block";
+
+    const hdr = document.createElement("div");
+    hdr.className = "day-hdr " + day.cls;
+    hdr.innerHTML = "<span>" + day.label + "</span><div style='display:flex;align-items:center;gap:8px'><span class='day-done'>" + done + "/" + total + "</span><span class='day-chevron'>›</span></div>";
+    hdr.addEventListener("click", () => {
+      // close all other day blocks in this host
+      host.querySelectorAll(".day-block.open").forEach(b => { if(b !== block) b.classList.remove("open"); });
+      block.classList.toggle("open");
+    });
     block.appendChild(hdr);
+
+    const body = document.createElement("div"); body.className = "day-body";
     day.exs.forEach((ex, i) => {
       const ck = "w" + week + "-" + day.key + "-" + i;
       const isDone = !!checks[ck];
@@ -1739,8 +1764,9 @@ function renderDashWorkout() {
         box.innerHTML = "<div class='swap-title'>Substitute Options</div>" + ex.subs.map(s => "<div class='sub-item'><div><div class='sub-name'>" + s.n + "</div><div class='sub-why'>" + s.w + "</div></div><div class='sub-meta'>" + s.s + "<br>" + s.l + "</div></div>").join("");
         row.appendChild(box);
       }
-      block.appendChild(row);
+      body.appendChild(row);
     });
+    block.appendChild(body);
     host.appendChild(block);
   });
 
