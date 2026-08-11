@@ -347,6 +347,15 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .accord-block.open .accord-arrow{transform:rotate(90deg)}
 .accord-body{display:none;padding:12px 13px 14px;background:var(--bg2);border-top:1px solid var(--border)}
 .accord-block.open .accord-body{display:block}
+
+/* ── dashboard quick weigh-in ── */
+.dash-weighin-row{display:flex;gap:8px;align-items:center}
+.dash-wi-input{flex:1;background:var(--card);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);padding:11px 13px;font-size:16px;outline:none;-webkit-appearance:none;transition:border-color .15s}
+.dash-wi-input:focus{border-color:var(--ph)}
+.dash-wi-btn{background:var(--ph);border:none;color:#fff;font-size:14px;font-weight:800;padding:11px 18px;border-radius:var(--rs);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .15s}
+.dash-wi-btn:active{opacity:.8}
+/* ── dashboard workout nav ── */
+.dash-workout-nav{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:10px}
 </style>
 </head>
 <body class="cut">
@@ -401,7 +410,13 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 
     <!-- DASHBOARD -->
     <section id="tab-dash" class="page on">
-      <div class="kpi2">
+
+      <div class="dash-weighin-row">
+        <input type="number" step="0.1" id="dash-wi-w" class="dash-wi-input" placeholder="Today's weight (lb)"/>
+        <button class="dash-wi-btn" id="dash-wi-save">Log</button>
+      </div>
+
+      <div class="kpi2" style="margin-top:10px">
         <div class="kpi hi"><div class="kpi-lbl">Current Weight</div><div class="kpi-val" id="d-wt">—</div><div class="kpi-sub" id="d-lost">—</div></div>
         <div class="kpi"><div class="kpi-lbl">Phase Target</div><div class="kpi-val" id="d-goal">—</div><div class="kpi-sub" id="d-rate">—</div></div>
       </div>
@@ -410,14 +425,26 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
         <div class="prog-track"><div class="prog-fill" id="d-fill" style="width:0%"></div></div>
         <div class="prog-ends"><span id="d-ps">—</span><span id="d-pe">—</span></div>
       </div>
+
       <div class="sh">This Week</div>
       <div class="kpi3">
         <div class="kpi"><div class="kpi-lbl">Log Days</div><div class="kpi-val" id="d-log" style="font-size:22px">—</div><div class="kpi-sub">/ 7</div></div>
         <div class="kpi hi"><div class="kpi-lbl">Sessions</div><div class="kpi-val" id="d-sess" style="font-size:22px">—</div><div class="kpi-sub">/ 6</div></div>
-        <div class="kpi"><div class="kpi-lbl">Protein</div><div class="kpi-val" id="d-prot" style="font-size:22px">—</div><div class="kpi-sub">/ 7 days</div></div>
+        <div class="kpi"><div class="kpi-lbl">Protein</div><div class="kpi-val" id="d-prot" style="font-size:22px">—</div><div class="kpi-sub">/ 7</div></div>
       </div>
-      <div class="sh">Top Lifts</div>
+
+      <div class="sh">Today's Workout</div>
+      <div class="dash-workout-nav">
+        <button class="wk-btn" id="dash-wk-prev">&#x2039;</button>
+        <div class="wk-lbl" id="dash-wk-lbl">Week 1</div>
+        <button class="wk-btn" id="dash-wk-next">&#x203a;</button>
+      </div>
+      <div class="sess-grid" id="dash-sess-grid" style="margin-bottom:12px"></div>
+      <div id="dash-workout-days"></div>
+
+      <div class="sh">Lift Markers</div>
       <div id="d-lifts" class="blist"></div>
+
     </section>
 
 
@@ -999,6 +1026,7 @@ async function initApp(user){
   await loadAllData();
   await loadWorkoutConfig();
   renderDash();
+  renderDashWorkout();
   renderWorkout();
   renderLB();
 }
@@ -1634,6 +1662,97 @@ async function loadWorkoutConfig(){
   }else{
     activeTemplate=TEMPLATES[0];customWorkout=null;
   }
+}
+
+
+// ── DASHBOARD QUICK WEIGH-IN ──────────────────────────────────────────────────
+document.getElementById("dash-wi-save").addEventListener("click", async () => {
+  const w = parseFloat(document.getElementById("dash-wi-w").value);
+  if (isNaN(w)) return;
+  const d = today();
+  const existing = weighins.find(e => e.d === d);
+  if (existing) {
+    await sb.from("weighins").update({weight: w}).eq("id", existing.id);
+    existing.w = w;
+  } else {
+    const {data} = await sb.from("weighins").insert({user_id: USER.id, date: d, weight: w}).select().single();
+    if (data) weighins.push({id: data.id, d: data.date, w: data.weight});
+  }
+  document.getElementById("dash-wi-w").value = "";
+  renderDash();
+  toast("Weight logged");
+});
+
+// ── DASHBOARD WORKOUT (mirrors workout tab, shares state) ─────────────────────
+document.getElementById("dash-wk-prev").addEventListener("click", () => {
+  if (week > 1) { week--; openSwap = null; renderWorkout(); renderDashWorkout(); renderDash(); }
+});
+document.getElementById("dash-wk-next").addEventListener("click", () => {
+  if (week < 52) { week++; openSwap = null; renderWorkout(); renderDashWorkout(); renderDash(); }
+});
+
+function renderDashWorkout() {
+  document.getElementById("dash-wk-lbl").textContent = "Week " + week;
+
+  // session chips
+  const sg = document.getElementById("dash-sess-grid"); sg.innerHTML = "";
+  SESSIONS.forEach(s => {
+    const ck = "w" + week + "-s-" + s.key, done = !!checks[ck];
+    const btn = document.createElement("div"); btn.className = "sess-btn" + (done ? " done" : "");
+    btn.innerHTML = '<div class="sb-lbl">' + s.lbl + '</div>';
+    btn.addEventListener("click", async () => {
+      checks[ck] = !checks[ck];
+      if (checks[ck]) await sb.from("session_checks").upsert({user_id: USER.id, check_key: ck}, {onConflict: "user_id,check_key"});
+      else await sb.from("session_checks").delete().eq("user_id", USER.id).eq("check_key", ck);
+      renderDashWorkout(); renderWorkout(); renderDash();
+      if (checks[ck]) toast(s.lbl + " done");
+    });
+    sg.appendChild(btn);
+  });
+
+  // exercise days — same full renderer, just targeting dash-workout-days
+  const host = document.getElementById("dash-workout-days"); host.innerHTML = "";
+  getDays().forEach(day => {
+    const total = day.exs.length;
+    const done = day.exs.filter((_, i) => checks["w" + week + "-" + day.key + "-" + i]).length;
+    const block = document.createElement("div"); block.className = "day-block";
+    const hdr = document.createElement("div"); hdr.className = "day-hdr " + day.cls;
+    hdr.innerHTML = "<span>" + day.label + "</span><span class='day-done'>" + done + "/" + total + "</span>";
+    block.appendChild(hdr);
+    day.exs.forEach((ex, i) => {
+      const ck = "w" + week + "-" + day.key + "-" + i;
+      const isDone = !!checks[ck];
+      const sk = "dash-" + day.key + "-" + i;
+      const isOpen = openSwap === sk;
+      const row = document.createElement("div"); row.className = "ex-row";
+      const main = document.createElement("div"); main.className = "ex-main";
+      main.innerHTML = "<div class='ex-name'>" + ex.n + "</div><div class='ex-meta'>" + ex.s + " · " + (ex.l || "—") + "</div><button class='ex-chk" + (isDone ? " done" : "") + "' data-ck='" + ck + "'>✓</button>";
+      row.appendChild(main);
+      if (day.cls !== "cardio") row.appendChild(renderSetLogger(ex, ck));
+      if (ex.subs && ex.subs.length) {
+        const bar = document.createElement("div"); bar.className = "swap-bar";
+        const sb2 = document.createElement("button"); sb2.className = "swap-btn" + (isOpen ? " active" : "");
+        sb2.textContent = isOpen ? "Hide substitutes" : "Substitute machines";
+        sb2.addEventListener("click", () => { openSwap = isOpen ? null : sk; renderDashWorkout(); });
+        bar.appendChild(sb2); row.appendChild(bar);
+        const box = document.createElement("div"); box.className = "swap-box" + (isOpen ? " open" : "");
+        box.innerHTML = "<div class='swap-title'>Substitute Options</div>" + ex.subs.map(s => "<div class='sub-item'><div><div class='sub-name'>" + s.n + "</div><div class='sub-why'>" + s.w + "</div></div><div class='sub-meta'>" + s.s + "<br>" + s.l + "</div></div>").join("");
+        row.appendChild(box);
+      }
+      block.appendChild(row);
+    });
+    host.appendChild(block);
+  });
+
+  host.querySelectorAll(".ex-chk").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const ck = btn.dataset.ck; checks[ck] = !checks[ck];
+      if (checks[ck]) await sb.from("session_checks").upsert({user_id: USER.id, check_key: ck}, {onConflict: "user_id,check_key"});
+      else await sb.from("session_checks").delete().eq("user_id", USER.id).eq("check_key", ck);
+      btn.classList.toggle("done", checks[ck]);
+      renderDash();
+    });
+  });
 }
 
 // ── BOOT ──────────────────────────────────────────────
