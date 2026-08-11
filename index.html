@@ -233,6 +233,111 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .lb-update-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:11px 13px;margin-bottom:7px;gap:8px}
 .lb-update-name{font-size:13px;font-weight:700}
 .lb-edit-btn{background:var(--card2);border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer}
+
+/* ── template picker ── */
+.tmpl-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:4px}
+.tmpl-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
+.tmpl-card.active{border-color:var(--ph);background:var(--ph-bg)}
+.tmpl-card-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .2s}
+.tmpl-card.active .tmpl-card-check{background:var(--ph);border-color:var(--ph);color:#fff}
+.tmpl-name{font-size:14px;font-weight:800}
+.tmpl-desc{font-size:11px;color:var(--sub);margin-top:2px}
+
+/* ── custom builder ── */
+.builder-day{background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.builder-day-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border)}
+.builder-day-name{font-size:13px;font-weight:800}
+.builder-day-actions{display:flex;gap:6px}
+.builder-action-btn{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:11px;font-weight:700;padding:4px 9px;cursor:pointer}
+.builder-action-btn.danger{border-color:#7c0505;color:#ef4444}
+.builder-ex-list{display:flex;flex-direction:column}
+.builder-ex-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);gap:8px}
+.builder-ex-row:last-child{border-bottom:none}
+.builder-ex-name{font-size:13px;font-weight:600;flex:1}
+.builder-ex-meta{font-size:11px;color:var(--sub)}
+.builder-ex-del{background:none;border:none;color:var(--mute);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1}
+.add-day-btn{width:100%;background:none;border:2px dashed var(--border2);border-radius:var(--r);padding:13px;color:var(--sub);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px;transition:all .15s}
+.add-day-btn:active{background:var(--card)}
+
+/* ── exercise picker modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal-overlay.hidden{display:none}
+.modal-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:520px;max-height:85dvh;display:flex;flex-direction:column}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:16px;font-weight:800}
+.modal-close{background:none;border:none;color:var(--sub);font-size:24px;cursor:pointer;line-height:1;padding:0 4px}
+.modal-search{padding:10px 16px;border-bottom:1px solid var(--border)}
+.modal-search input{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);padding:9px 12px;font-size:15px;width:100%;outline:none}
+.modal-search input:focus{border-color:var(--ph)}
+.modal-muscle-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 16px;border-bottom:1px solid var(--border)}
+.modal-muscle-tabs::-webkit-scrollbar{display:none}
+.muscle-tab{background:var(--card2);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.muscle-tab.on{background:var(--ph-bg);border-color:var(--ph-border);color:var(--ph)}
+.modal-ex-list{overflow-y:auto;flex:1;padding:8px 0}
+.modal-ex-item{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;cursor:pointer;transition:background .1s;gap:10px}
+.modal-ex-item:active{background:var(--card2)}
+.modal-ex-item-name{font-size:14px;font-weight:600}
+.modal-ex-item-meta{font-size:11px;color:var(--sub);margin-top:2px}
+.modal-ex-item-add{background:var(--ph);border:none;color:#fff;font-size:12px;font-weight:800;padding:5px 12px;border-radius:6px;cursor:pointer;flex-shrink:0}
+.eq-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;margin-right:4px}
+.eq-badge.barbell{background:#1c1200;color:#f59f00}
+.eq-badge.dumbbell{background:#071428;color:#60a5fa}
+.eq-badge.cable{background:#0a2e20;color:var(--ph)}
+.eq-badge.machine{background:#1a0a3d;color:#a78bfa}
+.eq-badge.bodyweight{background:#1c0505;color:#ef4444}
+.eq-badge.cardio{background:#451a03;color:#fcd34d}
+/* ── template picker ── */
+.tmpl-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:4px}
+.tmpl-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
+.tmpl-card.active{border-color:var(--ph);background:var(--ph-bg)}
+.tmpl-card-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .2s}
+.tmpl-card.active .tmpl-card-check{background:var(--ph);border-color:var(--ph);color:#fff}
+.tmpl-name{font-size:14px;font-weight:800}
+.tmpl-desc{font-size:11px;color:var(--sub);margin-top:2px}
+
+/* ── custom builder ── */
+.builder-day{background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.builder-day-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border)}
+.builder-day-name{font-size:13px;font-weight:800}
+.builder-day-actions{display:flex;gap:6px}
+.builder-action-btn{background:none;border:1px solid var(--border2);border-radius:6px;color:var(--sub);font-size:11px;font-weight:700;padding:4px 9px;cursor:pointer}
+.builder-action-btn.danger{border-color:#7c0505;color:#ef4444}
+.builder-ex-list{display:flex;flex-direction:column}
+.builder-ex-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);gap:8px}
+.builder-ex-row:last-child{border-bottom:none}
+.builder-ex-name{font-size:13px;font-weight:600;flex:1}
+.builder-ex-meta{font-size:11px;color:var(--sub)}
+.builder-ex-del{background:none;border:none;color:var(--mute);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1}
+.add-day-btn{width:100%;background:none;border:2px dashed var(--border2);border-radius:var(--r);padding:13px;color:var(--sub);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px;transition:all .15s}
+.add-day-btn:active{background:var(--card)}
+
+/* ── exercise picker modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal-overlay.hidden{display:none}
+.modal-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:520px;max-height:85dvh;display:flex;flex-direction:column}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:16px;font-weight:800}
+.modal-close{background:none;border:none;color:var(--sub);font-size:24px;cursor:pointer;line-height:1;padding:0 4px}
+.modal-search{padding:10px 16px;border-bottom:1px solid var(--border)}
+.modal-search input{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);padding:9px 12px;font-size:15px;width:100%;outline:none}
+.modal-search input:focus{border-color:var(--ph)}
+.modal-muscle-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 16px;border-bottom:1px solid var(--border)}
+.modal-muscle-tabs::-webkit-scrollbar{display:none}
+.muscle-tab{background:var(--card2);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.muscle-tab.on{background:var(--ph-bg);border-color:var(--ph-border);color:var(--ph)}
+.modal-ex-list{overflow-y:auto;flex:1;padding:8px 0}
+.modal-ex-item{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;cursor:pointer;transition:background .1s;gap:10px}
+.modal-ex-item:active{background:var(--card2)}
+.modal-ex-item-name{font-size:14px;font-weight:600}
+.modal-ex-item-meta{font-size:11px;color:var(--sub);margin-top:2px}
+.modal-ex-item-add{background:var(--ph);border:none;color:#fff;font-size:12px;font-weight:800;padding:5px 12px;border-radius:6px;cursor:pointer;flex-shrink:0}
+.eq-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;margin-right:4px}
+.eq-badge.barbell{background:#1c1200;color:#f59f00}
+.eq-badge.dumbbell{background:#071428;color:#60a5fa}
+.eq-badge.cable{background:#0a2e20;color:var(--ph)}
+.eq-badge.machine{background:#1a0a3d;color:#a78bfa}
+.eq-badge.bodyweight{background:#1c0505;color:#ef4444}
+.eq-badge.cardio{background:#451a03;color:#fcd34d}
 </style>
 </head>
 <body class="cut">
@@ -353,16 +458,54 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 
     <!-- WORKOUT -->
     <section id="tab-workout" class="page">
-      <div class="wk-nav">
-        <button class="wk-btn" id="wk-prev">‹</button>
-        <div class="wk-lbl" id="wk-lbl">Week 1</div>
-        <button class="wk-btn" id="wk-next">›</button>
+      <!-- Sub-tabs: Log / Template / Builder -->
+      <div style="display:flex;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:3px;margin-bottom:14px">
+        <button class="wtab on" data-wt="log" style="flex:1;background:var(--card);border:none;border-radius:7px;color:var(--text);font-size:12px;font-weight:700;padding:8px 4px;cursor:pointer">Log</button>
+        <button class="wtab" data-wt="template" style="flex:1;background:none;border:none;border-radius:7px;color:var(--sub);font-size:12px;font-weight:700;padding:8px 4px;cursor:pointer">Templates</button>
+        <button class="wtab" data-wt="builder" style="flex:1;background:none;border:none;border-radius:7px;color:var(--sub);font-size:12px;font-weight:700;padding:8px 4px;cursor:pointer">Custom Build</button>
       </div>
-      <div class="sh">Sessions</div>
-      <div class="sess-grid" id="sess-grid"></div>
-      <div class="sh">Exercises</div>
-      <div id="workout-days"></div>
+
+      <!-- LOG VIEW -->
+      <div id="wview-log">
+        <div class="wk-nav">
+          <button class="wk-btn" id="wk-prev">‹</button>
+          <div class="wk-lbl" id="wk-lbl">Week 1</div>
+          <button class="wk-btn" id="wk-next">›</button>
+        </div>
+        <div class="sh">Sessions</div>
+        <div class="sess-grid" id="sess-grid"></div>
+        <div class="sh">Exercises</div>
+        <div id="workout-days"></div>
+      </div>
+
+      <!-- TEMPLATE VIEW -->
+      <div id="wview-template" style="display:none">
+        <div class="sh" style="margin-top:4px">Choose a Template</div>
+        <div class="tmpl-grid" id="tmpl-grid"></div>
+        <button class="btn" id="tmpl-apply" style="margin-top:4px">Apply Template</button>
+      </div>
+
+      <!-- BUILDER VIEW -->
+      <div id="wview-builder" style="display:none">
+        <div class="sh" style="margin-top:4px">Custom Workout</div>
+        <div id="builder-days"></div>
+        <button class="add-day-btn" id="add-day-btn">+ Add Day</button>
+        <button class="btn" id="builder-save">Save Custom Workout</button>
+      </div>
     </section>
+
+    <!-- EXERCISE PICKER MODAL -->
+    <div class="modal-overlay hidden" id="ex-modal">
+      <div class="modal-sheet">
+        <div class="modal-hdr">
+          <div class="modal-title">Add Exercise</div>
+          <button class="modal-close" id="modal-close">×</button>
+        </div>
+        <div class="modal-search"><input type="text" id="modal-search" placeholder="Search exercises..."/></div>
+        <div class="modal-muscle-tabs" id="modal-muscle-tabs"></div>
+        <div class="modal-ex-list" id="modal-ex-list"></div>
+      </div>
+    </div>
 
     <!-- WEIGHT -->
     <section id="tab-weigh" class="page">
@@ -457,46 +600,293 @@ const sb=supabase.createClient(SB_URL,SB_KEY);
 const LIFTS=["Bench Press","Overhead Press","Lat Pulldown","Assisted Pull-up","Seated Row","T-Bar Row"];
 const BASELINES={"Bench Press":null,"Overhead Press":null,"Lat Pulldown":null,"Assisted Pull-up":null,"Seated Row":null,"T-Bar Row":null};
 const SESSIONS=[{key:"push",lbl:"Push"},{key:"pull",lbl:"Pull"},{key:"upper",lbl:"Upper"},{key:"arms",lbl:"Arms"},{key:"run",lbl:"Run"},{key:"walk",lbl:"Walk"}];
-const DAYS=[
-  {key:"push",cls:"push",label:"DAY 1 · PUSH",exs:[
-    {n:"Overhead Press",s:"4×6",l:"95 lb",subs:[{n:"DB Shoulder Press",s:"4×8",l:"Dumbbells",w:"no rack needed"},{n:"Cable Overhead Press",s:"4×10",l:"Low cable",w:"constant tension"}]},
-    {n:"Bench Press",s:"4×5",l:"205 lb",subs:[{n:"DB Flat Press",s:"4×8",l:"Dumbbells",w:"if bench taken"},{n:"Machine Chest Press",s:"4×10",l:"Any machine",w:"easy solo"}]},
-    {n:"Incline Machine Press",s:"3×8",l:"—",subs:[{n:"Incline DB Press",s:"3×10",l:"DBs on incline",w:"if machine busy"},{n:"Incline Cable Fly",s:"3×12",l:"Low cables",w:"cable sub"}]},
-    {n:"Tricep Press",s:"3×8",l:"62.5 lb",subs:[{n:"Close-Grip DB Press",s:"3×10",l:"DBs close together",w:"no machine"},{n:"Dip",s:"3×10",l:"Parallel bars",w:"bodyweight"}]},
-    {n:"Lateral Raise",s:"3×15",l:"12.5 lb",subs:[{n:"DB Lateral Raise",s:"3×15",l:"Dumbbells",w:"always available"},{n:"Band Raise",s:"3×20",l:"Band under foot",w:"if DBs taken"}]},
-    {n:"Triceps Extension",s:"3×10",l:"42.5 lb",subs:[{n:"DB Overhead Extension",s:"3×12",l:"Single DB",w:"one DB only"},{n:"Bench Dip",s:"3×15",l:"Bodyweight",w:"zero equipment"}]},
-  ]},
-  {key:"pull",cls:"pull",label:"DAY 2 · PULL",exs:[
-    {n:"Assisted Pull-up",s:"4×10",l:"−85 lb",subs:[{n:"Lat Pulldown",s:"4×12",l:"Cable",w:"closest sub"},{n:"Band Pull-up",s:"4×10",l:"Band on bar",w:"no machine"}]},
-    {n:"T-Bar Row",s:"4×8",l:"125 lb",subs:[{n:"Bent-Over DB Row",s:"4×10",l:"One arm DBs",w:"if T-bar busy"},{n:"Cable Row Wide",s:"4×10",l:"Wide bar",w:"cable sub"}]},
-    {n:"Seated Row",s:"3×8",l:"160 lb",subs:[{n:"Band Row",s:"3×15",l:"Band at chest height",w:"if cables taken"},{n:"Chest-Supported DB Row",s:"3×10",l:"Incline face-down",w:"isolates back"}]},
-    {n:"Lat Pulldown",s:"3×10",l:"160 lb",subs:[{n:"Straight-Arm Pulldown",s:"3×15",l:"Same cable",w:"different angle"},{n:"Single-Arm DB Row",s:"3×12",l:"Brace on bench",w:"no cable"}]},
-    {n:"Preacher Curl",s:"3×8",l:"90 lb",subs:[{n:"Incline DB Curl",s:"3×10",l:"Incline bench",w:"great stretch"},{n:"Cable Curl",s:"3×12",l:"Low cable",w:"cable sub"}]},
-    {n:"Rear Delt Fly",s:"3×15",l:"7.5 lb",subs:[{n:"Face Pull",s:"3×15",l:"Cable + rope",w:"hits rotator cuff too"},{n:"Band Pull-Apart",s:"3×20",l:"Band at chest",w:"no equipment"}]},
-  ]},
-  {key:"upper",cls:"upper",label:"DAY 3 · UPPER",exs:[
-    {n:"Bench Press",s:"4×6",l:"205 lb",subs:[{n:"DB Flat Press",s:"4×8",l:"Dumbbells",w:"if bench taken"},{n:"Machine Press",s:"4×10",l:"Any machine",w:"quick to load"}]},
-    {n:"Lat Pulldown",s:"4×10",l:"160 lb",subs:[{n:"Assisted Pull-up",s:"4×10",l:"Assist machine",w:"if cable busy"},{n:"Single-Arm Cable Pull",s:"4×12",l:"One arm",w:"works around others"}]},
-    {n:"Chest Fly",s:"3×12",l:"100 lb",subs:[{n:"DB Flat Fly",s:"3×12",l:"DBs on bench",w:"same pattern"},{n:"Cable Crossover",s:"3×15",l:"High cables",w:"great stretch"}]},
-    {n:"Single-Arm Row",s:"3×10",l:"35 lb",subs:[{n:"Chest-Supported DB Row",s:"3×10",l:"Incline face-down",w:"no lower back"},{n:"Band Row",s:"3×15",l:"Band on post",w:"no bench needed"}]},
-    {n:"Bicep Curl",s:"3×10",l:"42.5 lb",subs:[{n:"DB Hammer Curl",s:"3×12",l:"Neutral grip",w:"hits brachialis"},{n:"Band Curl",s:"3×15",l:"Band under feet",w:"last resort"}]},
-    {n:"Lateral Raise",s:"3×15",l:"12.5 lb",subs:[{n:"DB Lateral Raise",s:"3×15",l:"Exact same",w:"always available"},{n:"Band Raise",s:"3×20",l:"Band under foot",w:"if DBs taken"}]},
-    {n:"Abdominal Crunch",s:"3×12",l:"—",subs:[{n:"Cable Crunch",s:"3×15",l:"Kneeling, rope",w:"weighted"},{n:"Hanging Knee Raise",s:"3×15",l:"Pull-up bar",w:"no machine"}]},
-  ]},
-  {key:"arms",cls:"arms",label:"DAY 4 · SHOULDERS & ARMS",exs:[
-    {n:"Overhead Press",s:"3×8",l:"95 lb",subs:[{n:"DB Shoulder Press",s:"3×10",l:"Seated DBs",w:"if rack busy"},{n:"Arnold Press",s:"3×10",l:"DBs rotating",w:"no rack"}]},
-    {n:"Lateral Raise",s:"4×15",l:"12.5 lb",subs:[{n:"DB Lateral Raise",s:"4×15",l:"Exact same",w:"always available"},{n:"Cable Lateral",s:"4×15",l:"One arm cable",w:"constant tension"}]},
-    {n:"Preacher Curl",s:"3×8",l:"90 lb",subs:[{n:"Incline DB Curl",s:"3×10",l:"Incline bench",w:"if machine taken"},{n:"EZ Bar Curl",s:"3×10",l:"EZ bar",w:"barbell sub"}]},
-    {n:"Triceps Extension",s:"3×10",l:"42.5 lb",subs:[{n:"DB Overhead Extension",s:"3×12",l:"Single DB",w:"one DB"},{n:"Skull Crusher",s:"3×10",l:"EZ bar or DBs",w:"no cable"}]},
-    {n:"Rear Delt Fly",s:"3×15",l:"7.5 lb",subs:[{n:"Face Pull",s:"3×15",l:"Cable + rope",w:"rotator cuff too"},{n:"Band Pull-Apart",s:"3×20",l:"Band",w:"no equipment"}]},
-    {n:"Abdominal Crunch",s:"3×12",l:"—",subs:[{n:"Weighted Sit-up",s:"3×15",l:"Plate at chest",w:"any weight"},{n:"Plank",s:"3×45s",l:"Bodyweight",w:"no equipment"}]},
-  ]},
-  {key:"cardio",cls:"cardio",label:"CARDIO",exs:[
-    {n:"Steady Run",s:"~45 min",l:"4+ mi",subs:[{n:"Elliptical",s:"~45 min",l:"Lower impact",w:"if treadmill taken"},{n:"Stationary Bike",s:"~50 min",l:"Higher cadence",w:"seated option"}]},
-    {n:"Long Walk (LISS)",s:"~60 min",l:"4 mi",subs:[{n:"Incline Treadmill Walk",s:"~45 min",l:"10-12%, 3 mph",w:"same burn, less time"},{n:"Stairmaster",s:"~30 min",l:"Low-medium intensity",w:"best machine sub"}]},
-    {n:"Optional LISS",s:"20-40 min",l:"easy",subs:[{n:"Row Erg",s:"25 min",l:"Easy pace",w:"low impact full body"},{n:"Outdoor Walk",s:"30-40 min",l:"Any pace",w:"no gym"}]},
-  ]},
+// ─── EXERCISE LIBRARY ────────────────────────────────────────────────────────
+const MUSCLE_GROUPS=["Chest","Back","Shoulders","Biceps","Triceps","Core","Cardio"];
+const EXERCISE_LIBRARY={
+  Chest:[
+    {n:"Bench Press (Barbell)",    eq:"barbell", sets:"4×5",  load:""},
+    {n:"Incline Bench Press",      eq:"barbell", sets:"3×8",  load:""},
+    {n:"Decline Bench Press",      eq:"barbell", sets:"3×8",  load:""},
+    {n:"DB Flat Press",            eq:"dumbbell",sets:"3×10", load:""},
+    {n:"DB Incline Press",         eq:"dumbbell",sets:"3×10", load:""},
+    {n:"DB Decline Press",         eq:"dumbbell",sets:"3×10", load:""},
+    {n:"Machine Chest Press",      eq:"machine", sets:"3×12", load:""},
+    {n:"Incline Machine Press",    eq:"machine", sets:"3×12", load:""},
+    {n:"Chest Fly (Cable)",        eq:"cable",   sets:"3×12", load:""},
+    {n:"Chest Fly (DB)",           eq:"dumbbell",sets:"3×12", load:""},
+    {n:"Cable Crossover",          eq:"cable",   sets:"3×15", load:""},
+    {n:"Pec Deck",                 eq:"machine", sets:"3×15", load:""},
+    {n:"Push-Up",                  eq:"bodyweight",sets:"3×15",load:""},
+    {n:"Dip (Chest)",              eq:"bodyweight",sets:"3×10",load:""},
+  ],
+  Back:[
+    {n:"Deadlift",                 eq:"barbell", sets:"4×5",  load:""},
+    {n:"Bent-Over Row (Barbell)",  eq:"barbell", sets:"4×8",  load:""},
+    {n:"T-Bar Row",                eq:"barbell", sets:"4×8",  load:""},
+    {n:"Seated Row (Cable)",       eq:"cable",   sets:"3×8",  load:""},
+    {n:"Lat Pulldown (Cable)",     eq:"cable",   sets:"3×10", load:""},
+    {n:"Single-Arm Row (DB)",      eq:"dumbbell",sets:"3×10", load:""},
+    {n:"Chest-Supported Row (DB)", eq:"dumbbell",sets:"3×10", load:""},
+    {n:"Pull-Up",                  eq:"bodyweight",sets:"4×8",load:""},
+    {n:"Assisted Pull-Up",         eq:"machine", sets:"4×10", load:""},
+    {n:"Straight-Arm Pulldown",    eq:"cable",   sets:"3×15", load:""},
+    {n:"Face Pull",                eq:"cable",   sets:"3×15", load:""},
+    {n:"Rear Delt Fly (DB)",       eq:"dumbbell",sets:"3×15", load:""},
+    {n:"Hyperextension",           eq:"machine", sets:"3×12", load:""},
+    {n:"Cable Row (Wide Grip)",    eq:"cable",   sets:"3×10", load:""},
+    {n:"Meadows Row",              eq:"barbell", sets:"3×10", load:""},
+  ],
+  Shoulders:[
+    {n:"Overhead Press (Barbell)", eq:"barbell", sets:"4×6",  load:""},
+    {n:"DB Shoulder Press",        eq:"dumbbell",sets:"3×10", load:""},
+    {n:"Arnold Press",             eq:"dumbbell",sets:"3×10", load:""},
+    {n:"Machine Shoulder Press",   eq:"machine", sets:"3×12", load:""},
+    {n:"Lateral Raise (DB)",       eq:"dumbbell",sets:"3×15", load:""},
+    {n:"Lateral Raise (Cable)",    eq:"cable",   sets:"3×15", load:""},
+    {n:"Front Raise (DB)",         eq:"dumbbell",sets:"3×12", load:""},
+    {n:"Front Raise (Cable)",      eq:"cable",   sets:"3×12", load:""},
+    {n:"Rear Delt Fly (Machine)",  eq:"machine", sets:"3×15", load:""},
+    {n:"Upright Row",              eq:"barbell", sets:"3×12", load:""},
+    {n:"Shrug (DB)",               eq:"dumbbell",sets:"3×15", load:""},
+    {n:"Shrug (Barbell)",          eq:"barbell", sets:"3×15", load:""},
+  ],
+  Biceps:[
+    {n:"Barbell Curl",             eq:"barbell", sets:"3×10", load:""},
+    {n:"EZ Bar Curl",              eq:"barbell", sets:"3×10", load:""},
+    {n:"DB Bicep Curl",            eq:"dumbbell",sets:"3×12", load:""},
+    {n:"Hammer Curl",              eq:"dumbbell",sets:"3×12", load:""},
+    {n:"Incline DB Curl",          eq:"dumbbell",sets:"3×10", load:""},
+    {n:"Concentration Curl",       eq:"dumbbell",sets:"3×12", load:""},
+    {n:"Cable Curl",               eq:"cable",   sets:"3×12", load:""},
+    {n:"Rope Hammer Curl",         eq:"cable",   sets:"3×15", load:""},
+    {n:"Preacher Curl (Machine)",  eq:"machine", sets:"3×10", load:""},
+    {n:"Preacher Curl (EZ Bar)",   eq:"barbell", sets:"3×10", load:""},
+  ],
+  Triceps:[
+    {n:"Tricep Pushdown (Rope)",   eq:"cable",   sets:"3×12", load:""},
+    {n:"Tricep Pushdown (Bar)",    eq:"cable",   sets:"3×12", load:""},
+    {n:"Overhead Extension (Cable)",eq:"cable",  sets:"3×12", load:""},
+    {n:"Overhead Extension (DB)",  eq:"dumbbell",sets:"3×12", load:""},
+    {n:"Skull Crusher",            eq:"barbell", sets:"3×10", load:""},
+    {n:"Close-Grip Bench Press",   eq:"barbell", sets:"3×8",  load:""},
+    {n:"Tricep Press (Machine)",   eq:"machine", sets:"3×12", load:""},
+    {n:"Dip (Tricep)",             eq:"bodyweight",sets:"3×10",load:""},
+    {n:"DB Kickback",              eq:"dumbbell",sets:"3×15", load:""},
+    {n:"Bench Dip",                eq:"bodyweight",sets:"3×15",load:""},
+  ],
+  Core:[
+    {n:"Abdominal Crunch (Machine)",eq:"machine",sets:"3×15", load:""},
+    {n:"Cable Crunch",             eq:"cable",   sets:"3×15", load:""},
+    {n:"Hanging Knee Raise",       eq:"bodyweight",sets:"3×15",load:""},
+    {n:"Hanging Leg Raise",        eq:"bodyweight",sets:"3×12",load:""},
+    {n:"Plank",                    eq:"bodyweight",sets:"3×45s",load:""},
+    {n:"Ab Wheel Rollout",         eq:"bodyweight",sets:"3×10",load:""},
+    {n:"Russian Twist",            eq:"dumbbell",sets:"3×20", load:""},
+    {n:"Decline Sit-Up",           eq:"bodyweight",sets:"3×15",load:""},
+    {n:"Weighted Sit-Up",          eq:"dumbbell",sets:"3×15", load:""},
+    {n:"Wood Chop (Cable)",        eq:"cable",   sets:"3×12", load:""},
+  ],
+  Cardio:[
+    {n:"Treadmill Run",            eq:"cardio",  sets:"1×45min",load:""},
+    {n:"Treadmill Walk (Incline)", eq:"cardio",  sets:"1×60min",load:""},
+    {n:"Elliptical",               eq:"cardio",  sets:"1×45min",load:""},
+    {n:"Stationary Bike",          eq:"cardio",  sets:"1×45min",load:""},
+    {n:"Stairmaster",              eq:"cardio",  sets:"1×30min",load:""},
+    {n:"Row Erg",                  eq:"cardio",  sets:"1×25min",load:""},
+    {n:"Jump Rope",                eq:"cardio",  sets:"5×3min", load:""},
+  ],
+};
+
+// ─── WORKOUT TEMPLATES ───────────────────────────────────────────────────────
+const TEMPLATES=[
+  {
+    id:"ppua",name:"Push / Pull / Upper / Arms",
+    desc:"4-day upper split. Great for muscle retention on a cut.",
+    days:[
+      {key:"push",cls:"push",label:"DAY 1 · PUSH",exs:[
+        {n:"Overhead Press (Barbell)",s:"4×6", l:"",subs:[{n:"DB Shoulder Press",s:"4×8",l:"",w:"no rack"},{n:"Machine Shoulder Press",s:"4×10",l:"",w:"machine sub"}]},
+        {n:"Bench Press (Barbell)",   s:"4×5", l:"",subs:[{n:"DB Flat Press",s:"4×8",l:"",w:"if bench taken"},{n:"Machine Chest Press",s:"4×10",l:"",w:"machine sub"}]},
+        {n:"Incline Machine Press",   s:"3×8", l:"",subs:[{n:"DB Incline Press",s:"3×10",l:"",w:"DB sub"},{n:"Chest Fly (Cable)",s:"3×12",l:"",w:"cable sub"}]},
+        {n:"Tricep Press (Machine)",  s:"3×8", l:"",subs:[{n:"Close-Grip Bench Press",s:"3×10",l:"",w:"barbell sub"},{n:"Dip (Tricep)",s:"3×10",l:"",w:"bodyweight"}]},
+        {n:"Lateral Raise (Cable)",   s:"3×15",l:"",subs:[{n:"Lateral Raise (DB)",s:"3×15",l:"",w:"always available"},{n:"Machine Shoulder Press",s:"3×15",l:"",w:"machine sub"}]},
+        {n:"Overhead Extension (Cable)",s:"3×10",l:"",subs:[{n:"Overhead Extension (DB)",s:"3×12",l:"",w:"DB sub"},{n:"Bench Dip",s:"3×15",l:"",w:"bodyweight"}]},
+      ]},
+      {key:"pull",cls:"pull",label:"DAY 2 · PULL",exs:[
+        {n:"Assisted Pull-Up",        s:"4×10",l:"",subs:[{n:"Lat Pulldown (Cable)",s:"4×12",l:"",w:"cable sub"},{n:"Straight-Arm Pulldown",s:"4×12",l:"",w:"same cable"}]},
+        {n:"T-Bar Row",               s:"4×8", l:"",subs:[{n:"Single-Arm Row (DB)",s:"4×10",l:"",w:"DB sub"},{n:"Cable Row (Wide Grip)",s:"4×10",l:"",w:"cable sub"}]},
+        {n:"Seated Row (Cable)",      s:"3×8", l:"",subs:[{n:"Chest-Supported Row (DB)",s:"3×10",l:"",w:"DB sub"},{n:"Bent-Over Row (Barbell)",s:"3×8",l:"",w:"barbell sub"}]},
+        {n:"Lat Pulldown (Cable)",    s:"3×10",l:"",subs:[{n:"Straight-Arm Pulldown",s:"3×15",l:"",w:"same cable"},{n:"Single-Arm Row (DB)",s:"3×12",l:"",w:"DB sub"}]},
+        {n:"Preacher Curl (Machine)", s:"3×8", l:"",subs:[{n:"Incline DB Curl",s:"3×10",l:"",w:"DB sub"},{n:"Cable Curl",s:"3×12",l:"",w:"cable sub"}]},
+        {n:"Rear Delt Fly (DB)",      s:"3×15",l:"",subs:[{n:"Face Pull",s:"3×15",l:"",w:"cable sub"},{n:"Rear Delt Fly (Machine)",s:"3×15",l:"",w:"machine sub"}]},
+      ]},
+      {key:"upper",cls:"upper",label:"DAY 3 · UPPER",exs:[
+        {n:"Bench Press (Barbell)",   s:"4×6", l:"",subs:[{n:"DB Flat Press",s:"4×8",l:"",w:"DB sub"},{n:"Machine Chest Press",s:"4×10",l:"",w:"machine sub"}]},
+        {n:"Lat Pulldown (Cable)",    s:"4×10",l:"",subs:[{n:"Assisted Pull-Up",s:"4×10",l:"",w:"machine sub"},{n:"Single-Arm Row (DB)",s:"4×12",l:"",w:"DB sub"}]},
+        {n:"Chest Fly (Cable)",       s:"3×12",l:"",subs:[{n:"Chest Fly (DB)",s:"3×12",l:"",w:"DB sub"},{n:"Pec Deck",s:"3×15",l:"",w:"machine sub"}]},
+        {n:"Single-Arm Row (DB)",     s:"3×10",l:"",subs:[{n:"Chest-Supported Row (DB)",s:"3×10",l:"",w:"no lower back"},{n:"Seated Row (Cable)",s:"3×10",l:"",w:"cable sub"}]},
+        {n:"DB Bicep Curl",           s:"3×10",l:"",subs:[{n:"Hammer Curl",s:"3×12",l:"",w:"brachialis"},{n:"Cable Curl",s:"3×15",l:"",w:"cable sub"}]},
+        {n:"Lateral Raise (DB)",      s:"3×15",l:"",subs:[{n:"Lateral Raise (Cable)",s:"3×15",l:"",w:"cable sub"},{n:"Front Raise (DB)",s:"3×12",l:"",w:"front delt"}]},
+        {n:"Abdominal Crunch (Machine)",s:"3×15",l:"",subs:[{n:"Cable Crunch",s:"3×15",l:"",w:"cable sub"},{n:"Hanging Knee Raise",s:"3×15",l:"",w:"bodyweight"}]},
+      ]},
+      {key:"arms",cls:"arms",label:"DAY 4 · SHOULDERS & ARMS",exs:[
+        {n:"Overhead Press (Barbell)",s:"3×8", l:"",subs:[{n:"DB Shoulder Press",s:"3×10",l:"",w:"DB sub"},{n:"Arnold Press",s:"3×10",l:"",w:"no rack"}]},
+        {n:"Lateral Raise (DB)",      s:"4×15",l:"",subs:[{n:"Lateral Raise (Cable)",s:"4×15",l:"",w:"cable sub"},{n:"Machine Shoulder Press",s:"3×12",l:"",w:"machine"}]},
+        {n:"Preacher Curl (Machine)", s:"3×8", l:"",subs:[{n:"Incline DB Curl",s:"3×10",l:"",w:"DB sub"},{n:"EZ Bar Curl",s:"3×10",l:"",w:"barbell sub"}]},
+        {n:"Overhead Extension (Cable)",s:"3×10",l:"",subs:[{n:"Overhead Extension (DB)",s:"3×12",l:"",w:"DB sub"},{n:"Skull Crusher",s:"3×10",l:"",w:"barbell sub"}]},
+        {n:"Rear Delt Fly (DB)",      s:"3×15",l:"",subs:[{n:"Face Pull",s:"3×15",l:"",w:"cable sub"},{n:"Rear Delt Fly (Machine)",s:"3×15",l:"",w:"machine sub"}]},
+        {n:"Abdominal Crunch (Machine)",s:"3×15",l:"",subs:[{n:"Cable Crunch",s:"3×15",l:"",w:"cable sub"},{n:"Plank",s:"3×45s",l:"",w:"bodyweight"}]},
+      ]},
+      {key:"cardio",cls:"cardio",label:"CARDIO",exs:[
+        {n:"Treadmill Run",           s:"~45 min",l:"",subs:[{n:"Elliptical",s:"~45 min",l:"",w:"lower impact"},{n:"Stationary Bike",s:"~50 min",l:"",w:"seated"}]},
+        {n:"Treadmill Walk (Incline)",s:"~60 min",l:"",subs:[{n:"Stairmaster",s:"~30 min",l:"",w:"best machine sub"},{n:"Row Erg",s:"~25 min",l:"",w:"full body"}]},
+      ]},
+    ]
+  },
+  {
+    id:"ppl",name:"Push / Pull / Legs",
+    desc:"3 or 6-day split. Most popular intermediate program.",
+    days:[
+      {key:"push",cls:"push",label:"PUSH",exs:[
+        {n:"Bench Press (Barbell)",   s:"4×5", l:"",subs:[{n:"DB Flat Press",s:"4×8",l:"",w:"DB sub"},{n:"Machine Chest Press",s:"4×10",l:"",w:"machine sub"}]},
+        {n:"Overhead Press (Barbell)",s:"3×8", l:"",subs:[{n:"DB Shoulder Press",s:"3×10",l:"",w:"DB sub"},{n:"Machine Shoulder Press",s:"3×12",l:"",w:"machine sub"}]},
+        {n:"DB Incline Press",        s:"3×10",l:"",subs:[{n:"Incline Machine Press",s:"3×10",l:"",w:"machine sub"},{n:"Chest Fly (Cable)",s:"3×12",l:"",w:"cable sub"}]},
+        {n:"Lateral Raise (DB)",      s:"3×15",l:"",subs:[{n:"Lateral Raise (Cable)",s:"3×15",l:"",w:"cable sub"}]},
+        {n:"Tricep Pushdown (Rope)",  s:"3×12",l:"",subs:[{n:"Overhead Extension (Cable)",s:"3×12",l:"",w:"long head"},{n:"Skull Crusher",s:"3×10",l:"",w:"barbell sub"}]},
+        {n:"Overhead Extension (DB)", s:"3×12",l:"",subs:[{n:"Tricep Pushdown (Bar)",s:"3×12",l:"",w:"cable sub"},{n:"Bench Dip",s:"3×15",l:"",w:"bodyweight"}]},
+      ]},
+      {key:"pull",cls:"pull",label:"PULL",exs:[
+        {n:"Deadlift",                s:"4×5", l:"",subs:[{n:"Romanian Deadlift",s:"4×8",l:"",w:"less technical"},{n:"Bent-Over Row (Barbell)",s:"4×6",l:"",w:"upper back focus"}]},
+        {n:"Pull-Up",                 s:"4×8", l:"",subs:[{n:"Assisted Pull-Up",s:"4×10",l:"",w:"machine sub"},{n:"Lat Pulldown (Cable)",s:"4×10",l:"",w:"cable sub"}]},
+        {n:"Seated Row (Cable)",      s:"3×10",l:"",subs:[{n:"Single-Arm Row (DB)",s:"3×10",l:"",w:"DB sub"},{n:"T-Bar Row",s:"3×8",l:"",w:"barbell sub"}]},
+        {n:"Face Pull",               s:"3×15",l:"",subs:[{n:"Rear Delt Fly (DB)",s:"3×15",l:"",w:"DB sub"},{n:"Rear Delt Fly (Machine)",s:"3×15",l:"",w:"machine sub"}]},
+        {n:"Barbell Curl",            s:"3×10",l:"",subs:[{n:"EZ Bar Curl",s:"3×10",l:"",w:"easier on wrists"},{n:"DB Bicep Curl",s:"3×12",l:"",w:"DB sub"}]},
+        {n:"Hammer Curl",             s:"3×12",l:"",subs:[{n:"Rope Hammer Curl",s:"3×15",l:"",w:"cable sub"},{n:"Incline DB Curl",s:"3×10",l:"",w:"stretch"}]},
+      ]},
+      {key:"legs",cls:"cardio",label:"LEGS",exs:[
+        {n:"Squat (Barbell)",         s:"4×5", l:"",subs:[{n:"Hack Squat (Machine)",s:"4×8",l:"",w:"machine sub"},{n:"Leg Press",s:"4×10",l:"",w:"machine sub"}]},
+        {n:"Romanian Deadlift",       s:"3×8", l:"",subs:[{n:"Leg Curl (Machine)",s:"3×10",l:"",w:"isolates hamstring"},{n:"Good Morning",s:"3×10",l:"",w:"barbell sub"}]},
+        {n:"Leg Press",               s:"3×10",l:"",subs:[{n:"Bulgarian Split Squat",s:"3×10",l:"",w:"unilateral"},{n:"Hack Squat (Machine)",s:"3×10",l:"",w:"machine sub"}]},
+        {n:"Leg Curl (Machine)",      s:"3×12",l:"",subs:[{n:"Romanian Deadlift",s:"3×10",l:"",w:"barbell sub"},{n:"Good Morning",s:"3×10",l:"",w:"barbell sub"}]},
+        {n:"Leg Extension (Machine)", s:"3×15",l:"",subs:[{n:"Squat (Barbell)",s:"3×8",l:"",w:"compound sub"},{n:"Leg Press",s:"3×12",l:"",w:"machine sub"}]},
+        {n:"Calf Raise (Machine)",    s:"4×15",l:"",subs:[{n:"Standing Calf Raise",s:"4×15",l:"",w:"bodyweight"}]},
+      ]},
+    ]
+  },
+  {
+    id:"fullbody",name:"Full Body 3×/week",
+    desc:"Monday / Wednesday / Friday. Best for beginners.",
+    days:[
+      {key:"mon",cls:"push",label:"MONDAY",exs:[
+        {n:"Squat (Barbell)",         s:"3×5", l:"",subs:[{n:"Leg Press",s:"3×10",l:"",w:"machine sub"},{n:"Hack Squat (Machine)",s:"3×10",l:"",w:"machine sub"}]},
+        {n:"Bench Press (Barbell)",   s:"3×5", l:"",subs:[{n:"DB Flat Press",s:"3×8",l:"",w:"DB sub"},{n:"Machine Chest Press",s:"3×10",l:"",w:"machine sub"}]},
+        {n:"Bent-Over Row (Barbell)", s:"3×5", l:"",subs:[{n:"Seated Row (Cable)",s:"3×8",l:"",w:"cable sub"},{n:"Single-Arm Row (DB)",s:"3×10",l:"",w:"DB sub"}]},
+        {n:"Overhead Press (Barbell)",s:"3×8", l:"",subs:[{n:"DB Shoulder Press",s:"3×10",l:"",w:"DB sub"}]},
+        {n:"Abdominal Crunch (Machine)",s:"3×15",l:"",subs:[{n:"Plank",s:"3×45s",l:"",w:"bodyweight"}]},
+      ]},
+      {key:"wed",cls:"pull",label:"WEDNESDAY",exs:[
+        {n:"Deadlift",                s:"3×5", l:"",subs:[{n:"Romanian Deadlift",s:"3×8",l:"",w:"less technical"},{n:"Leg Press",s:"3×10",l:"",w:"machine sub"}]},
+        {n:"DB Incline Press",        s:"3×8", l:"",subs:[{n:"Incline Machine Press",s:"3×10",l:"",w:"machine sub"}]},
+        {n:"Pull-Up",                 s:"3×8", l:"",subs:[{n:"Assisted Pull-Up",s:"3×10",l:"",w:"machine sub"},{n:"Lat Pulldown (Cable)",s:"3×10",l:"",w:"cable sub"}]},
+        {n:"DB Shoulder Press",       s:"3×10",l:"",subs:[{n:"Machine Shoulder Press",s:"3×12",l:"",w:"machine sub"}]},
+        {n:"Plank",                   s:"3×45s",l:"",subs:[{n:"Ab Wheel Rollout",s:"3×10",l:"",w:"harder"}]},
+      ]},
+      {key:"fri",cls:"upper",label:"FRIDAY",exs:[
+        {n:"Squat (Barbell)",         s:"3×5", l:"",subs:[{n:"Hack Squat (Machine)",s:"3×8",l:"",w:"machine sub"},{n:"Leg Press",s:"3×10",l:"",w:"machine sub"}]},
+        {n:"Bench Press (Barbell)",   s:"3×8", l:"",subs:[{n:"DB Flat Press",s:"3×8",l:"",w:"DB sub"}]},
+        {n:"Seated Row (Cable)",      s:"3×8", l:"",subs:[{n:"Single-Arm Row (DB)",s:"3×10",l:"",w:"DB sub"}]},
+        {n:"DB Bicep Curl",           s:"3×12",l:"",subs:[{n:"Barbell Curl",s:"3×10",l:"",w:"barbell sub"}]},
+        {n:"Tricep Pushdown (Rope)",  s:"3×12",l:"",subs:[{n:"Overhead Extension (DB)",s:"3×12",l:"",w:"DB sub"}]},
+      ]},
+    ]
+  },
+  {
+    id:"upperlower",name:"Upper / Lower 4-day",
+    desc:"Alternating upper and lower days. Balanced strength + size.",
+    days:[
+      {key:"uppera",cls:"push",label:"UPPER A",exs:[
+        {n:"Bench Press (Barbell)",   s:"4×5", l:"",subs:[{n:"DB Flat Press",s:"4×8",l:"",w:"DB sub"},{n:"Machine Chest Press",s:"4×10",l:"",w:"machine sub"}]},
+        {n:"Bent-Over Row (Barbell)", s:"4×5", l:"",subs:[{n:"Seated Row (Cable)",s:"4×8",l:"",w:"cable sub"},{n:"T-Bar Row",s:"4×6",l:"",w:"barbell sub"}]},
+        {n:"Overhead Press (Barbell)",s:"3×8", l:"",subs:[{n:"DB Shoulder Press",s:"3×10",l:"",w:"DB sub"}]},
+        {n:"Lat Pulldown (Cable)",    s:"3×10",l:"",subs:[{n:"Assisted Pull-Up",s:"3×10",l:"",w:"machine sub"}]},
+        {n:"DB Bicep Curl",           s:"3×12",l:"",subs:[{n:"Barbell Curl",s:"3×10",l:"",w:"barbell sub"}]},
+        {n:"Tricep Pushdown (Rope)",  s:"3×12",l:"",subs:[{n:"Skull Crusher",s:"3×10",l:"",w:"barbell sub"}]},
+      ]},
+      {key:"lowera",cls:"pull",label:"LOWER A",exs:[
+        {n:"Squat (Barbell)",         s:"4×5", l:"",subs:[{n:"Hack Squat (Machine)",s:"4×8",l:"",w:"machine sub"},{n:"Leg Press",s:"4×10",l:"",w:"machine sub"}]},
+        {n:"Romanian Deadlift",       s:"3×8", l:"",subs:[{n:"Leg Curl (Machine)",s:"3×10",l:"",w:"isolation"},{n:"Good Morning",s:"3×10",l:"",w:"barbell sub"}]},
+        {n:"Leg Press",               s:"3×10",l:"",subs:[{n:"Bulgarian Split Squat",s:"3×10",l:"",w:"unilateral"}]},
+        {n:"Leg Curl (Machine)",      s:"3×12",l:"",subs:[{n:"Romanian Deadlift",s:"3×10",l:"",w:"compound sub"}]},
+        {n:"Calf Raise (Machine)",    s:"4×15",l:"",subs:[{n:"Standing Calf Raise",s:"4×20",l:"",w:"bodyweight"}]},
+        {n:"Plank",                   s:"3×45s",l:"",subs:[{n:"Hanging Knee Raise",s:"3×15",l:"",w:"hanging"}]},
+      ]},
+      {key:"upperb",cls:"upper",label:"UPPER B",exs:[
+        {n:"DB Incline Press",        s:"4×10",l:"",subs:[{n:"Incline Machine Press",s:"4×10",l:"",w:"machine sub"}]},
+        {n:"Single-Arm Row (DB)",     s:"4×10",l:"",subs:[{n:"Chest-Supported Row (DB)",s:"4×10",l:"",w:"no lower back"}]},
+        {n:"DB Shoulder Press",       s:"3×10",l:"",subs:[{n:"Arnold Press",s:"3×10",l:"",w:"rotation"}]},
+        {n:"Chest Fly (Cable)",       s:"3×12",l:"",subs:[{n:"Chest Fly (DB)",s:"3×12",l:"",w:"DB sub"}]},
+        {n:"Hammer Curl",             s:"3×12",l:"",subs:[{n:"Concentration Curl",s:"3×12",l:"",w:"peak"}]},
+        {n:"Overhead Extension (DB)", s:"3×12",l:"",subs:[{n:"Bench Dip",s:"3×15",l:"",w:"bodyweight"}]},
+      ]},
+      {key:"lowerb",cls:"arms",label:"LOWER B",exs:[
+        {n:"Deadlift",                s:"4×5", l:"",subs:[{n:"Romanian Deadlift",s:"4×8",l:"",w:"less technical"}]},
+        {n:"Hack Squat (Machine)",    s:"3×10",l:"",subs:[{n:"Leg Press",s:"3×10",l:"",w:"machine sub"},{n:"Squat (Barbell)",s:"3×5",l:"",w:"compound"}]},
+        {n:"Leg Extension (Machine)", s:"3×15",l:"",subs:[{n:"Bulgarian Split Squat",s:"3×10",l:"",w:"unilateral"}]},
+        {n:"Leg Curl (Machine)",      s:"3×12",l:"",subs:[{n:"Romanian Deadlift",s:"3×10",l:"",w:"compound sub"}]},
+        {n:"Calf Raise (Machine)",    s:"4×15",l:"",subs:[{n:"Standing Calf Raise",s:"4×20",l:"",w:"bodyweight"}]},
+        {n:"Cable Crunch",            s:"3×15",l:"",subs:[{n:"Hanging Leg Raise",s:"3×12",l:"",w:"harder"}]},
+      ]},
+    ]
+  },
+  {
+    id:"brosplit",name:"Bro Split 5-day",
+    desc:"One muscle group per day. Classic bodybuilding split.",
+    days:[
+      {key:"chest",cls:"push",label:"CHEST",exs:[
+        {n:"Bench Press (Barbell)",   s:"4×5", l:"",subs:[{n:"DB Flat Press",s:"4×8",l:"",w:"DB sub"}]},
+        {n:"DB Incline Press",        s:"4×10",l:"",subs:[{n:"Incline Machine Press",s:"4×10",l:"",w:"machine sub"}]},
+        {n:"Chest Fly (Cable)",       s:"3×12",l:"",subs:[{n:"Chest Fly (DB)",s:"3×12",l:"",w:"DB sub"},{n:"Pec Deck",s:"3×15",l:"",w:"machine sub"}]},
+        {n:"Machine Chest Press",     s:"3×15",l:"",subs:[{n:"DB Flat Press",s:"3×15",l:"",w:"DB sub"}]},
+        {n:"Push-Up",                 s:"3×20",l:"",subs:[]},
+      ]},
+      {key:"back",cls:"pull",label:"BACK",exs:[
+        {n:"Deadlift",                s:"4×5", l:"",subs:[{n:"Bent-Over Row (Barbell)",s:"4×6",l:"",w:"no deadlift"}]},
+        {n:"Pull-Up",                 s:"4×8", l:"",subs:[{n:"Assisted Pull-Up",s:"4×10",l:"",w:"machine sub"},{n:"Lat Pulldown (Cable)",s:"4×10",l:"",w:"cable sub"}]},
+        {n:"T-Bar Row",               s:"4×8", l:"",subs:[{n:"Bent-Over Row (Barbell)",s:"4×8",l:"",w:"barbell sub"}]},
+        {n:"Seated Row (Cable)",      s:"3×10",l:"",subs:[{n:"Single-Arm Row (DB)",s:"3×10",l:"",w:"DB sub"}]},
+        {n:"Face Pull",               s:"3×15",l:"",subs:[{n:"Rear Delt Fly (DB)",s:"3×15",l:"",w:"DB sub"}]},
+      ]},
+      {key:"shoulders",cls:"upper",label:"SHOULDERS",exs:[
+        {n:"Overhead Press (Barbell)",s:"4×6", l:"",subs:[{n:"DB Shoulder Press",s:"4×8",l:"",w:"DB sub"}]},
+        {n:"DB Shoulder Press",       s:"3×10",l:"",subs:[{n:"Arnold Press",s:"3×10",l:"",w:"rotation"}]},
+        {n:"Lateral Raise (DB)",      s:"4×15",l:"",subs:[{n:"Lateral Raise (Cable)",s:"4×15",l:"",w:"cable sub"}]},
+        {n:"Front Raise (DB)",        s:"3×12",l:"",subs:[{n:"Front Raise (Cable)",s:"3×12",l:"",w:"cable sub"}]},
+        {n:"Rear Delt Fly (Machine)", s:"3×15",l:"",subs:[{n:"Face Pull",s:"3×15",l:"",w:"cable sub"}]},
+        {n:"Shrug (DB)",              s:"3×15",l:"",subs:[{n:"Shrug (Barbell)",s:"3×15",l:"",w:"barbell sub"}]},
+      ]},
+      {key:"arms",cls:"arms",label:"ARMS",exs:[
+        {n:"Barbell Curl",            s:"4×10",l:"",subs:[{n:"EZ Bar Curl",s:"4×10",l:"",w:"wrist friendly"}]},
+        {n:"Skull Crusher",           s:"4×10",l:"",subs:[{n:"Tricep Pushdown (Rope)",s:"4×12",l:"",w:"cable sub"}]},
+        {n:"Hammer Curl",             s:"3×12",l:"",subs:[{n:"Rope Hammer Curl",s:"3×15",l:"",w:"cable sub"}]},
+        {n:"Tricep Pushdown (Rope)",  s:"3×12",l:"",subs:[{n:"Overhead Extension (Cable)",s:"3×12",l:"",w:"long head"}]},
+        {n:"Preacher Curl (EZ Bar)",  s:"3×10",l:"",subs:[{n:"Preacher Curl (Machine)",s:"3×10",l:"",w:"machine sub"}]},
+        {n:"Overhead Extension (DB)", s:"3×12",l:"",subs:[{n:"Bench Dip",s:"3×15",l:"",w:"bodyweight"}]},
+      ]},
+      {key:"cardio",cls:"cardio",label:"CARDIO + CORE",exs:[
+        {n:"Treadmill Run",           s:"~30 min",l:"",subs:[{n:"Elliptical",s:"~30 min",l:"",w:"lower impact"},{n:"Stationary Bike",s:"~35 min",l:"",w:"seated"}]},
+        {n:"Abdominal Crunch (Machine)",s:"3×15",l:"",subs:[{n:"Cable Crunch",s:"3×15",l:"",w:"cable sub"}]},
+        {n:"Hanging Knee Raise",      s:"3×15",l:"",subs:[{n:"Hanging Leg Raise",s:"3×12",l:"",w:"harder"}]},
+        {n:"Plank",                   s:"3×45s",l:"",subs:[]},
+      ]},
+    ]
+  },
 ];
+
+// active template — loaded from DB or defaults to first template
+let activeTemplate=null;
+let customWorkout=null; // overrides template when user builds custom
+
+// DAYS loaded dynamically from active template
+function getDays(){return customWorkout||(activeTemplate?activeTemplate.days:TEMPLATES[0].days);}
 
 // ── STATE ─────────────────────────────────────────────
 let USER=null;
@@ -580,6 +970,7 @@ async function initApp(user){
   document.getElementById("auth-screen").style.display="none";
   document.getElementById("main-app").style.display="block";
   await loadAllData();
+  await loadWorkoutConfig();
   renderDash();
   renderWorkout();
   renderWeighins();
@@ -881,7 +1272,7 @@ function renderWorkout(){
     sg.appendChild(btn);
   });
   const host=document.getElementById("workout-days");host.innerHTML="";
-  DAYS.forEach(day=>{
+  getDays().forEach(day=>{
     const total=day.exs.length,done=day.exs.filter((_,i)=>checks[`w${week}-${day.key}-${i}`]).length;
     const block=document.createElement("div");block.className="day-block";
     const hdr=document.createElement("div");hdr.className=`day-hdr ${day.cls}`;
@@ -1036,6 +1427,171 @@ document.getElementById("nl-save").addEventListener("click",async()=>{
   await sb.from("weekly_logs").upsert({user_id:USER.id,week:wk,complete_days:c,protein_days:p2},{onConflict:"user_id,week"});
   renderDash();toast(`Week ${wk} logged`);
 });
+
+// ─── WORKOUT TAB SUB-NAVIGATION ──────────────────────────────────────────────
+function switchWorkoutView(view){
+  ["log","template","builder"].forEach(v=>{
+    const el=document.getElementById("wview-"+v);
+    if(el) el.style.display=v===view?"block":"none";
+  });
+  document.querySelectorAll(".wtab").forEach(b=>{
+    const on=b.dataset.wt===view;
+    b.style.background=on?"var(--card)":"none";
+    b.style.color=on?"var(--text)":"var(--sub)";
+    b.classList.toggle("on",on);
+  });
+}
+document.querySelectorAll(".wtab").forEach(b=>b.addEventListener("click",()=>{
+  switchWorkoutView(b.dataset.wt);
+  if(b.dataset.wt==="template") renderTemplatePicker();
+  if(b.dataset.wt==="builder") renderBuilder();
+}));
+
+// ─── TEMPLATE PICKER ─────────────────────────────────────────────────────────
+let selectedTemplateId=null;
+function renderTemplatePicker(){
+  const grid=document.getElementById("tmpl-grid");if(!grid)return;grid.innerHTML="";
+  TEMPLATES.forEach(t=>{
+    const isActive=activeTemplate&&activeTemplate.id===t.id;
+    const card=document.createElement("div");card.className="tmpl-card"+(isActive?" active":"");
+    card.innerHTML=`<div class="tmpl-card-check">${isActive?"✓":""}</div>
+      <div><div class="tmpl-name">${t.name}</div><div class="tmpl-desc">${t.desc}</div></div>`;
+    card.addEventListener("click",()=>{
+      selectedTemplateId=t.id;
+      document.querySelectorAll(".tmpl-card").forEach(c=>{c.classList.remove("active");c.querySelector(".tmpl-card-check").textContent="";});
+      card.classList.add("active");card.querySelector(".tmpl-card-check").textContent="✓";
+    });
+    grid.appendChild(card);
+  });
+}
+document.getElementById("tmpl-apply").addEventListener("click",async()=>{
+  if(!selectedTemplateId){toast("Select a template first");return;}
+  const t=TEMPLATES.find(t=>t.id===selectedTemplateId);if(!t)return;
+  activeTemplate=t;customWorkout=null;
+  await sb.from("plans").upsert({user_id:USER.id,active_template:t.id,custom_workout:null},{onConflict:"user_id"});
+  switchWorkoutView("log");renderWorkout();toast(`${t.name} applied`);
+});
+
+// ─── CUSTOM BUILDER ───────────────────────────────────────────────────────────
+let builderDays=[];
+let modalTargetDayIdx=null;
+const DAY_CLS_OPTIONS=["push","pull","upper","arms","cardio"];
+
+function renderBuilder(){
+  if(!builderDays.length){
+    const src=customWorkout||(activeTemplate?activeTemplate.days:null);
+    if(src) builderDays=JSON.parse(JSON.stringify(src));
+  }
+  const host=document.getElementById("builder-days");if(!host)return;host.innerHTML="";
+  builderDays.forEach((day,di)=>{
+    const block=document.createElement("div");block.className="builder-day";
+    block.innerHTML=`<div class="builder-day-hdr">
+        <input value="${day.label}" data-di="${di}" class="builder-day-name-input" style="background:none;border:none;color:var(--text);font-size:13px;font-weight:800;outline:none;flex:1;min-width:0"/>
+        <div class="builder-day-actions">
+          <button class="builder-action-btn add-ex-btn" data-di="${di}">+ Exercise</button>
+          <button class="builder-action-btn danger del-day-btn" data-di="${di}">Remove</button>
+        </div>
+      </div>
+      <div class="builder-ex-list" id="bday-${di}"></div>`;
+    const exList=block.querySelector(`#bday-${di}`);
+    if(day.exs.length){
+      day.exs.forEach((ex,ei)=>{
+        const row=document.createElement("div");row.className="builder-ex-row";
+        row.innerHTML=`<div class="builder-ex-name">${ex.n}</div>
+          <div class="builder-ex-meta">${ex.s}</div>
+          <button class="builder-ex-del" data-di="${di}" data-ei="${ei}">×</button>`;
+        exList.appendChild(row);
+      });
+    }else{
+      exList.innerHTML=`<div style="padding:12px 14px;font-size:12px;color:var(--sub)">No exercises — tap + Exercise</div>`;
+    }
+    host.appendChild(block);
+  });
+  host.querySelectorAll(".builder-day-name-input").forEach(inp=>{
+    inp.addEventListener("change",()=>{builderDays[+inp.dataset.di].label=inp.value;});
+  });
+  host.querySelectorAll(".del-day-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{builderDays.splice(+btn.dataset.di,1);renderBuilder();});
+  });
+  host.querySelectorAll(".builder-ex-del").forEach(btn=>{
+    btn.addEventListener("click",()=>{builderDays[+btn.dataset.di].exs.splice(+btn.dataset.ei,1);renderBuilder();});
+  });
+  host.querySelectorAll(".add-ex-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{modalTargetDayIdx=+btn.dataset.di;openExModal();});
+  });
+}
+
+document.getElementById("add-day-btn").addEventListener("click",()=>{
+  builderDays.push({key:"day"+Date.now(),cls:"push",label:`Day ${builderDays.length+1}`,exs:[]});
+  renderBuilder();
+});
+document.getElementById("builder-save").addEventListener("click",async()=>{
+  if(!builderDays.length){toast("Add at least one day");return;}
+  customWorkout=JSON.parse(JSON.stringify(builderDays));
+  activeTemplate=null;
+  await sb.from("plans").upsert({user_id:USER.id,custom_workout:JSON.stringify(customWorkout),active_template:null},{onConflict:"user_id"});
+  switchWorkoutView("log");renderWorkout();toast("Custom workout saved");
+});
+
+// ─── EXERCISE PICKER MODAL ───────────────────────────────────────────────────
+let modalMuscle=MUSCLE_GROUPS[0];
+let modalSearch="";
+function openExModal(){
+  modalMuscle=MUSCLE_GROUPS[0];modalSearch="";
+  document.getElementById("modal-search").value="";
+  document.getElementById("ex-modal").classList.remove("hidden");
+  renderModalTabs();renderModalList();
+}
+function closeExModal(){document.getElementById("ex-modal").classList.add("hidden");}
+document.getElementById("modal-close").addEventListener("click",closeExModal);
+document.getElementById("ex-modal").addEventListener("click",e=>{if(e.target===document.getElementById("ex-modal"))closeExModal();});
+document.getElementById("modal-search").addEventListener("input",e=>{modalSearch=e.target.value.toLowerCase();renderModalList();});
+
+function renderModalTabs(){
+  const tabs=document.getElementById("modal-muscle-tabs");tabs.innerHTML="";
+  MUSCLE_GROUPS.forEach(mg=>{
+    const t=document.createElement("div");t.className="muscle-tab"+(mg===modalMuscle?" on":"");
+    t.textContent=mg;t.addEventListener("click",()=>{modalMuscle=mg;renderModalTabs();renderModalList();});
+    tabs.appendChild(t);
+  });
+}
+function renderModalList(){
+  const list=document.getElementById("modal-ex-list");list.innerHTML="";
+  let exs=[];
+  if(modalSearch){
+    MUSCLE_GROUPS.forEach(mg=>{(EXERCISE_LIBRARY[mg]||[]).forEach(ex=>{if(ex.n.toLowerCase().includes(modalSearch))exs.push({...ex,mg});});});
+  }else{
+    exs=(EXERCISE_LIBRARY[modalMuscle]||[]).map(ex=>({...ex,mg:modalMuscle}));
+  }
+  if(!exs.length){list.innerHTML=`<div class="empty">No exercises found.</div>`;return;}
+  exs.forEach(ex=>{
+    const item=document.createElement("div");item.className="modal-ex-item";
+    item.innerHTML=`<div>
+        <div class="modal-ex-item-name">${ex.n}</div>
+        <div class="modal-ex-item-meta"><span class="eq-badge ${ex.eq}">${ex.eq}</span>${ex.mg}</div>
+      </div>
+      <button class="modal-ex-item-add">Add</button>`;
+    item.querySelector(".modal-ex-item-add").addEventListener("click",()=>{
+      if(modalTargetDayIdx===null)return;
+      builderDays[modalTargetDayIdx].exs.push({n:ex.n,s:ex.s,l:"",subs:[]});
+      renderBuilder();closeExModal();toast(`${ex.n} added`);
+    });
+    list.appendChild(item);
+  });
+}
+
+// ─── LOAD TEMPLATE/CUSTOM FROM DB ────────────────────────────────────────────
+async function loadWorkoutConfig(){
+  const{data}=await sb.from("plans").select("active_template,custom_workout").eq("user_id",USER.id).single();
+  if(!data){activeTemplate=TEMPLATES[0];customWorkout=null;return;}
+  if(data.custom_workout){
+    try{customWorkout=JSON.parse(data.custom_workout);activeTemplate=null;}catch(e){activeTemplate=TEMPLATES[0];customWorkout=null;}
+  }else if(data.active_template){
+    activeTemplate=TEMPLATES.find(t=>t.id===data.active_template)||TEMPLATES[0];customWorkout=null;
+  }else{
+    activeTemplate=TEMPLATES[0];customWorkout=null;
+  }
+}
 
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
