@@ -338,6 +338,15 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .eq-badge.machine{background:#1a0a3d;color:#a78bfa}
 .eq-badge.bodyweight{background:#1c0505;color:#ef4444}
 .eq-badge.cardio{background:#451a03;color:#fcd34d}
+
+/* ── accordion ── */
+.accord-block{border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.accord-hdr{width:100%;background:var(--card);border:none;color:var(--text);display:flex;align-items:center;justify-content:space-between;padding:14px 16px;font-size:14px;font-weight:800;cursor:pointer;text-align:left;transition:background .15s}
+.accord-hdr:active{background:var(--card2)}
+.accord-arrow{font-size:18px;color:var(--sub);transition:transform .25s;display:inline-block}
+.accord-block.open .accord-arrow{transform:rotate(90deg)}
+.accord-body{display:none;padding:12px 13px 14px;background:var(--bg2);border-top:1px solid var(--border)}
+.accord-block.open .accord-body{display:block}
 </style>
 </head>
 <body class="cut">
@@ -383,11 +392,9 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
   </header>
   <nav class="tabs">
     <button class="tab on" data-tab="dash">Dashboard</button>
-    <button class="tab" data-tab="goals">Goals</button>
-    <button class="tab" data-tab="lb">Leaderboard</button>
     <button class="tab" data-tab="workout">Workout</button>
-    <button class="tab" data-tab="weigh">Weight</button>
-    <button class="tab" data-tab="lifts">Lifts</button>
+    <button class="tab" data-tab="progress">Progress</button>
+    <button class="tab" data-tab="lb">Compete</button>
     <button class="tab" data-tab="settings">Settings</button>
   </nav>
   <main class="pages">
@@ -413,23 +420,7 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       <div id="d-lifts" class="blist"></div>
     </section>
 
-    <!-- GOALS -->
-    <section id="tab-goals" class="page">
-      <div class="sh" style="margin-top:4px">1RM Goal Board</div>
-      <div id="goal-board"></div>
-      <div class="sh">Set a Goal</div>
-      <div class="fcard">
-        <div class="frow2"><label>Lift</label>
-          <select id="g-lift">
-            <option>Bench Press</option><option>Overhead Press</option>
-            <option>Lat Pulldown</option><option>Assisted Pull-up</option>
-            <option>Seated Row</option><option>T-Bar Row</option>
-          </select>
-        </div>
-        <div class="frow2"><label>Goal e1RM (lb)</label><input type="number" id="g-val" placeholder="280"/></div>
-        <button class="btn" id="g-save">Set Goal</button>
-      </div>
-    </section>
+
 
     <!-- LEADERBOARD -->
     <section id="tab-lb" class="page">
@@ -507,37 +498,73 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       </div>
     </div>
 
-    <!-- WEIGHT -->
-    <section id="tab-weigh" class="page">
-      <div class="fcard">
-        <div class="ftitle">Log Weigh-in</div>
-        <div class="frow2"><label>Date</label><input type="date" id="wi-d"/></div>
-        <div class="frow2"><label>Weight (lb)</label><input type="number" step="0.1" id="wi-w" placeholder="184.8"/></div>
-        <button class="btn" id="wi-save">Save</button>
-      </div>
-      <div class="sh">History</div>
-      <div class="elist" id="wi-list"></div>
-    </section>
 
-    <!-- LIFTS -->
-    <section id="tab-lifts" class="page">
-      <div class="fcard">
-        <div class="ftitle">Log a Lift</div>
-        <div class="frow2"><label>Lift</label>
-          <select id="l-name">
-            <option>Bench Press</option><option>Overhead Press</option>
-            <option>Lat Pulldown</option><option>Assisted Pull-up</option>
-            <option>Seated Row</option><option>T-Bar Row</option>
-          </select>
+
+    <!-- PROGRESS (Weight + Lifts + Goals combined) -->
+    <section id="tab-progress" class="page">
+
+      <!-- WEIGHT LOG accordion -->
+      <div class="accord-block" id="accord-weight">
+        <button class="accord-hdr" data-target="accord-weight">
+          <span>Weight Log</span><span class="accord-arrow">›</span>
+        </button>
+        <div class="accord-body">
+          <div class="fcard" style="border-radius:0 0 var(--r) var(--r);border-top:none">
+            <div class="frow2"><label>Date</label><input type="date" id="wi-d"/></div>
+            <div class="frow2"><label>Weight (lb)</label><input type="number" step="0.1" id="wi-w" placeholder="e.g. 184.8"/></div>
+            <button class="btn" id="wi-save">Save Weigh-in</button>
+          </div>
+          <div class="elist" id="wi-list" style="margin-top:10px"></div>
         </div>
-        <div class="frow2"><label>Weight (lb)</label><input type="number" step="2.5" id="l-wt" placeholder="205"/></div>
-        <div class="frow2"><label>Reps</label><input type="number" id="l-rp" placeholder="8"/></div>
-        <button class="btn" id="l-save">Save</button>
       </div>
-      <div class="sh">Baselines</div>
-      <div class="blist" id="base-list"></div>
-      <div class="sh">History</div>
-      <div class="elist" id="l-hist"></div>
+
+      <!-- LIFT LOG accordion -->
+      <div class="accord-block" id="accord-lifts">
+        <button class="accord-hdr" data-target="accord-lifts">
+          <span>Lift Log</span><span class="accord-arrow">›</span>
+        </button>
+        <div class="accord-body">
+          <div class="fcard" style="border-radius:0 0 var(--r) var(--r);border-top:none">
+            <div class="frow2"><label>Lift</label>
+              <select id="l-name">
+                <option>Bench Press</option><option>Overhead Press</option>
+                <option>Lat Pulldown</option><option>Assisted Pull-up</option>
+                <option>Seated Row</option><option>T-Bar Row</option>
+              </select>
+            </div>
+            <div class="frow2"><label>Weight (lb)</label><input type="number" step="2.5" id="l-wt" placeholder="205"/></div>
+            <div class="frow2"><label>Reps</label><input type="number" id="l-rp" placeholder="8"/></div>
+            <button class="btn" id="l-save">Save Lift</button>
+          </div>
+          <div class="sh">Baselines</div>
+          <div class="blist" id="base-list"></div>
+          <div class="sh">History</div>
+          <div class="elist" id="l-hist"></div>
+        </div>
+      </div>
+
+      <!-- GOALS accordion -->
+      <div class="accord-block" id="accord-goals">
+        <button class="accord-hdr" data-target="accord-goals">
+          <span>1RM Goals</span><span class="accord-arrow">›</span>
+        </button>
+        <div class="accord-body">
+          <div id="goal-board" style="margin-bottom:12px"></div>
+          <div class="fcard">
+            <div class="ftitle">Set a Goal</div>
+            <div class="frow2"><label>Lift</label>
+              <select id="g-lift">
+                <option>Bench Press</option><option>Overhead Press</option>
+                <option>Lat Pulldown</option><option>Assisted Pull-up</option>
+                <option>Seated Row</option><option>T-Bar Row</option>
+              </select>
+            </div>
+            <div class="frow2"><label>Goal e1RM (lb)</label><input type="number" id="g-val" placeholder="280"/></div>
+            <button class="btn" id="g-save">Set Goal</button>
+          </div>
+        </div>
+      </div>
+
     </section>
 
     <!-- SETTINGS -->
@@ -973,9 +1000,6 @@ async function initApp(user){
   await loadWorkoutConfig();
   renderDash();
   renderWorkout();
-  renderWeighins();
-  renderLifts();
-  renderGoals();
   renderLB();
 }
 
@@ -1027,8 +1051,8 @@ document.querySelectorAll(".tab").forEach(b=>{
     document.querySelectorAll(".page").forEach(p=>p.classList.remove("on"));
     b.classList.add("on");
     document.getElementById("tab-"+b.dataset.tab).classList.add("on");
-    if(b.dataset.tab==="goals") renderGoals();
     if(b.dataset.tab==="lb") renderLB();
+    if(b.dataset.tab==="progress"){renderWeighins();renderLifts();}
   });
 });
 
@@ -1426,6 +1450,25 @@ document.getElementById("nl-save").addEventListener("click",async()=>{
   nutlog[wk]={c,p:p2};
   await sb.from("weekly_logs").upsert({user_id:USER.id,week:wk,complete_days:c,protein_days:p2},{onConflict:"user_id,week"});
   renderDash();toast(`Week ${wk} logged`);
+});
+
+
+// ─── ACCORDION ───────────────────────────────────────────────────────────────
+document.addEventListener("click", e => {
+  const hdr = e.target.closest(".accord-hdr");
+  if (!hdr) return;
+  const block = hdr.closest(".accord-block");
+  const wasOpen = block.classList.contains("open");
+  // close all in same page first
+  block.closest(".page").querySelectorAll(".accord-block").forEach(b => b.classList.remove("open"));
+  if (!wasOpen) {
+    block.classList.add("open");
+    // lazy-render contents if needed
+    const target = hdr.dataset.target;
+    if (target === "accord-lifts") renderLifts();
+    if (target === "accord-goals") renderGoals();
+    if (target === "accord-weight") renderWeighins();
+  }
 });
 
 // ─── WORKOUT TAB SUB-NAVIGATION ──────────────────────────────────────────────
