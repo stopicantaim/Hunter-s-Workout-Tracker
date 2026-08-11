@@ -585,6 +585,33 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
   from { opacity:0; transform:translateX(-50%) translateY(16px) scale(.9); }
   to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
 }
+
+/* ── hero card ── */
+.hero-card{background:var(--card);border:1px solid var(--ph-border);border-radius:var(--r);padding:16px;margin-top:10px;background:var(--ph-bg)}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.hero-label{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--ph);text-transform:uppercase;margin-bottom:4px}
+.hero-weight{font-size:42px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--text)}
+.hero-sub{font-size:12px;color:var(--sub);margin-top:4px}
+.hero-streaks{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.hero-streak{display:flex;align-items:center;gap:5px}
+.hero-streak .streak-num{font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+.hero-streak .streak-flame{font-size:18px}
+.hero-prog-track{height:6px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-bottom:6px}
+.hero-prog-ends{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--sub)}
+.hero-prog-ends .prog-pct{font-size:13px;font-weight:800;color:var(--ph)}
+
+/* ── week mini nav ── */
+.dash-wk-mini{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:6px 0 8px}
+
+/* ── dashboard accordions ── */
+.dash-accord{border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.dacc-hdr{width:100%;background:var(--card);border:none;color:var(--text);display:flex;align-items:center;justify-content:space-between;padding:13px 15px;font-size:13px;font-weight:800;cursor:pointer;text-align:left}
+.dacc-hdr:active{background:var(--card2)}
+.dacc-sub{font-size:11px;font-weight:600;color:var(--sub)}
+.dacc-arrow{font-size:16px;color:var(--sub);transition:transform .22s;display:inline-block;margin-left:4px}
+.dash-accord.open .dacc-arrow{transform:rotate(90deg)}
+.dacc-body{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease;display:block !important;padding:0 12px}
+.dash-accord.open .dacc-body{max-height:3000px;opacity:1;padding:0 12px 12px}
 </style>
 </head>
 <body class="cut">
@@ -640,68 +667,110 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
     <!-- DASHBOARD -->
     <section id="tab-dash" class="page on">
 
+      <!-- 1. QUICK WEIGH-IN -->
       <div class="dash-weighin-row">
         <input type="number" step="0.1" id="dash-wi-w" class="dash-wi-input" placeholder="Today's weight (lb)"/>
         <button class="dash-wi-btn" id="dash-wi-save">Log</button>
       </div>
 
-      <div class="kpi2" style="margin-top:10px">
-        <div class="kpi hi"><div class="kpi-lbl">Current Weight</div><div class="kpi-val" id="d-wt">—</div><div class="kpi-sub" id="d-lost">—</div></div>
-        <div class="kpi"><div class="kpi-lbl">Phase Target</div><div class="kpi-val" id="d-goal">—</div><div class="kpi-sub" id="d-rate">—</div></div>
-      </div>
-      <div class="prog-block">
-        <div class="prog-top"><div class="prog-pct" id="d-pct">0%</div><div class="band-pill" id="d-band">—</div></div>
-        <div class="prog-track"><div class="prog-fill" id="d-fill" style="width:0%"></div></div>
-        <div class="prog-ends"><span id="d-ps">—</span><span id="d-pe">—</span></div>
-      </div>
-
-      <!-- streak row -->
-      <div class="streak-row" id="streak-row">
-        <div class="streak-block" id="streak-weigh">
-          <div class="streak-flame" id="streak-weigh-icon">—</div>
-          <div class="streak-info">
-            <div class="streak-num" id="streak-weigh-num">0</div>
-            <div class="streak-lbl">day weigh-in streak</div>
+      <!-- 2. HERO CARD: weight + streak + progress -->
+      <div class="hero-card">
+        <div class="hero-top">
+          <div>
+            <div class="hero-label">Current Weight</div>
+            <div class="hero-weight" id="d-wt">—</div>
+            <div class="hero-sub" id="d-lost">—</div>
+          </div>
+          <div class="hero-streaks">
+            <div class="hero-streak">
+              <span class="streak-flame" id="streak-weigh-icon">–</span>
+              <span class="streak-num" id="streak-weigh-num">0</span>
+            </div>
+            <div class="hero-streak">
+              <span class="streak-flame" id="streak-train-icon">–</span>
+              <span class="streak-num" id="streak-train-num">0</span>
+            </div>
           </div>
         </div>
-        <div class="streak-divider"></div>
-        <div class="streak-block" id="streak-train">
-          <div class="streak-flame" id="streak-train-icon">—</div>
-          <div class="streak-info">
-            <div class="streak-num" id="streak-train-num">0</div>
-            <div class="streak-lbl">week training streak</div>
+        <div class="hero-prog-track">
+          <div class="prog-fill" id="d-fill" style="width:0%"></div>
+        </div>
+        <div class="hero-prog-ends">
+          <span id="d-ps">—</span>
+          <span class="prog-pct" id="d-pct">0%</span>
+          <span id="d-pe">—</span>
+        </div>
+        <div class="band-pill" id="d-band" style="margin-top:8px;display:inline-block">—</div>
+      </div>
+
+      <!-- 3. SESSION CHIPS — always visible -->
+      <div class="sh">Today</div>
+      <div class="sess-grid" id="dash-sess-grid"></div>
+
+      <!-- 4. WEEK NAV — compact -->
+      <div class="dash-wk-mini">
+        <button class="wk-btn" id="dash-wk-prev" style="width:28px;height:28px;font-size:16px">‹</button>
+        <span class="wk-lbl" id="dash-wk-lbl" style="font-size:13px">Week 1</span>
+        <button class="wk-btn" id="dash-wk-next" style="width:28px;height:28px;font-size:16px">›</button>
+      </div>
+
+      <!-- 5. COLLAPSIBLE: Exercises -->
+      <div class="dash-accord" id="dacc-workout">
+        <button class="dacc-hdr" data-dacc="dacc-workout">
+          <span>Exercises</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="dacc-sub" id="dacc-ex-sub"></span>
+            <span class="dacc-arrow">›</span>
+          </div>
+        </button>
+        <div class="dacc-body">
+          <div id="dash-workout-days" style="padding-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- 6. COLLAPSIBLE: This Week stats -->
+      <div class="dash-accord" id="dacc-week">
+        <button class="dacc-hdr" data-dacc="dacc-week">
+          <span>This Week</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="dacc-sub" id="dacc-week-sub"></span>
+            <span class="dacc-arrow">›</span>
+          </div>
+        </button>
+        <div class="dacc-body">
+          <div class="kpi3" style="padding-top:10px">
+            <div class="kpi"><div class="kpi-lbl">Log Days</div><div class="kpi-val" id="d-log" style="font-size:22px">—</div><div class="kpi-sub">/ 7</div></div>
+            <div class="kpi hi"><div class="kpi-lbl">Sessions</div><div class="kpi-val" id="d-sess" style="font-size:22px">—</div><div class="kpi-sub">/ 6</div></div>
+            <div class="kpi"><div class="kpi-lbl">Protein</div><div class="kpi-val" id="d-prot" style="font-size:22px">—</div><div class="kpi-sub">/ 7</div></div>
           </div>
         </div>
       </div>
 
-      <!-- weight sparkline -->
-      <div class="spark-block">
-        <div class="spark-hdr">
-          <span class="spark-title">Weight Trend</span>
-          <span class="spark-range" id="spark-range">last 8 weigh-ins</span>
+      <!-- 7. COLLAPSIBLE: Weight trend -->
+      <div class="dash-accord" id="dacc-spark">
+        <button class="dacc-hdr" data-dacc="dacc-spark">
+          <span>Weight Trend</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="dacc-sub" id="spark-range"></span>
+            <span class="dacc-arrow">›</span>
+          </div>
+        </button>
+        <div class="dacc-body">
+          <canvas id="spark-canvas" class="spark-canvas" height="64" style="margin-top:10px"></canvas>
+          <div class="spark-labels" id="spark-labels"></div>
         </div>
-        <canvas id="spark-canvas" class="spark-canvas" height="64"></canvas>
-        <div class="spark-labels" id="spark-labels"></div>
       </div>
 
-      <div class="sh">This Week</div>
-      <div class="kpi3">
-        <div class="kpi"><div class="kpi-lbl">Log Days</div><div class="kpi-val" id="d-log" style="font-size:22px">—</div><div class="kpi-sub">/ 7</div></div>
-        <div class="kpi hi"><div class="kpi-lbl">Sessions</div><div class="kpi-val" id="d-sess" style="font-size:22px">—</div><div class="kpi-sub">/ 6</div></div>
-        <div class="kpi"><div class="kpi-lbl">Protein</div><div class="kpi-val" id="d-prot" style="font-size:22px">—</div><div class="kpi-sub">/ 7</div></div>
+      <!-- 8. COLLAPSIBLE: Lift markers -->
+      <div class="dash-accord" id="dacc-lifts">
+        <button class="dacc-hdr" data-dacc="dacc-lifts">
+          <span>Lift Markers</span>
+          <span class="dacc-arrow">›</span>
+        </button>
+        <div class="dacc-body">
+          <div id="d-lifts" class="blist" style="padding-top:10px"></div>
+        </div>
       </div>
-
-      <div class="sh">Today's Workout</div>
-      <div class="dash-workout-nav">
-        <button class="wk-btn" id="dash-wk-prev">&#x2039;</button>
-        <div class="wk-lbl" id="dash-wk-lbl">Week 1</div>
-        <button class="wk-btn" id="dash-wk-next">&#x203a;</button>
-      </div>
-      <div class="sess-grid" id="dash-sess-grid" style="margin-bottom:12px"></div>
-      <div id="dash-workout-days"></div>
-
-      <div class="sh">Lift Markers</div>
-      <div id="d-lifts" class="blist"></div>
 
     </section>
 
@@ -1376,7 +1445,7 @@ function renderDash(){
   const doneSess=SESSIONS.filter(s=>checks[`w${week}-s-${s.key}`]).length;
   document.getElementById("d-sess").textContent=doneSess;
   renderStreaks();
-  renderSparkline();
+  updateDashSubtitles();
   const el=document.getElementById("d-lifts");el.innerHTML="";
   LIFTS.forEach(name=>{
     const myL=liftLogs.filter(l=>l.name===name).sort((a,c)=>a.d.localeCompare(c.d));
@@ -2254,6 +2323,37 @@ function countUp(elId, target, suffix, duration=600) {
     if (p < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
+}
+
+
+// ── DASHBOARD ACCORDIONS ──────────────────────────────────────────────────────
+document.querySelectorAll(".dacc-hdr").forEach(hdr => {
+  hdr.addEventListener("click", () => {
+    const block = hdr.closest(".dash-accord");
+    block.classList.toggle("open");
+    // lazy render when opened
+    const id = hdr.dataset.dacc;
+    if (block.classList.contains("open")) {
+      if (id === "dacc-spark") renderSparkline();
+      if (id === "dacc-lifts") {} // d-lifts already rendered in renderDash
+      if (id === "dacc-workout") renderDashWorkout();
+    }
+  });
+});
+
+function updateDashSubtitles() {
+  // exercises: X/Y done across all days
+  const days = getDays();
+  const totalEx = days.reduce((s,d) => s + d.exs.length, 0);
+  const doneEx  = days.reduce((s,d,_di) =>
+    s + d.exs.filter((_,i) => checks["w"+week+"-"+d.key+"-"+i]).length, 0);
+  const exSub = document.getElementById("dacc-ex-sub");
+  if (exSub) exSub.textContent = doneEx > 0 ? doneEx+"/"+totalEx+" done" : "";
+
+  // this week: sessions done
+  const doneSess = SESSIONS.filter(s => checks["w"+week+"-s-"+s.key]).length;
+  const wkSub = document.getElementById("dacc-week-sub");
+  if (wkSub) wkSub.textContent = doneSess+"/6 sessions";
 }
 
 // ── BOOT ──────────────────────────────────────────────
