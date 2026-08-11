@@ -363,6 +363,228 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .day-block.open .day-hdr .day-chevron{transform:rotate(90deg)}
 .day-body{display:none}
 .day-block.open .day-body{display:block}
+
+/* ── streak row ── */
+.streak-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-top:12px;gap:12px}
+.streak-divider{width:1px;height:36px;background:var(--border)}
+.streak-block{display:flex;align-items:center;gap:10px}
+.streak-flame{font-size:26px;line-height:1;flex-shrink:0}
+.streak-num{font-size:24px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;color:var(--ph)}
+.streak-lbl{font-size:10px;font-weight:700;color:var(--sub);margin-top:2px;letter-spacing:.04em}
+.streak-row.has-streak .streak-num{color:var(--ph)}
+
+/* ── weight sparkline ── */
+.spark-block{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 14px 10px;margin-top:10px}
+.spark-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.spark-title{font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--sub);text-transform:uppercase}
+.spark-range{font-size:11px;color:var(--mute)}
+.spark-canvas{width:100%;display:block;border-radius:4px}
+.spark-labels{display:flex;justify-content:space-between;margin-top:5px}
+.spark-label{font-size:10px;color:var(--sub);font-variant-numeric:tabular-nums}
+.spark-empty{text-align:center;padding:20px 0;font-size:12px;color:var(--mute)}
+
+/* ─── ANIMATIONS ──────────────────────────────────────────── */
+
+/* page fade-in already exists (@keyframes fi) — extend it */
+#tab-dash.on { animation: dashIn .35s cubic-bezier(.4,0,.2,1) both; }
+@keyframes dashIn {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:none; }
+}
+
+/* staggered children */
+#tab-dash.on > * {
+  animation: slideUp .4s cubic-bezier(.4,0,.2,1) both;
+}
+#tab-dash.on > *:nth-child(1) { animation-delay:.04s }
+#tab-dash.on > *:nth-child(2) { animation-delay:.08s }
+#tab-dash.on > *:nth-child(3) { animation-delay:.12s }
+#tab-dash.on > *:nth-child(4) { animation-delay:.16s }
+#tab-dash.on > *:nth-child(5) { animation-delay:.20s }
+#tab-dash.on > *:nth-child(6) { animation-delay:.24s }
+#tab-dash.on > *:nth-child(7) { animation-delay:.28s }
+#tab-dash.on > *:nth-child(8) { animation-delay:.32s }
+#tab-dash.on > *:nth-child(9) { animation-delay:.36s }
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:none; }
+}
+
+/* progress bar fill — animate on load */
+.prog-fill {
+  transition: width .9s cubic-bezier(.4,0,.2,1) !important;
+}
+
+/* KPI value count-up shimmer */
+.kpi-val { transition: color .3s; }
+.kpi-val.flash {
+  animation: numFlash .5s ease;
+}
+@keyframes numFlash {
+  0%   { opacity:1 }
+  30%  { opacity:.4 }
+  100% { opacity:1 }
+}
+
+/* streak fire pulse when streak > 0 */
+.streak-flame.alive {
+  animation: flamePulse 2s ease-in-out infinite;
+  display:inline-block;
+}
+@keyframes flamePulse {
+  0%,100% { transform:scale(1); }
+  50%      { transform:scale(1.18) rotate(-4deg); }
+}
+
+/* weigh-in log button ripple */
+.dash-wi-btn { position:relative; overflow:hidden; }
+.dash-wi-btn::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,.25);
+  border-radius:inherit;
+  transform:scale(0);
+  opacity:0;
+  transition:transform .4s ease, opacity .4s ease;
+}
+.dash-wi-btn.ripple::after {
+  transform:scale(2);
+  opacity:0;
+  transition:none;
+  animation:rippleOut .4s ease forwards;
+}
+@keyframes rippleOut {
+  from { transform:scale(0); opacity:.4; }
+  to   { transform:scale(2.5); opacity:0; }
+}
+
+/* session chip tap bounce */
+.sess-btn { transition: transform .12s ease, background .15s, border-color .15s; }
+.sess-btn:active { transform:scale(.92); }
+.sess-btn.done { animation: chipPop .25s cubic-bezier(.4,0,.2,1); }
+@keyframes chipPop {
+  0%   { transform:scale(1); }
+  50%  { transform:scale(1.15); }
+  100% { transform:scale(1); }
+}
+
+/* day block open/close slide */
+.day-body {
+  overflow:hidden;
+  max-height:0;
+  transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+  opacity:0;
+  display:block !important; /* override display:none — use max-height instead */
+}
+.day-block.open .day-body {
+  max-height:2000px;
+  opacity:1;
+}
+
+/* ex-chk done pop */
+.ex-chk { transition: background .15s, border-color .15s, color .15s, transform .12s; }
+.ex-chk:active { transform:scale(.88); }
+.ex-chk.done { animation:checkPop .3s cubic-bezier(.4,0,.2,1); }
+@keyframes checkPop {
+  0%   { transform:scale(1); }
+  40%  { transform:scale(1.25); }
+  100% { transform:scale(1); }
+}
+
+/* set done button */
+.set-done-btn { transition: background .15s, border-color .15s, color .15s, transform .1s; }
+.set-done-btn:active { transform:scale(.88); }
+.set-done-btn.done { animation:checkPop .25s cubic-bezier(.4,0,.2,1); }
+
+/* rest bar slide in */
+.rest-bar-wrap {
+  overflow:hidden;
+  max-height:0;
+  opacity:0;
+  transition:max-height .3s ease, opacity .25s ease;
+  display:block !important;
+  padding-top:0; padding-bottom:0;
+}
+.rest-bar-wrap.active {
+  max-height:80px;
+  opacity:1;
+  padding:6px 13px 10px;
+}
+
+/* sparkline block fade in */
+.spark-block { animation: slideUp .45s .3s cubic-bezier(.4,0,.2,1) both; }
+
+/* streak row pop in */
+.streak-row { animation: slideUp .4s .1s cubic-bezier(.4,0,.2,1) both; }
+
+/* tab switch underline slide */
+.tab { position:relative; }
+.tab::after {
+  content:"";
+  position:absolute;
+  bottom:0; left:50%;
+  width:0; height:2px;
+  background:var(--ph);
+  transition:width .2s ease, left .2s ease;
+  border-radius:99px;
+}
+.tab.on::after {
+  width:100%; left:0;
+}
+/* hide the hard border-bottom and let ::after handle it */
+.tab { border-bottom:2px solid transparent !important; }
+.tab.on { border-bottom:2px solid transparent !important; }
+
+/* KPI card hover/active */
+.kpi { transition:transform .12s ease, border-color .2s; }
+.kpi:active { transform:scale(.97); }
+
+/* progress pct count-up */
+@keyframes countUp {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:none; }
+}
+.prog-pct { animation:countUp .5s .2s both; }
+
+/* goal fill bar animate */
+.goal-fill { transition:width .8s cubic-bezier(.4,0,.2,1); }
+
+/* leaderboard cards stagger */
+.lb-card { animation:slideUp .35s cubic-bezier(.4,0,.2,1) both; }
+.lb-card:nth-child(1) { animation-delay:.05s }
+.lb-card:nth-child(2) { animation-delay:.12s }
+.lb-card:nth-child(3) { animation-delay:.19s }
+.lb-card:nth-child(4) { animation-delay:.26s }
+
+/* accordion open smooth */
+.accord-body {
+  overflow:hidden;
+  max-height:0;
+  opacity:0;
+  transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+  display:block !important;
+  padding:0 13px;
+}
+.accord-block.open .accord-body {
+  max-height:3000px;
+  opacity:1;
+  padding:12px 13px 14px;
+}
+
+/* builder day block */
+.builder-day {
+  animation:slideUp .3s cubic-bezier(.4,0,.2,1) both;
+}
+
+/* toast bounce in */
+.toast.show {
+  animation:toastIn .3s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes toastIn {
+  from { opacity:0; transform:translateX(-50%) translateY(16px) scale(.9); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+}
 </style>
 </head>
 <body class="cut">
@@ -431,6 +653,35 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
         <div class="prog-top"><div class="prog-pct" id="d-pct">0%</div><div class="band-pill" id="d-band">—</div></div>
         <div class="prog-track"><div class="prog-fill" id="d-fill" style="width:0%"></div></div>
         <div class="prog-ends"><span id="d-ps">—</span><span id="d-pe">—</span></div>
+      </div>
+
+      <!-- streak row -->
+      <div class="streak-row" id="streak-row">
+        <div class="streak-block" id="streak-weigh">
+          <div class="streak-flame" id="streak-weigh-icon">—</div>
+          <div class="streak-info">
+            <div class="streak-num" id="streak-weigh-num">0</div>
+            <div class="streak-lbl">day weigh-in streak</div>
+          </div>
+        </div>
+        <div class="streak-divider"></div>
+        <div class="streak-block" id="streak-train">
+          <div class="streak-flame" id="streak-train-icon">—</div>
+          <div class="streak-info">
+            <div class="streak-num" id="streak-train-num">0</div>
+            <div class="streak-lbl">week training streak</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- weight sparkline -->
+      <div class="spark-block">
+        <div class="spark-hdr">
+          <span class="spark-title">Weight Trend</span>
+          <span class="spark-range" id="spark-range">last 8 weigh-ins</span>
+        </div>
+        <canvas id="spark-canvas" class="spark-canvas" height="64"></canvas>
+        <div class="spark-labels" id="spark-labels"></div>
       </div>
 
       <div class="sh">This Week</div>
@@ -1100,7 +1351,7 @@ function renderDash(){
   const sorted=[...weighins].sort((a,b)=>a.d.localeCompare(b.d));
   const latest=sorted.at(-1);
   const cur=latest?+latest.w:sw;
-  document.getElementById("d-wt").textContent=cur.toFixed(1)+" lb";
+  countUp("d-wt", cur, " lb", 700);
   document.getElementById("d-goal").textContent=(+gw).toFixed(1)+" lb";
   const diff=phase==="bulk"?cur-sw:sw-cur;
   document.getElementById("d-lost").textContent=diff>=0?(phase==="bulk"?"↑":"↓")+` ${diff.toFixed(1)} lb`:`${Math.abs(diff).toFixed(1)} lb`;
@@ -1110,7 +1361,7 @@ function renderDash(){
   const total=Math.abs(sw-gw),moved=phase==="bulk"?cur-sw:sw-cur;
   const pct=total>0?Math.min(100,Math.max(0,(moved/total)*100)):0;
   document.getElementById("d-pct").textContent=pct.toFixed(0)+"%";
-  document.getElementById("d-fill").style.width=pct+"%";
+  animateProgressBar(pct);
   document.getElementById("d-ps").textContent=(+sw).toFixed(1)+" lb";
   document.getElementById("d-pe").textContent=(+gw).toFixed(1)+" lb";
   const pill=document.getElementById("d-band");pill.className="band-pill";
@@ -1124,6 +1375,8 @@ function renderDash(){
   document.getElementById("d-prot").textContent=wkData.p??0;
   const doneSess=SESSIONS.filter(s=>checks[`w${week}-s-${s.key}`]).length;
   document.getElementById("d-sess").textContent=doneSess;
+  renderStreaks();
+  renderSparkline();
   const el=document.getElementById("d-lifts");el.innerHTML="";
   LIFTS.forEach(name=>{
     const myL=liftLogs.filter(l=>l.name===name).sort((a,c)=>a.d.localeCompare(c.d));
@@ -1779,6 +2032,228 @@ function renderDashWorkout() {
       renderDash();
     });
   });
+}
+
+
+// ─── STREAK COUNTER ───────────────────────────────────────────────────────────
+function calcWeighInStreak(){
+  // consecutive days ending today where a weigh-in exists
+  const dateSet=new Set(weighins.map(w=>w.d));
+  let streak=0;
+  const d=new Date(); d.setHours(0,0,0,0);
+  // allow today OR yesterday as the most recent (don't break streak for not weighing yet today)
+  const todayStr=d.toISOString().split("T")[0];
+  const yd=new Date(d); yd.setDate(yd.getDate()-1);
+  const ydStr=yd.toISOString().split("T")[0];
+  // start from today; if neither today nor yesterday has a log, streak is 0
+  let cur=new Date(dateSet.has(todayStr)?d:yd);
+  if(!dateSet.has(cur.toISOString().split("T")[0])) return 0;
+  while(true){
+    const s=cur.toISOString().split("T")[0];
+    if(dateSet.has(s)){ streak++; cur.setDate(cur.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+
+function calcTrainingStreak(){
+  // consecutive weeks (ending current week) with at least 1 session checked
+  let streak=0;
+  for(let wk=week;wk>=1;wk--){
+    const hasSess=SESSIONS.some(s=>checks["w"+wk+"-s-"+s.key]);
+    if(hasSess) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function renderStreaks(){
+  const ws=calcWeighInStreak();
+  const ts=calcTrainingStreak();
+
+  const wIcon=document.getElementById("streak-weigh-icon");
+  const tIcon=document.getElementById("streak-train-icon");
+  document.getElementById("streak-weigh-num").textContent=ws;
+  document.getElementById("streak-train-num").textContent=ts;
+
+  // flame levels
+  if(ws===0){ wIcon.textContent="–"; wIcon.style.filter="grayscale(1)"; }
+  else if(ws<3){ wIcon.textContent="🔥"; wIcon.style.filter="none"; }
+  else if(ws<7){ wIcon.textContent="🔥"; wIcon.style.filter="hue-rotate(0deg)"; }
+  else{ wIcon.textContent="🔥"; wIcon.style.filter="brightness(1.3)"; }
+
+  if(ts===0){ tIcon.textContent="–"; tIcon.style.filter="grayscale(1)"; }
+  else if(ts<3){ tIcon.textContent="🔥"; tIcon.style.filter="none"; }
+  else{ tIcon.textContent="🔥"; tIcon.style.filter="brightness(1.3)"; }
+
+  // color the numbers by streak level
+  const wNum=document.getElementById("streak-weigh-num");
+  const tNum=document.getElementById("streak-train-num");
+  wNum.style.color=ws===0?"var(--sub)":ws>=7?"#fbbf24":ws>=3?"#f59f00":"var(--ph)";
+  tNum.style.color=ts===0?"var(--sub)":ts>=4?"#fbbf24":ts>=2?"#f59f00":"var(--ph)";
+  updateFlameAnim();
+}
+
+// ─── WEIGHT SPARKLINE ─────────────────────────────────────────────────────────
+function renderSparkline(){
+  const canvas=document.getElementById("spark-canvas");
+  const labelsEl=document.getElementById("spark-labels");
+  if(!canvas) return;
+
+  const sorted=[...weighins].sort((a,b)=>a.d.localeCompare(b.d));
+  const pts=sorted.slice(-8); // last 8
+
+  if(pts.length<2){
+    canvas.style.display="none";
+    labelsEl.innerHTML="<div class='spark-empty'>Log 2+ weigh-ins to see your trend</div>";
+    return;
+  }
+  canvas.style.display="block";
+
+  // sizing — use offsetWidth or fallback
+  const W=canvas.parentElement.clientWidth-28||300;
+  const H=64;
+  canvas.width=W*2; canvas.height=H*2; // retina
+  canvas.style.width=W+"px"; canvas.style.height=H+"px";
+
+  const ctx=canvas.getContext("2d");
+  ctx.scale(2,2);
+  ctx.clearRect(0,0,W,H);
+
+  const vals=pts.map(p=>+p.w);
+  const mn=Math.min(...vals), mx=Math.max(...vals);
+  const rng=mx-mn||1;
+  const pad={l:4,r:4,t:8,b:8};
+
+  // compute x,y for each point
+  const coords=pts.map((p,i)=>{
+    const x=pad.l+(i/(pts.length-1))*(W-pad.l-pad.r);
+    const y=pad.t+((mx-+p.w)/rng)*(H-pad.t-pad.b);
+    return{x,y,w:+p.w,d:p.d};
+  });
+
+  // gradient fill under line
+  const grad=ctx.createLinearGradient(0,pad.t,0,H);
+  // color based on trend: going down (cut) = green, going up = amber
+  const trend=vals[vals.length-1]-vals[0];
+  const lineCol=trend<=0?"#10b981":"#f59f00";
+  const fillTop=trend<=0?"rgba(16,185,129,0.18)":"rgba(245,159,0,0.18)";
+  grad.addColorStop(0,fillTop);
+  grad.addColorStop(1,"rgba(0,0,0,0)");
+
+  ctx.beginPath();
+  ctx.moveTo(coords[0].x,coords[0].y);
+  for(let i=1;i<coords.length;i++){
+    // smooth curve
+    const prev=coords[i-1],cur=coords[i];
+    const cpx=(prev.x+cur.x)/2;
+    ctx.bezierCurveTo(cpx,prev.y,cpx,cur.y,cur.x,cur.y);
+  }
+  ctx.lineTo(coords[coords.length-1].x,H-pad.b);
+  ctx.lineTo(coords[0].x,H-pad.b);
+  ctx.closePath();
+  ctx.fillStyle=grad;
+  ctx.fill();
+
+  // line
+  ctx.beginPath();
+  ctx.moveTo(coords[0].x,coords[0].y);
+  for(let i=1;i<coords.length;i++){
+    const prev=coords[i-1],cur=coords[i];
+    const cpx=(prev.x+cur.x)/2;
+    ctx.bezierCurveTo(cpx,prev.y,cpx,cur.y,cur.x,cur.y);
+  }
+  ctx.strokeStyle=lineCol;
+  ctx.lineWidth=2;
+  ctx.lineJoin="round";
+  ctx.stroke();
+
+  // dots
+  coords.forEach((c,i)=>{
+    ctx.beginPath();
+    ctx.arc(c.x,c.y,3,0,Math.PI*2);
+    ctx.fillStyle=i===coords.length-1?"#ffffff":lineCol;
+    ctx.fill();
+    if(i===coords.length-1){
+      ctx.beginPath();ctx.arc(c.x,c.y,3,0,Math.PI*2);
+      ctx.strokeStyle=lineCol;ctx.lineWidth=2;ctx.stroke();
+    }
+  });
+
+  // value label on last point
+  ctx.font="bold 10px -apple-system,sans-serif";
+  ctx.fillStyle="#eef0f8";
+  ctx.textAlign="right";
+  ctx.fillText(coords[coords.length-1].w.toFixed(1)+" lb",W-pad.r,coords[coords.length-1].y-5);
+
+  // x-axis date labels (first + last)
+  labelsEl.innerHTML="";
+  const fmtSpark=d=>d?d.slice(5).replace("-","/"):"";
+  const first=document.createElement("span");first.className="spark-label";first.textContent=fmtSpark(pts[0].d);
+  const last=document.createElement("span");last.className="spark-label";last.textContent=fmtSpark(pts[pts.length-1].d);
+  labelsEl.appendChild(first);labelsEl.appendChild(last);
+
+  // range label
+  const diff=vals[vals.length-1]-vals[0];
+  document.getElementById("spark-range").textContent=(diff<=0?"↓ ":"↑ ")+Math.abs(diff).toFixed(1)+" lb over "+pts.length+" entries";
+  document.getElementById("spark-range").style.color=diff<=0?"var(--ph)":"#f59f00";
+}
+
+
+// ─── ANIMATION HELPERS ────────────────────────────────────────────────────────
+
+// ripple on weigh-in log button
+document.getElementById("dash-wi-save").addEventListener("click", () => {
+  const btn = document.getElementById("dash-wi-save");
+  btn.classList.remove("ripple");
+  void btn.offsetWidth; // reflow
+  btn.classList.add("ripple");
+  setTimeout(() => btn.classList.remove("ripple"), 500);
+});
+
+// flash a KPI value when it changes
+function flashKpi(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("flash");
+  void el.offsetWidth;
+  el.classList.add("flash");
+}
+
+// keep streak flames alive (pulsing) when streak > 0
+function updateFlameAnim() {
+  const wIcon = document.getElementById("streak-weigh-icon");
+  const tIcon = document.getElementById("streak-train-icon");
+  const wNum  = parseInt(document.getElementById("streak-weigh-num").textContent) || 0;
+  const tNum  = parseInt(document.getElementById("streak-train-num").textContent) || 0;
+  if (wIcon) wIcon.classList.toggle("alive", wNum > 0);
+  if (tIcon) tIcon.classList.toggle("alive", tNum > 0);
+}
+
+// progress bar — start at 0 then animate to real value
+function animateProgressBar(pct) {
+  const fill = document.getElementById("d-fill");
+  if (!fill) return;
+  fill.style.width = "0%";
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { fill.style.width = pct + "%"; });
+  });
+}
+
+// number count-up for KPI values
+function countUp(elId, target, suffix, duration=600) {
+  const el = document.getElementById(elId);
+  if (!el || isNaN(target)) return;
+  const start = performance.now();
+  const from  = parseFloat(el.textContent) || 0;
+  function step(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
+    const val = from + (target - from) * ease;
+    el.textContent = Number.isInteger(target) ? Math.round(val) + suffix : val.toFixed(1) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 // ── BOOT ──────────────────────────────────────────────
