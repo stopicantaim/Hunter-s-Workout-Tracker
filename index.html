@@ -734,6 +734,10 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
   background:var(--ph-bg);border:1px solid var(--ph-border);
   border-radius:8px;padding:5px 11px;
 }
+
+.hero-meta{font-size:11px;color:var(--sub);margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hero-meta b{color:var(--ph);font-weight:800}
+.hero-dot{opacity:.5}
 </style>
 </head>
 <body class="cut">
@@ -802,6 +806,11 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
             <div class="hero-label">Current Weight</div>
             <div class="hero-weight" id="d-wt">—</div>
             <div class="hero-sub" id="d-lost">—</div>
+            <div class="hero-meta">
+              <span>Goal <b id="d-goal">—</b></span>
+              <span class="hero-dot">·</span>
+              <span id="d-rate">—</span>
+            </div>
           </div>
           <div class="hero-streaks">
             <div class="hero-streak">
@@ -1429,55 +1438,8 @@ const fmtD=d=>d?d.slice(5).replace("-","/"):"—";
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
 
 // ── AUTH TABS ─────────────────────────────────────────
-// auth tab listeners (no-op in testing mode)
-try{
-document.getElementById("tab-signin").addEventListener("click",()=>{
-  document.getElementById("tab-signin").classList.add("on");
-  document.getElementById("tab-signup").classList.remove("on");
-  document.getElementById("signin-form").style.display="block";
-  document.getElementById("signup-form").style.display="none";
-});
-document.getElementById("tab-signup").addEventListener("click",()=>{
-  document.getElementById("tab-signup").classList.add("on");
-  document.getElementById("tab-signin").classList.remove("on");
-  document.getElementById("signup-form").style.display="block";
-  document.getElementById("signin-form").style.display="none";
-});
-}catch(e){}
-
-// ── SIGN UP ───────────────────────────────────────────
-try{document.getElementById("su-btn").addEventListener("click",async()=>{
-  const username=document.getElementById("su-user").value.trim();
-  const email=document.getElementById("su-email").value.trim();
-  const pass=document.getElementById("su-pass").value;
-  const errEl=document.getElementById("su-err");
-  errEl.textContent="";
-  if(!username||!email||!pass){errEl.textContent="All fields required.";return;}
-  if(pass.length<6){errEl.textContent="Password must be at least 6 characters.";return;}
-  document.getElementById("su-btn").textContent="Creating account...";
-  const{data,error}=await sb.auth.signUp({email,password:pass,options:{data:{username}}});}catch(e){}
-  if(error){errEl.textContent=error.message;document.getElementById("su-btn").textContent="Create Account";return;}
-  // insert profile row
-  if(data.user){
-    await sb.from("profiles").upsert({id:data.user.id,username});
-     lsSet("plan",{phase:"cut",phase_length:60});
-  }
-  errEl.style.color="var(--ph)";
-  errEl.textContent="Account created! Check your email to confirm, then sign in.";
-  document.getElementById("su-btn").textContent="Create Account";
-});
-
-// ── SIGN IN ───────────────────────────────────────────
-try{document.getElementById("si-btn").addEventListener("click",async()=>{
-  const email=document.getElementById("si-email").value.trim();
-  const pass=document.getElementById("si-pass").value;
-  const errEl=document.getElementById("si-err");
-  errEl.textContent="";
-  document.getElementById("si-btn").textContent="Signing in...";
-  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});}catch(e){}
-  if(error){errEl.textContent=error.message;document.getElementById("si-btn").textContent="Sign In";return;}
-  await initApp(data.user);
-});
+// ── AUTH LISTENERS (disabled in testing mode) ────────────────────────────────
+// Auth is bypassed; these handlers are intentionally omitted.
 
 // ── SIGN OUT ──────────────────────────────────────────
 async function signOut(){lsSet("plan",null);lsSet("weighins",null);lsSet("liftLogs",null);lsSet("checks",null);lsSet("nutlog",null);lsSet("setLogs",null);lsSet("goals",null);lsSet("friends",null);location.reload();}
@@ -2532,141 +2494,6 @@ function updateDashSubtitles() {
   if (wkSub) wkSub.textContent = doneSess+"/6 sessions";
 }
 
-
-
-// ─── PER-DAY START WORKOUT ────────────────────────────────────────────────────
-let activeDayKey = null;
-
-function openDayWorkout(day) {
-  activeDayKey = day.key;
-  const overlay = document.getElementById("workout-overlay");
-  overlay.classList.remove("hidden");
-  overlay.classList.add("entering");
-  setTimeout(() => overlay.classList.remove("entering"), 300);
-  document.body.style.overflow = "hidden";
-  renderActiveWorkout(day);
-}
-
-function closeWorkoutOverlay() {
-  document.getElementById("workout-overlay").classList.add("hidden");
-  document.body.style.overflow = "";
-  activeDayKey = null;
-  // deselect all day blocks
-  document.querySelectorAll(".day-block.selected").forEach(b => b.classList.remove("selected"));
-  renderDash();
-  renderDashWorkout();
-  updateDashSubtitles();
-}
-
-
-
-// swipe down to close
-(function(){
-  const el = document.getElementById("workout-overlay");
-  let startY = 0;
-  el.addEventListener("touchstart", e => { startY = e.touches[0].clientY; }, {passive:true});
-  el.addEventListener("touchend", e => {
-    if (e.changedTouches[0].clientY - startY > 90) closeWorkoutOverlay();
-  }, {passive:true});
-})();
-
-function renderActiveWorkout(day) {
-  // header
-  document.getElementById("wo-title").textContent = day.label;
-  document.getElementById("wo-subtitle").textContent = "Week " + week + "  ·  Swipe down to exit";
-
-  const host = document.getElementById("wo-body");
-  host.innerHTML = "";
-
-  // session chip for this day (quick tick)
-  const sessKey = "w" + week + "-s-" + day.key;
-  const sessMatch = SESSIONS.find(s => s.key === day.key);
-  if (sessMatch) {
-    const chipWrap = document.createElement("div");
-    chipWrap.style.cssText = "margin-bottom:14px";
-    const chip = document.createElement("div");
-    chip.className = "wo-sess-chip" + (checks[sessKey] ? " done" : "");
-    chip.style.cssText = "display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--sub)";
-    if (checks[sessKey]) { chip.style.background="var(--ph-bg)"; chip.style.borderColor="var(--ph)"; chip.style.color="var(--ph)"; }
-    chip.innerHTML = "<span>" + (checks[sessKey] ? "✓" : "○") + "</span> Mark " + sessMatch.lbl + " session done";
-    chip.addEventListener("click", async () => {
-      checks[sessKey] = !checks[sessKey];
-      if (checks[sessKey]) lsSet("checks",checks);
-      else lsSet("checks",checks);
-      toast(checks[sessKey] ? sessMatch.lbl + " session done" : "Unmarked");
-      renderActiveWorkout(day);
-    });
-    chipWrap.appendChild(chip);
-    host.appendChild(chipWrap);
-  }
-
-  // progress bar
-  const total = day.exs.length;
-  const done  = day.exs.filter((_, i) => checks["w" + week + "-" + day.key + "-" + i]).length;
-  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
-  const progWrap = document.createElement("div");
-  progWrap.style.cssText = "margin-bottom:16px";
-  progWrap.innerHTML = `
-    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px">
-      <span>${done} of ${total} exercises</span><span>${pct}%</span>
-    </div>
-    <div style="height:5px;background:var(--mute);border-radius:99px;overflow:hidden">
-      <div style="height:100%;width:${pct}%;background:var(--ph);border-radius:99px;transition:width .5s ease"></div>
-    </div>`;
-  host.appendChild(progWrap);
-
-  // exercises
-  day.exs.forEach((ex, i) => {
-    const ck = "w" + week + "-" + day.key + "-" + i;
-    const isDone = !!checks[ck];
-    const sk = "wo-active-" + day.key + "-" + i;
-    const isOpen = openSwap === sk;
-
-    const row = document.createElement("div");
-    row.className = "ex-row";
-    row.style.cssText = isDone ? "opacity:.55" : "";
-
-    const main = document.createElement("div");
-    main.className = "ex-main";
-    main.innerHTML = `<div class="ex-name">${ex.n}</div><div class="ex-meta">${ex.s} · ${ex.l||"—"}</div><button class="ex-chk${isDone?" done":""}" data-ck="${ck}">✓</button>`;
-    row.appendChild(main);
-
-    if (day.cls !== "cardio") row.appendChild(renderSetLogger(ex, ck));
-
-    if (ex.subs && ex.subs.length) {
-      const bar = document.createElement("div"); bar.className = "swap-bar";
-      const sb2 = document.createElement("button");
-      sb2.className = "swap-btn" + (isOpen ? " active" : "");
-      sb2.textContent = isOpen ? "Hide substitutes" : "Substitute machines";
-      sb2.addEventListener("click", (e) => { e.stopPropagation(); openSwap = isOpen ? null : sk; renderActiveWorkout(day); });
-      bar.appendChild(sb2); row.appendChild(bar);
-      const box = document.createElement("div");
-      box.className = "swap-box" + (isOpen ? " open" : "");
-      box.innerHTML = "<div class='swap-title'>Substitute Options</div>" +
-        ex.subs.map(s => `<div class="sub-item"><div><div class="sub-name">${s.n}</div><div class="sub-why">${s.w}</div></div><div class="sub-meta">${s.s}<br>${s.l}</div></div>`).join("");
-      row.appendChild(box);
-    }
-    host.appendChild(row);
-  });
-
-  // finish button at bottom
-  const finBtn = document.createElement("button");
-  finBtn.className = "wo-complete-btn";
-  finBtn.textContent = done === total && total > 0 ? "Day Complete — Close" : "Finish & Close";
-  finBtn.addEventListener("click", closeWorkoutOverlay);
-  host.appendChild(finBtn);
-
-  // wire checkboxes
-  host.querySelectorAll(".ex-chk").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const ck = btn.dataset.ck;
-      checks[ck] = !checks[ck];
-      if (checks[ck]) lsSet("checks",checks);
-      else lsSet("checks",checks);
-      renderActiveWorkout(day); // re-render to update progress + fade
-    });
-  });
-}
 
 
 // ─── PER-DAY WORKOUT OVERLAY ─────────────────────────────────────────────────
