@@ -1429,6 +1429,8 @@ const fmtD=d=>d?d.slice(5).replace("-","/"):"—";
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
 
 // ── AUTH TABS ─────────────────────────────────────────
+// auth tab listeners (no-op in testing mode)
+try{
 document.getElementById("tab-signin").addEventListener("click",()=>{
   document.getElementById("tab-signin").classList.add("on");
   document.getElementById("tab-signup").classList.remove("on");
@@ -1441,9 +1443,10 @@ document.getElementById("tab-signup").addEventListener("click",()=>{
   document.getElementById("signup-form").style.display="block";
   document.getElementById("signin-form").style.display="none";
 });
+}catch(e){}
 
 // ── SIGN UP ───────────────────────────────────────────
-document.getElementById("su-btn").addEventListener("click",async()=>{
+try{document.getElementById("su-btn").addEventListener("click",async()=>{
   const username=document.getElementById("su-user").value.trim();
   const email=document.getElementById("su-email").value.trim();
   const pass=document.getElementById("su-pass").value;
@@ -1452,7 +1455,7 @@ document.getElementById("su-btn").addEventListener("click",async()=>{
   if(!username||!email||!pass){errEl.textContent="All fields required.";return;}
   if(pass.length<6){errEl.textContent="Password must be at least 6 characters.";return;}
   document.getElementById("su-btn").textContent="Creating account...";
-  const{data,error}=await sb.auth.signUp({email,password:pass,options:{data:{username}}});
+  const{data,error}=await sb.auth.signUp({email,password:pass,options:{data:{username}}});}catch(e){}
   if(error){errEl.textContent=error.message;document.getElementById("su-btn").textContent="Create Account";return;}
   // insert profile row
   if(data.user){
@@ -1465,21 +1468,20 @@ document.getElementById("su-btn").addEventListener("click",async()=>{
 });
 
 // ── SIGN IN ───────────────────────────────────────────
-document.getElementById("si-btn").addEventListener("click",async()=>{
+try{document.getElementById("si-btn").addEventListener("click",async()=>{
   const email=document.getElementById("si-email").value.trim();
   const pass=document.getElementById("si-pass").value;
   const errEl=document.getElementById("si-err");
   errEl.textContent="";
   document.getElementById("si-btn").textContent="Signing in...";
-  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});}catch(e){}
   if(error){errEl.textContent=error.message;document.getElementById("si-btn").textContent="Sign In";return;}
   await initApp(data.user);
 });
 
 // ── SIGN OUT ──────────────────────────────────────────
 async function signOut(){lsSet("plan",null);lsSet("weighins",null);lsSet("liftLogs",null);lsSet("checks",null);lsSet("nutlog",null);lsSet("setLogs",null);lsSet("goals",null);lsSet("friends",null);location.reload();}
-document.getElementById("signout-btn").addEventListener("click",signOut);
-document.getElementById("signout-btn2").addEventListener("click",signOut);
+try{document.getElementById("signout-btn").addEventListener("click",signOut);document.getElementById("signout-btn2").addEventListener("click",signOut);}catch(e){}
 
 // ── INIT APP ──────────────────────────────────────────
 async function initApp(user){
@@ -2814,17 +2816,23 @@ function renderActiveWorkout(day) {
 
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
-  // ── TESTING MODE: skip auth, use local storage ──
-  USER = { id: "hunter-local", email: "hunter@test.com" };
-  document.getElementById("auth-screen").style.display = "none";
-  document.getElementById("main-app").style.display = "block";
-  loadDataLocal();
-  await loadWorkoutConfig();
-  renderDash();
-  renderDashWorkout();
-  renderWorkout();
-  renderLB();
-  updateDashSubtitles();
+  try {
+    // ── TESTING MODE: skip auth, use local storage ──
+    USER = { id: "hunter-local", email: "hunter@test.com" };
+    const as = document.getElementById("auth-screen");
+    const ma = document.getElementById("main-app");
+    if(as) as.style.display = "none";
+    if(ma) ma.style.display = "block";
+    loadDataLocal();
+    await loadWorkoutConfig();
+    renderDash();
+    renderDashWorkout();
+    renderWorkout();
+    renderLB();
+    updateDashSubtitles();
+  } catch(err) {
+    console.error("Boot error:", err);
+  }
 })();
 </script>
 </body>
