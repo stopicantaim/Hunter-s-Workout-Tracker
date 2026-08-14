@@ -1457,7 +1457,7 @@ document.getElementById("su-btn").addEventListener("click",async()=>{
   // insert profile row
   if(data.user){
     await sb.from("profiles").upsert({id:data.user.id,username});
-    await sb.from("plans").upsert({user_id:data.user.id,phase:"cut",phase_length:60});
+     lsSet("plan",{phase:"cut",phase_length:60});
   }
   errEl.style.color="var(--ph)";
   errEl.textContent="Account created! Check your email to confirm, then sign in.";
@@ -1477,7 +1477,7 @@ document.getElementById("si-btn").addEventListener("click",async()=>{
 });
 
 // ── SIGN OUT ──────────────────────────────────────────
-async function signOut(){await sb.auth.signOut();location.reload();}
+async function signOut(){lsSet("plan",null);lsSet("weighins",null);lsSet("liftLogs",null);lsSet("checks",null);lsSet("nutlog",null);lsSet("setLogs",null);lsSet("goals",null);lsSet("friends",null);location.reload();}
 document.getElementById("signout-btn").addEventListener("click",signOut);
 document.getElementById("signout-btn2").addEventListener("click",signOut);
 
@@ -1495,17 +1495,62 @@ async function initApp(user){
   updateDashSubtitles();
 }
 
+
+// ── LOCAL STORAGE HELPERS + SEEDED DATA ──────────────────────────────────────
+const lsGet = k => { try{ return JSON.parse(localStorage.getItem("sicg_"+k)) }catch{ return null } };
+const lsSet = (k,v) => localStorage.setItem("sicg_"+k, JSON.stringify(v));
+
+function loadDataLocal(){
+  plan = lsGet("plan") || {
+    phase:"cut", start_date:"2026-07-31",
+    start_weight:185.4, goal_weight:178, phase_length:60,
+    active_template:"ppua", custom_workout:null
+  };
+  targets = lsGet("targets") || {cal:2264, pro:199, fat:75, carb:199};
+  weighins = lsGet("weighins") || [
+    {id:"w1",d:"2026-06-01",w:188.2},{id:"w2",d:"2026-06-04",w:187.8},
+    {id:"w3",d:"2026-06-06",w:187.2},{id:"w4",d:"2026-06-09",w:189.2},
+    {id:"w5",d:"2026-06-12",w:189.0},{id:"w6",d:"2026-06-15",w:187.8},
+    {id:"w7",d:"2026-06-16",w:187.4},{id:"w8",d:"2026-06-17",w:187.6},
+    {id:"w9",d:"2026-06-18",w:188.4},{id:"w10",d:"2026-06-19",w:187.2},
+    {id:"w11",d:"2026-06-21",w:185.4}
+  ];
+  liftLogs = lsGet("liftLogs") || [
+    {id:"l1",d:"2026-06-18",name:"Bench Press",w:225,r:2},
+    {id:"l2",d:"2026-06-18",name:"Bench Press",w:205,r:8},
+    {id:"l3",d:"2026-06-17",name:"Overhead Press",w:95,r:8},
+    {id:"l4",d:"2026-06-17",name:"Overhead Press",w:100,r:4},
+    {id:"l5",d:"2026-06-28",name:"Lat Pulldown",w:160,r:10},
+    {id:"l6",d:"2026-06-28",name:"Assisted Pull-up",w:-85,r:12},
+    {id:"l7",d:"2026-06-28",name:"Seated Row",w:160,r:8},
+    {id:"l8",d:"2026-06-28",name:"T-Bar Row",w:125,r:10}
+  ];
+  goalMap = lsGet("goals") || {
+    "Bench Press":280, "Overhead Press":135,
+    "Lat Pulldown":200, "Seated Row":200
+  };
+  checks  = lsGet("checks")  || {};
+  nutlog  = lsGet("nutlog")  || {"1":{c:3,p:2}};
+  setLogs = lsGet("setLogs") || {};
+  friends = lsGet("friends") || [];
+  applyPhase(plan.phase||"cut");
+  loadSettingsForm();
+}
+
+// ── LOAD ALL DATA (stub — using localStorage for testing) ─────────────────────
+async function loadAllData(){ loadDataLocal(); }
+
 // ── LOAD ALL DATA ─────────────────────────────────────
 async function loadAllData(){
   const uid=USER.id;
   const[planRes,wiRes,liftRes,goalRes,checkRes,nutRes,setRes]=await Promise.all([
-    sb.from("plans").select("*").eq("user_id",uid).single(),
-    sb.from("weighins").select("*").eq("user_id",uid).order("date",{ascending:true}),
-    sb.from("lift_logs").select("*").eq("user_id",uid).order("date",{ascending:true}),
-    sb.from("goals").select("*").eq("user_id",uid),
-    sb.from("session_checks").select("*").eq("user_id",uid),
-    sb.from("weekly_logs").select("*").eq("user_id",uid),
-    sb.from("set_logs").select("*").eq("user_id",uid),
+    // data loaded locally
+    // data loaded locally
+    // data loaded locally
+    // data loaded locally
+    // data loaded locally
+    // data loaded locally
+    // data loaded locally
   ]);
   if(planRes.data) plan={...plan,...planRes.data};
   else { plan={phase:"cut",start_date:null,start_weight:null,goal_weight:null,phase_length:60}; }
@@ -1523,7 +1568,7 @@ async function loadAllData(){
   // load targets from plan extra columns if stored, else defaults
   if(plan.calories) targets={cal:plan.calories,pro:plan.protein,fat:plan.fat,carb:plan.carbs};
   // load friends from localStorage (cross-device share not needed yet)
-  friends=JSON.parse(localStorage.getItem("friends")||"[]");
+  friends=JSON.parse(lsGet("friends")||"[]");
   applyPhase(plan.phase||"cut");
   loadSettingsForm();
   if(!plan.start_weight){document.getElementById("onboard-banner").style.display="block";}
@@ -1625,8 +1670,7 @@ document.getElementById("g-save").addEventListener("click",async()=>{
   const lift=document.getElementById("g-lift").value;
   const val=parseFloat(document.getElementById("g-val").value);
   if(!lift||isNaN(val))return;
-  await sb.from("goals").upsert({user_id:USER.id,lift_name:lift,goal_e1rm:val},{onConflict:"user_id,lift_name"});
-  goalMap[lift]=val;document.getElementById("g-val").value="";
+  goalMap[lift]=val;lsSet("goals",goalMap);document.getElementById("g-val").value="";
   renderGoals();toast("Goal set");
 });
 
@@ -1682,7 +1726,7 @@ function renderLB(){
       <button class="lb-edit-btn" data-id="${f.id}">Edit</button><button class="del" data-id="${f.id}">×</button></div>`;
     ul.appendChild(row);
   });
-  ul.querySelectorAll(".del").forEach(b=>b.addEventListener("click",()=>{friends=friends.filter(f=>f.id!==b.dataset.id);localStorage.setItem("friends",JSON.stringify(friends));renderLB();toast("Removed");}));
+  ul.querySelectorAll(".del").forEach(b=>b.addEventListener("click",()=>{friends=friends.filter(f=>f.id!==b.dataset.id);lsSet("friends",friends);renderLB();toast("Removed");}));
   ul.querySelectorAll(".lb-edit-btn").forEach(b=>b.addEventListener("click",()=>{
     const f=friends.find(f=>f.id===b.dataset.id);if(!f)return;
     document.getElementById("lbf-name").value=f.name;
@@ -1690,14 +1734,14 @@ function renderLB(){
     document.getElementById("lbf-prs").value=f.prs||0;
     document.getElementById("lbf-streak").value=f.streak||0;
     document.getElementById("lbf-band").value=f.band?1:0;
-    friends=friends.filter(fr=>fr.id!==f.id);localStorage.setItem("friends",JSON.stringify(friends));
+    friends=friends.filter(fr=>fr.id!==f.id);lsSet("friends",friends);
   }));
 }
 document.getElementById("lbf-save").addEventListener("click",()=>{
   const name=document.getElementById("lbf-name").value.trim();
   if(!name)return;
   friends.push({id:Date.now()+"",name,sess:+document.getElementById("lbf-sess").value||0,prs:+document.getElementById("lbf-prs").value||0,streak:+document.getElementById("lbf-streak").value||0,band:document.getElementById("lbf-band").value==="1"});
-  localStorage.setItem("friends",JSON.stringify(friends));
+  lsSet("friends",friends);
   document.getElementById("lbf-name").value="";renderLB();toast(`${name} added`);
 });
 
@@ -1743,10 +1787,7 @@ function renderSetLogger(ex,ck){
     inp.addEventListener("change",async()=>{
       const si=+inp.dataset.si,field=inp.dataset.field;
       setLogs[ck][si][field]=field==="w"?parseFloat(inp.value)||0:parseInt(inp.value)||0;
-      const dbId=setLogs[ck][si].dbId;
-      const payload={user_id:USER.id,log_key:ck,set_index:si,weight:setLogs[ck][si].w,reps:setLogs[ck][si].r,done:setLogs[ck][si].done};
-      if(dbId){await sb.from("set_logs").update(payload).eq("id",dbId);}
-      else{const{data}=await sb.from("set_logs").upsert(payload,{onConflict:"user_id,log_key,set_index"}).select().single();if(data)setLogs[ck][si].dbId=data.id;}
+      lsSet("setLogs",setLogs);
     });
   });
   const allSetRows=[...rows.querySelectorAll(".set-row")];
@@ -1754,16 +1795,13 @@ function renderSetLogger(ex,ck){
     btn.addEventListener("click",async()=>{
       const si=+btn.dataset.si;setLogs[ck][si].done=!setLogs[ck][si].done;
       btn.classList.toggle("done",setLogs[ck][si].done);
-      const dbId=setLogs[ck][si].dbId;
-      const payload={user_id:USER.id,log_key:ck,set_index:si,weight:setLogs[ck][si].w,reps:setLogs[ck][si].r,done:setLogs[ck][si].done};
-      if(dbId)await sb.from("set_logs").update(payload).eq("id",dbId);
-      else{const{data}=await sb.from("set_logs").upsert(payload,{onConflict:"user_id,log_key,set_index"}).select().single();if(data)setLogs[ck][si].dbId=data.id;}
+      lsSet("setLogs",setLogs);
       if(setLogs[ck][si].done){
         const doneCount=setLogs[ck].filter(s=>s.done).length;
         const targetRow=allSetRows[si];if(targetRow?._restBar)startTimer(targetRow._restBar,doneCount,numSets);
         if(doneCount===numSets&&!checks[ck]){
           checks[ck]=true;
-          await sb.from("session_checks").upsert({user_id:USER.id,check_key:ck},{onConflict:"user_id,check_key"});
+          lsSet("checks",checks);
           const parentChk=wrap.closest(".ex-row")?.querySelector(".ex-chk");
           if(parentChk){parentChk.classList.add("done");parentChk.textContent="✓";}
           renderDash();
@@ -1783,8 +1821,8 @@ function renderWorkout(){
     btn.innerHTML=`<div class="sb-icon">—</div><div class="sb-lbl">${s.lbl}</div>`;
     btn.addEventListener("click",async()=>{
       checks[ck]=!checks[ck];
-      if(checks[ck])await sb.from("session_checks").upsert({user_id:USER.id,check_key:ck},{onConflict:"user_id,check_key"});
-      else await sb.from("session_checks").delete().eq("user_id",USER.id).eq("check_key",ck);
+      if(checks[ck])lsSet("checks",checks);
+      else lsSet("checks",checks);
       renderWorkout();renderDash();if(checks[ck])toast(s.lbl+" done");
     });
     sg.appendChild(btn);
@@ -1826,8 +1864,8 @@ function renderWorkout(){
   host.querySelectorAll(".ex-chk").forEach(btn=>{
     btn.addEventListener("click",async()=>{
       const ck=btn.dataset.ck;checks[ck]=!checks[ck];
-      if(checks[ck])await sb.from("session_checks").upsert({user_id:USER.id,check_key:ck},{onConflict:"user_id,check_key"});
-      else await sb.from("session_checks").delete().eq("user_id",USER.id).eq("check_key",ck);
+      if(checks[ck])lsSet("checks",checks);
+      else lsSet("checks",checks);
       btn.classList.toggle("done",checks[ck]);renderDash();
     });
   });
@@ -1850,8 +1888,7 @@ function renderWeighins(){
     list.appendChild(item);
   });
   list.querySelectorAll(".del").forEach(b=>b.addEventListener("click",async()=>{
-    await sb.from("weighins").delete().eq("id",b.dataset.id);
-    weighins=weighins.filter(w=>w.id!==b.dataset.id);renderWeighins();renderDash();toast("Deleted");
+    weighins=weighins.filter(w=>w.id!==b.dataset.id);lsSet("weighins",weighins);renderWeighins();renderDash();toast("Deleted");
   }));
 }
 document.getElementById("wi-save").addEventListener("click",async()=>{
@@ -1859,13 +1896,9 @@ document.getElementById("wi-save").addEventListener("click",async()=>{
   if(!d||isNaN(w))return;
   // upsert by date for this user
   const existing=weighins.find(e=>e.d===d);
-  if(existing){
-    await sb.from("weighins").update({weight:w}).eq("id",existing.id);
-    existing.w=w;
-  }else{
-    const{data}=await sb.from("weighins").insert({user_id:USER.id,date:d,weight:w}).select().single();
-    if(data) weighins.push({id:data.id,d:data.date,w:data.weight});
-  }
+  if(existing){ existing.w=w; }
+  else{ weighins.push({id:"w"+Date.now(),d,w}); }
+  lsSet("weighins",weighins);
   document.getElementById("wi-w").value="";renderWeighins();renderDash();toast("Saved");
 });
 
@@ -1892,16 +1925,14 @@ function renderLifts(){
     hist.appendChild(item);
   });
   hist.querySelectorAll(".del").forEach(b=>b.addEventListener("click",async()=>{
-    await sb.from("lift_logs").delete().eq("id",b.dataset.id);
-    liftLogs=liftLogs.filter(l=>l.id!==b.dataset.id);renderLifts();renderDash();toast("Deleted");
+    liftLogs=liftLogs.filter(l=>l.id!==b.dataset.id);lsSet("liftLogs",liftLogs);renderLifts();renderDash();toast("Deleted");
   }));
 }
 document.getElementById("l-save").addEventListener("click",async()=>{
   const name=document.getElementById("l-name").value,w=parseFloat(document.getElementById("l-wt").value),r=parseInt(document.getElementById("l-rp").value);
   if(!name||isNaN(w)||isNaN(r))return;
   const d=today();
-  const{data}=await sb.from("lift_logs").insert({user_id:USER.id,date:d,name,weight:w,reps:r}).select().single();
-  if(data) liftLogs.push({id:data.id,d:data.date,name:data.name,w:data.weight,r:data.reps});
+  liftLogs.push({id:"l"+Date.now(),d,name,w,r});lsSet("liftLogs",liftLogs);
   document.getElementById("l-wt").value="";document.getElementById("l-rp").value="";
   renderLifts();renderDash();renderGoals();
   const allForLift=liftLogs.filter(l=>l.name===name),newE=e1rm(w,r);
@@ -1924,7 +1955,7 @@ function loadSettingsForm(){
 document.querySelectorAll(".ph-btn").forEach(btn=>{
   btn.addEventListener("click",async()=>{
     plan.phase=btn.dataset.phase;
-    await sb.from("plans").upsert({user_id:USER.id,phase:plan.phase},{onConflict:"user_id"});
+    lsSet("plan",plan);
     applyPhase(plan.phase);renderDash();toast("Switched to "+plan.phase.toUpperCase());
   });
 });
@@ -1934,21 +1965,21 @@ document.getElementById("p-save").addEventListener("click",async()=>{
   plan.goal_weight=parseFloat(document.getElementById("p-gw").value);
   plan.phase_length=parseInt(document.getElementById("p-len").value)||60;
   document.getElementById("plan-saving").textContent="Saving...";
-  await sb.from("plans").upsert({user_id:USER.id,...plan},{onConflict:"user_id"});
+  lsSet("plan",plan);
   document.getElementById("plan-saving").textContent="Saved";
   setTimeout(()=>document.getElementById("plan-saving").textContent="",2000);
   renderDash();
 });
 document.getElementById("t-save").addEventListener("click",async()=>{
   targets={cal:+document.getElementById("t-cal").value||2264,pro:+document.getElementById("t-pro").value||199,fat:+document.getElementById("t-fat").value||75,carb:+document.getElementById("t-carb").value||199};
-  await sb.from("plans").upsert({user_id:USER.id,calories:targets.cal,protein:targets.pro,fat:targets.fat,carbs:targets.carb},{onConflict:"user_id"});
+  lsSet("targets",targets);
   toast("Targets saved");
 });
 document.getElementById("nl-save").addEventListener("click",async()=>{
   const wk=+document.getElementById("nl-wk").value;
   const c=+document.getElementById("nl-c").value,p2=+document.getElementById("nl-p").value;
   nutlog[wk]={c,p:p2};
-  await sb.from("weekly_logs").upsert({user_id:USER.id,week:wk,complete_days:c,protein_days:p2},{onConflict:"user_id,week"});
+  lsSet("nutlog",nutlog);
   renderDash();toast(`Week ${wk} logged`);
 });
 
@@ -2011,7 +2042,7 @@ document.getElementById("tmpl-apply").addEventListener("click",async()=>{
   if(!selectedTemplateId){toast("Select a template first");return;}
   const t=TEMPLATES.find(t=>t.id===selectedTemplateId);if(!t)return;
   activeTemplate=t;customWorkout=null;
-  await sb.from("plans").upsert({user_id:USER.id,active_template:t.id,custom_workout:null},{onConflict:"user_id"});
+  plan.active_template=t.id;plan.custom_workout=null;lsSet("plan",plan);
   switchWorkoutView("log");renderWorkout();toast(`${t.name} applied`);
 });
 
@@ -2072,7 +2103,7 @@ document.getElementById("builder-save").addEventListener("click",async()=>{
   if(!builderDays.length){toast("Add at least one day");return;}
   customWorkout=JSON.parse(JSON.stringify(builderDays));
   activeTemplate=null;
-  await sb.from("plans").upsert({user_id:USER.id,custom_workout:JSON.stringify(customWorkout),active_template:null},{onConflict:"user_id"});
+  plan.custom_workout=JSON.stringify(customWorkout);plan.active_template=null;lsSet("plan",plan);
   switchWorkoutView("log");renderWorkout();toast("Custom workout saved");
 });
 
@@ -2125,12 +2156,10 @@ function renderModalList(){
 
 // ─── LOAD TEMPLATE/CUSTOM FROM DB ────────────────────────────────────────────
 async function loadWorkoutConfig(){
-  const{data}=await sb.from("plans").select("active_template,custom_workout").eq("user_id",USER.id).single();
-  if(!data){activeTemplate=TEMPLATES[0];customWorkout=null;return;}
-  if(data.custom_workout){
-    try{customWorkout=JSON.parse(data.custom_workout);activeTemplate=null;}catch(e){activeTemplate=TEMPLATES[0];customWorkout=null;}
-  }else if(data.active_template){
-    activeTemplate=TEMPLATES.find(t=>t.id===data.active_template)||TEMPLATES[0];customWorkout=null;
+  if(plan.custom_workout){
+    try{customWorkout=JSON.parse(plan.custom_workout);activeTemplate=null;}catch(e){activeTemplate=TEMPLATES[0];customWorkout=null;}
+  }else if(plan.active_template){
+    activeTemplate=TEMPLATES.find(t=>t.id===plan.active_template)||TEMPLATES[0];customWorkout=null;
   }else{
     activeTemplate=TEMPLATES[0];customWorkout=null;
   }
@@ -2144,10 +2173,10 @@ document.getElementById("dash-wi-save").addEventListener("click", async () => {
   const d = today();
   const existing = weighins.find(e => e.d === d);
   if (existing) {
-    await sb.from("weighins").update({weight: w}).eq("id", existing.id);
+     if(existing){existing.w=w;}else{weighins.push({id:"w"+Date.now(),d,w});}lsSet("weighins",weighins);
     existing.w = w;
   } else {
-    const {data} = await sb.from("weighins").insert({user_id: USER.id, date: d, weight: w}).select().single();
+     // handled above
     if (data) weighins.push({id: data.id, d: data.date, w: data.weight});
   }
   document.getElementById("dash-wi-w").value = "";
@@ -2174,8 +2203,8 @@ function renderDashWorkout() {
     btn.innerHTML = '<div class="sb-lbl">' + s.lbl + '</div>';
     btn.addEventListener("click", async () => {
       checks[ck] = !checks[ck];
-      if (checks[ck]) await sb.from("session_checks").upsert({user_id: USER.id, check_key: ck}, {onConflict: "user_id,check_key"});
-      else await sb.from("session_checks").delete().eq("user_id", USER.id).eq("check_key", ck);
+       lsSet("checks",checks);
+       // handled above
       renderDashWorkout(); renderWorkout(); renderDash();
       if (checks[ck]) toast(s.lbl + " done");
     });
@@ -2240,8 +2269,8 @@ function renderDashWorkout() {
   host.querySelectorAll(".ex-chk").forEach(btn => {
     btn.addEventListener("click", async () => {
       const ck = btn.dataset.ck; checks[ck] = !checks[ck];
-      if (checks[ck]) await sb.from("session_checks").upsert({user_id: USER.id, check_key: ck}, {onConflict: "user_id,check_key"});
-      else await sb.from("session_checks").delete().eq("user_id", USER.id).eq("check_key", ck);
+       lsSet("checks",checks);
+       // handled above
       btn.classList.toggle("done", checks[ck]);
       renderDash();
     });
@@ -2560,8 +2589,8 @@ function renderActiveWorkout(day) {
     chip.innerHTML = "<span>" + (checks[sessKey] ? "✓" : "○") + "</span> Mark " + sessMatch.lbl + " session done";
     chip.addEventListener("click", async () => {
       checks[sessKey] = !checks[sessKey];
-      if (checks[sessKey]) await sb.from("session_checks").upsert({user_id:USER.id,check_key:sessKey},{onConflict:"user_id,check_key"});
-      else await sb.from("session_checks").delete().eq("user_id",USER.id).eq("check_key",sessKey);
+      if (checks[sessKey]) lsSet("checks",checks);
+      else lsSet("checks",checks);
       toast(checks[sessKey] ? sessMatch.lbl + " session done" : "Unmarked");
       renderActiveWorkout(day);
     });
@@ -2630,8 +2659,8 @@ function renderActiveWorkout(day) {
     btn.addEventListener("click", async () => {
       const ck = btn.dataset.ck;
       checks[ck] = !checks[ck];
-      if (checks[ck]) await sb.from("session_checks").upsert({user_id:USER.id,check_key:ck},{onConflict:"user_id,check_key"});
-      else await sb.from("session_checks").delete().eq("user_id",USER.id).eq("check_key",ck);
+      if (checks[ck]) lsSet("checks",checks);
+      else lsSet("checks",checks);
       renderActiveWorkout(day); // re-render to update progress + fade
     });
   });
@@ -2714,8 +2743,8 @@ function renderActiveWorkout(day) {
     chip.innerHTML = "<span>" + (done ? "✓" : "○") + "</span> Mark " + sessMatch.lbl + " session done";
     chip.addEventListener("click", async () => {
       checks[sessKey] = !checks[sessKey];
-      if (checks[sessKey]) await sb.from("session_checks").upsert({ user_id: USER.id, check_key: sessKey }, { onConflict: "user_id,check_key" });
-      else await sb.from("session_checks").delete().eq("user_id", USER.id).eq("check_key", sessKey);
+       lsSet("checks",checks);
+       // handled above
       toast(checks[sessKey] ? sessMatch.lbl + " session done" : "Unmarked");
       renderActiveWorkout(day);
     });
@@ -2776,8 +2805,8 @@ function renderActiveWorkout(day) {
     btn.addEventListener("click", async () => {
       const ck = btn.dataset.ck;
       checks[ck] = !checks[ck];
-      if (checks[ck]) await sb.from("session_checks").upsert({ user_id: USER.id, check_key: ck }, { onConflict: "user_id,check_key" });
-      else await sb.from("session_checks").delete().eq("user_id", USER.id).eq("check_key", ck);
+       lsSet("checks",checks);
+       // handled above
       renderActiveWorkout(day);
     });
   });
@@ -2785,8 +2814,17 @@ function renderActiveWorkout(day) {
 
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
-  const{data:{session}}=await sb.auth.getSession();
-  if(session?.user) await initApp(session.user);
+  // ── TESTING MODE: skip auth, use local storage ──
+  USER = { id: "hunter-local", email: "hunter@test.com" };
+  document.getElementById("auth-screen").style.display = "none";
+  document.getElementById("main-app").style.display = "block";
+  loadDataLocal();
+  await loadWorkoutConfig();
+  renderDash();
+  renderDashWorkout();
+  renderWorkout();
+  renderLB();
+  updateDashSubtitles();
 })();
 </script>
 </body>
