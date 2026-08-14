@@ -715,7 +715,7 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       </div>
 
       <!-- 5. COLLAPSIBLE: Exercises -->
-      <div class="dash-accord" id="dacc-workout">
+      <div class="dash-accord open" id="dacc-workout">
         <button class="dacc-hdr" data-dacc="dacc-workout">
           <span>Exercises</span>
           <div style="display:flex;align-items:center;gap:8px">
@@ -975,7 +975,7 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 // ── SUPABASE ──────────────────────────────────────────
 const SB_URL="https://pxtuvfdmzicokchxurqb.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4dHV2ZmRtemljb2tjaHh1cnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0NDY1NDksImV4cCI6MjEwMjAyMjU0OX0.fpuaVN_rx4B86jFxukzh0gBzxyipM2R_-CjQrdLtV1Q";
-const sb=supabase.createClient(SB_URL,SB_KEY);
+const sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,storageKey:"sicg-session",storage:window.localStorage,autoRefreshToken:true,detectSessionInUrl:false}});
 
 // ── CONSTANTS ─────────────────────────────────────────
 const LIFTS=["Bench Press","Overhead Press","Lat Pulldown","Assisted Pull-up","Seated Row","T-Bar Row"];
@@ -1356,6 +1356,7 @@ async function initApp(user){
   renderDashWorkout();
   renderWorkout();
   renderLB();
+  updateDashSubtitles();
 }
 
 // ── LOAD ALL DATA ─────────────────────────────────────
@@ -1675,7 +1676,7 @@ function renderWorkout(){
         const bar=document.createElement("div");bar.className="swap-bar";
         const sb2=document.createElement("button");sb2.className="swap-btn"+(isOpen?" active":"");
         sb2.textContent=isOpen?"Hide substitutes":"Substitute machines";
-        sb2.addEventListener("click",()=>{openSwap=isOpen?null:sk;renderWorkout();});
+        sb2.addEventListener("click",(e)=>{e.stopPropagation();openSwap=isOpen?null:sk;renderWorkout();});
         bar.appendChild(sb2);row.appendChild(bar);
         const box=document.createElement("div");box.className="swap-box"+(isOpen?" open":"");
         box.innerHTML=`<div class="swap-title">Substitute Options</div>`+ex.subs.map(s=>`<div class="sub-item"><div><div class="sub-name">${s.n}</div><div class="sub-why">${s.w}</div></div><div class="sub-meta">${s.s}<br>${s.l}</div></div>`).join("");
@@ -2080,7 +2081,7 @@ function renderDashWorkout() {
         const bar = document.createElement("div"); bar.className = "swap-bar";
         const sb2 = document.createElement("button"); sb2.className = "swap-btn" + (isOpen ? " active" : "");
         sb2.textContent = isOpen ? "Hide substitutes" : "Substitute machines";
-        sb2.addEventListener("click", () => { openSwap = isOpen ? null : sk; renderDashWorkout(); });
+        sb2.addEventListener("click", (e) => { e.stopPropagation(); openSwap = isOpen ? null : sk; renderDashWorkout(); });
         bar.appendChild(sb2); row.appendChild(bar);
         const box = document.createElement("div"); box.className = "swap-box" + (isOpen ? " open" : "");
         box.innerHTML = "<div class='swap-title'>Substitute Options</div>" + ex.subs.map(s => "<div class='sub-item'><div><div class='sub-name'>" + s.n + "</div><div class='sub-why'>" + s.w + "</div></div><div class='sub-meta'>" + s.s + "<br>" + s.l + "</div></div>").join("");
