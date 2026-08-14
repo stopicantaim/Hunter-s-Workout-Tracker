@@ -672,6 +672,60 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 /* scrollable day list */
 .wo-days{flex:1;overflow-y:auto;padding:12px 13px 32px;-webkit-overflow-scrolling:touch}
 .wo-days .day-block{margin-bottom:12px}
+
+/* ── day select + start ── */
+.day-start-bar{
+  display:none;padding:10px 13px;
+  background:var(--bg2);border-top:1px solid var(--border);
+}
+.day-block.selected .day-start-bar{display:block}
+.day-start-btn{
+  width:100%;background:var(--ph);border:none;color:#fff;
+  font-size:15px;font-weight:900;padding:13px;border-radius:var(--rs);
+  cursor:pointer;letter-spacing:.04em;
+  box-shadow:0 4px 18px rgba(16,185,129,.3);
+  transition:opacity .15s,transform .12s;
+}
+.day-start-btn:active{opacity:.85;transform:scale(.98)}
+.day-hdr.selected-hdr{outline:2px solid var(--ph);outline-offset:-2px}
+
+/* ── fullscreen active workout ── */
+.wo-overlay{
+  position:fixed;inset:0;z-index:300;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top,0px);
+}
+.wo-overlay.hidden{display:none!important}
+.wo-overlay.entering{animation:woIn .28s cubic-bezier(.4,0,.2,1) both}
+@keyframes woIn{
+  from{opacity:0;transform:translateY(32px)}
+  to{opacity:1;transform:none}
+}
+.wo-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px 11px;
+  background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.wo-header-left{display:flex;flex-direction:column;gap:1px}
+.wo-title{font-size:17px;font-weight:900;color:var(--ph)}
+.wo-subtitle{font-size:11px;color:var(--sub);font-weight:700}
+.wo-close{
+  background:var(--card2);border:1px solid var(--border2);
+  color:var(--text);font-size:16px;font-weight:800;
+  width:36px;height:36px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.wo-close:active{background:var(--border2)}
+.wo-body{flex:1;overflow-y:auto;padding:12px 13px 40px;-webkit-overflow-scrolling:touch}
+.wo-complete-btn{
+  width:100%;background:var(--ph);border:none;color:#fff;
+  font-size:15px;font-weight:900;padding:15px;border-radius:var(--r);
+  cursor:pointer;margin-top:16px;letter-spacing:.04em;
+  box-shadow:0 4px 20px rgba(16,185,129,.35);
+  transition:opacity .15s;
+}
+.wo-complete-btn:active{opacity:.8}
 </style>
 </head>
 <body class="cut">
@@ -773,9 +827,6 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
         <span class="wk-lbl" id="dash-wk-lbl" style="font-size:13px">Week 1</span>
         <button class="wk-btn" id="dash-wk-next" style="width:28px;height:28px;font-size:16px">›</button>
       </div>
-
-      <!-- START WORKOUT BUTTON -->
-      <button class="start-workout-btn" id="start-workout-btn">Start Workout</button>
 
       <!-- 5. COLLAPSIBLE: Exercises -->
       <div class="dash-accord open" id="dacc-workout">
@@ -1038,12 +1089,11 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
   <div class="wo-header">
     <div class="wo-header-left">
       <div class="wo-title" id="wo-title">Workout</div>
-      <div class="wo-week" id="wo-week">Week 1</div>
+      <div class="wo-subtitle" id="wo-subtitle">Week 1</div>
     </div>
     <button class="wo-close" id="wo-close">✕</button>
   </div>
-  <div class="wo-sess-strip" id="wo-sess-strip"></div>
-  <div class="wo-days" id="wo-days"></div>
+  <div class="wo-body" id="wo-body"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2137,11 +2187,19 @@ function renderDashWorkout() {
     hdr.className = "day-hdr " + day.cls;
     hdr.innerHTML = "<span>" + day.label + "</span><div style='display:flex;align-items:center;gap:8px'><span class='day-done'>" + done + "/" + total + "</span><span class='day-chevron'>›</span></div>";
     hdr.addEventListener("click", () => {
-      // close all other day blocks in this host
-      host.querySelectorAll(".day-block.open").forEach(b => { if(b !== block) b.classList.remove("open"); });
-      block.classList.toggle("open");
+      const wasSelected = block.classList.contains("selected");
+      // deselect all
+      host.querySelectorAll(".day-block").forEach(b => b.classList.remove("selected","open"));
+      if (!wasSelected) { block.classList.add("selected","open"); }
     });
     block.appendChild(hdr);
+
+    // start button — shown when day is selected
+    const startBar = document.createElement("div"); startBar.className = "day-start-bar";
+    const startBtn = document.createElement("button"); startBtn.className = "day-start-btn";
+    startBtn.textContent = "Start " + day.label;
+    startBtn.addEventListener("click", (e) => { e.stopPropagation(); openDayWorkout(day); });
+    startBar.appendChild(startBtn); block.appendChild(startBar);
 
     const body = document.createElement("div"); body.className = "day-body";
     day.exs.forEach((ex, i) => {
@@ -2557,6 +2615,141 @@ function renderWorkoutOverlay(){
           dayHdr.textContent=doneCount+"/"+allEx.length;
         }
       }
+    });
+  });
+}
+
+
+// ─── PER-DAY START WORKOUT ────────────────────────────────────────────────────
+let activeDayKey = null;
+
+function openDayWorkout(day) {
+  activeDayKey = day.key;
+  const overlay = document.getElementById("workout-overlay");
+  overlay.classList.remove("hidden");
+  overlay.classList.add("entering");
+  setTimeout(() => overlay.classList.remove("entering"), 300);
+  document.body.style.overflow = "hidden";
+  renderActiveWorkout(day);
+}
+
+function closeWorkoutOverlay() {
+  document.getElementById("workout-overlay").classList.add("hidden");
+  document.body.style.overflow = "";
+  activeDayKey = null;
+  // deselect all day blocks
+  document.querySelectorAll(".day-block.selected").forEach(b => b.classList.remove("selected"));
+  renderDash();
+  renderDashWorkout();
+  updateDashSubtitles();
+}
+
+document.getElementById("wo-close").addEventListener("click", closeWorkoutOverlay);
+
+// swipe down to close
+(function(){
+  const el = document.getElementById("workout-overlay");
+  let startY = 0;
+  el.addEventListener("touchstart", e => { startY = e.touches[0].clientY; }, {passive:true});
+  el.addEventListener("touchend", e => {
+    if (e.changedTouches[0].clientY - startY > 90) closeWorkoutOverlay();
+  }, {passive:true});
+})();
+
+function renderActiveWorkout(day) {
+  // header
+  document.getElementById("wo-title").textContent = day.label;
+  document.getElementById("wo-subtitle").textContent = "Week " + week + "  ·  Swipe down to exit";
+
+  const host = document.getElementById("wo-body");
+  host.innerHTML = "";
+
+  // session chip for this day (quick tick)
+  const sessKey = "w" + week + "-s-" + day.key;
+  const sessMatch = SESSIONS.find(s => s.key === day.key);
+  if (sessMatch) {
+    const chipWrap = document.createElement("div");
+    chipWrap.style.cssText = "margin-bottom:14px";
+    const chip = document.createElement("div");
+    chip.className = "wo-sess-chip" + (checks[sessKey] ? " done" : "");
+    chip.style.cssText = "display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--sub)";
+    if (checks[sessKey]) { chip.style.background="var(--ph-bg)"; chip.style.borderColor="var(--ph)"; chip.style.color="var(--ph)"; }
+    chip.innerHTML = "<span>" + (checks[sessKey] ? "✓" : "○") + "</span> Mark " + sessMatch.lbl + " session done";
+    chip.addEventListener("click", async () => {
+      checks[sessKey] = !checks[sessKey];
+      if (checks[sessKey]) await sb.from("session_checks").upsert({user_id:USER.id,check_key:sessKey},{onConflict:"user_id,check_key"});
+      else await sb.from("session_checks").delete().eq("user_id",USER.id).eq("check_key",sessKey);
+      toast(checks[sessKey] ? sessMatch.lbl + " session done" : "Unmarked");
+      renderActiveWorkout(day);
+    });
+    chipWrap.appendChild(chip);
+    host.appendChild(chipWrap);
+  }
+
+  // progress bar
+  const total = day.exs.length;
+  const done  = day.exs.filter((_, i) => checks["w" + week + "-" + day.key + "-" + i]).length;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+  const progWrap = document.createElement("div");
+  progWrap.style.cssText = "margin-bottom:16px";
+  progWrap.innerHTML = `
+    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--sub);margin-bottom:5px">
+      <span>${done} of ${total} exercises</span><span>${pct}%</span>
+    </div>
+    <div style="height:5px;background:var(--mute);border-radius:99px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:var(--ph);border-radius:99px;transition:width .5s ease"></div>
+    </div>`;
+  host.appendChild(progWrap);
+
+  // exercises
+  day.exs.forEach((ex, i) => {
+    const ck = "w" + week + "-" + day.key + "-" + i;
+    const isDone = !!checks[ck];
+    const sk = "wo-active-" + day.key + "-" + i;
+    const isOpen = openSwap === sk;
+
+    const row = document.createElement("div");
+    row.className = "ex-row";
+    row.style.cssText = isDone ? "opacity:.55" : "";
+
+    const main = document.createElement("div");
+    main.className = "ex-main";
+    main.innerHTML = `<div class="ex-name">${ex.n}</div><div class="ex-meta">${ex.s} · ${ex.l||"—"}</div><button class="ex-chk${isDone?" done":""}" data-ck="${ck}">✓</button>`;
+    row.appendChild(main);
+
+    if (day.cls !== "cardio") row.appendChild(renderSetLogger(ex, ck));
+
+    if (ex.subs && ex.subs.length) {
+      const bar = document.createElement("div"); bar.className = "swap-bar";
+      const sb2 = document.createElement("button");
+      sb2.className = "swap-btn" + (isOpen ? " active" : "");
+      sb2.textContent = isOpen ? "Hide substitutes" : "Substitute machines";
+      sb2.addEventListener("click", (e) => { e.stopPropagation(); openSwap = isOpen ? null : sk; renderActiveWorkout(day); });
+      bar.appendChild(sb2); row.appendChild(bar);
+      const box = document.createElement("div");
+      box.className = "swap-box" + (isOpen ? " open" : "");
+      box.innerHTML = "<div class='swap-title'>Substitute Options</div>" +
+        ex.subs.map(s => `<div class="sub-item"><div><div class="sub-name">${s.n}</div><div class="sub-why">${s.w}</div></div><div class="sub-meta">${s.s}<br>${s.l}</div></div>`).join("");
+      row.appendChild(box);
+    }
+    host.appendChild(row);
+  });
+
+  // finish button at bottom
+  const finBtn = document.createElement("button");
+  finBtn.className = "wo-complete-btn";
+  finBtn.textContent = done === total && total > 0 ? "Day Complete — Close" : "Finish & Close";
+  finBtn.addEventListener("click", closeWorkoutOverlay);
+  host.appendChild(finBtn);
+
+  // wire checkboxes
+  host.querySelectorAll(".ex-chk").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const ck = btn.dataset.ck;
+      checks[ck] = !checks[ck];
+      if (checks[ck]) await sb.from("session_checks").upsert({user_id:USER.id,check_key:ck},{onConflict:"user_id,check_key"});
+      else await sb.from("session_checks").delete().eq("user_id",USER.id).eq("check_key",ck);
+      renderActiveWorkout(day); // re-render to update progress + fade
     });
   });
 }
