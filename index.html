@@ -764,6 +764,25 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .plan-name{font-size:12px;font-weight:800;color:var(--sub);letter-spacing:.03em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .plan-edit-btn{background:none;border:1px solid var(--ph-border);border-radius:7px;color:var(--ph);font-size:11px;font-weight:800;padding:5px 11px;cursor:pointer;flex-shrink:0;transition:background .15s}
 .plan-edit-btn:active{background:var(--ph-bg)}
+
+/* ── add exercise row inside a day ── */
+.day-add-row{padding:10px 13px;background:var(--bg2);border-top:1px solid var(--border)}
+.day-add-btn{
+  width:100%;background:none;border:1.5px dashed var(--border2);
+  border-radius:9px;color:var(--sub);font-size:12px;font-weight:800;
+  padding:10px;cursor:pointer;letter-spacing:.03em;transition:all .15s;
+}
+.day-add-btn:active{background:var(--card);border-color:var(--ph);color:var(--ph)}
+.ex-added-badge{
+  font-size:9px;font-weight:800;color:var(--ph);
+  background:var(--ph-bg);border:1px solid var(--ph-border);
+  border-radius:99px;padding:1px 6px;margin-left:6px;vertical-align:middle;
+}
+.ex-remove-btn{
+  background:none;border:none;color:var(--mute);
+  font-size:17px;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0;
+}
+.ex-remove-btn:active{color:#ef4444}
 </style>
 </head>
 <body class="cut">
@@ -982,6 +1001,19 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       </div>
     </div>
 
+    <!-- ADD EXERCISE MODAL (day-filtered) -->
+    <div class="modal-overlay hidden" id="add-ex-modal">
+      <div class="modal-sheet">
+        <div class="modal-hdr">
+          <div class="modal-title" id="add-ex-title">Add Exercise</div>
+          <button class="modal-close" id="add-ex-close">×</button>
+        </div>
+        <div class="modal-search"><input type="text" id="add-ex-search" placeholder="Search exercises..."/></div>
+        <div class="modal-muscle-tabs" id="add-ex-tabs"></div>
+        <div class="modal-ex-list" id="add-ex-list"></div>
+      </div>
+    </div>
+
     <!-- EXERCISE PICKER MODAL -->
     <div class="modal-overlay hidden" id="ex-modal">
       <div class="modal-sheet">
@@ -1139,7 +1171,38 @@ const LIFTS=["Bench Press","Overhead Press","Lat Pulldown","Assisted Pull-up","S
 const BASELINES={"Bench Press":null,"Overhead Press":null,"Lat Pulldown":null,"Assisted Pull-up":null,"Seated Row":null,"T-Bar Row":null};
 const SESSIONS=[{key:"push",lbl:"Push"},{key:"pull",lbl:"Pull"},{key:"upper",lbl:"Upper"},{key:"arms",lbl:"Arms"},{key:"run",lbl:"Run"},{key:"walk",lbl:"Walk"}];
 // ─── EXERCISE LIBRARY ────────────────────────────────────────────────────────
-const MUSCLE_GROUPS=["Chest","Back","Shoulders","Biceps","Triceps","Core","Cardio"];
+const MUSCLE_GROUPS=["Chest","Back","Shoulders","Biceps","Triceps","Legs","Core","Cardio"];
+
+// which muscle groups belong to which day type — keeps the picker relevant
+const DAY_MUSCLES={
+  push:   ["Chest","Shoulders","Triceps"],
+  pull:   ["Back","Biceps"],
+  upper:  ["Chest","Back","Shoulders","Biceps","Triceps","Core"],
+  arms:   ["Shoulders","Biceps","Triceps","Core"],
+  legs:   ["Legs","Core"],
+  cardio: ["Cardio","Core"],
+  chest:  ["Chest","Triceps"],
+  back:   ["Back","Biceps"],
+  shoulders:["Shoulders","Core"],
+  mon:    ["Chest","Back","Shoulders","Legs","Core"],
+  wed:    ["Chest","Back","Shoulders","Legs","Core"],
+  fri:    ["Chest","Back","Shoulders","Biceps","Triceps","Core"],
+  uppera: ["Chest","Back","Shoulders","Biceps","Triceps","Core"],
+  upperb: ["Chest","Back","Shoulders","Biceps","Triceps","Core"],
+  lowera: ["Legs","Core"],
+  lowerb: ["Legs","Core"],
+};
+// fall back to the visual class if the key isn't mapped
+const CLS_MUSCLES={
+  push:["Chest","Shoulders","Triceps"],
+  pull:["Back","Biceps"],
+  upper:["Chest","Back","Shoulders","Biceps","Triceps","Core"],
+  arms:["Shoulders","Biceps","Triceps","Core"],
+  cardio:["Cardio","Legs","Core"],
+};
+function musclesForDay(day){
+  return DAY_MUSCLES[day.key] || CLS_MUSCLES[day.cls] || MUSCLE_GROUPS;
+}
 const EXERCISE_LIBRARY={
   Chest:[
     {n:"Bench Press (Barbell)",    eq:"barbell", sets:"4×5",  load:""},
@@ -1211,6 +1274,24 @@ const EXERCISE_LIBRARY={
     {n:"Dip (Tricep)",             eq:"bodyweight",sets:"3×10",load:""},
     {n:"DB Kickback",              eq:"dumbbell",sets:"3×15", load:""},
     {n:"Bench Dip",                eq:"bodyweight",sets:"3×15",load:""},
+  ],
+  Legs:[
+    {n:"Squat (Barbell)",          eq:"barbell", sets:"4×5",  load:""},
+    {n:"Front Squat",              eq:"barbell", sets:"3×6",  load:""},
+    {n:"Hack Squat (Machine)",     eq:"machine", sets:"3×10", load:""},
+    {n:"Leg Press",                eq:"machine", sets:"3×12", load:""},
+    {n:"Romanian Deadlift",        eq:"barbell", sets:"3×8",  load:""},
+    {n:"Good Morning",             eq:"barbell", sets:"3×10", load:""},
+    {n:"Bulgarian Split Squat",    eq:"dumbbell",sets:"3×10", load:""},
+    {n:"Walking Lunge",            eq:"dumbbell",sets:"3×12", load:""},
+    {n:"Step-Up",                  eq:"dumbbell",sets:"3×12", load:""},
+    {n:"Leg Curl (Machine)",       eq:"machine", sets:"3×12", load:""},
+    {n:"Leg Extension (Machine)",  eq:"machine", sets:"3×15", load:""},
+    {n:"Calf Raise (Machine)",     eq:"machine", sets:"4×15", load:""},
+    {n:"Standing Calf Raise",      eq:"bodyweight",sets:"4×20",load:""},
+    {n:"Glute Bridge",             eq:"barbell", sets:"3×12", load:""},
+    {n:"Hip Thrust",               eq:"barbell", sets:"3×10", load:""},
+    {n:"Goblet Squat",             eq:"dumbbell",sets:"3×12", load:""},
   ],
   Core:[
     {n:"Abdominal Crunch (Machine)",eq:"machine",sets:"3×15", load:""},
@@ -1424,7 +1505,18 @@ let activeTemplate=null;
 let customWorkout=null; // overrides template when user builds custom
 
 // DAYS loaded dynamically from active template
-function getDays(){return customWorkout||(activeTemplate?activeTemplate.days:TEMPLATES[0].days);}
+let dayExtras = {};   // { dayKey: [ {n,s,l,subs,added:true} ] }
+
+function getBaseDays(){
+  return customWorkout || (activeTemplate ? activeTemplate.days : TEMPLATES[0].days);
+}
+// merge user-added exercises into each day
+function getDays(){
+  return getBaseDays().map(day => {
+    const extras = dayExtras[day.key] || [];
+    return extras.length ? {...day, exs:[...day.exs, ...extras]} : day;
+  });
+}
 
 // ── STATE ─────────────────────────────────────────────
 let USER=null;
@@ -1509,6 +1601,7 @@ function loadDataLocal(){
   nutlog  = lsGet("nutlog")  || {"1":{c:3,p:2}};
   setLogs = lsGet("setLogs") || {};
   friends = lsGet("friends") || [];
+  dayExtras = lsGet("dayExtras") || {};
   applyPhase(plan.phase||"cut");
   loadSettingsForm();
 }
@@ -2179,8 +2272,18 @@ function renderDashWorkout() {
       const isOpen = openSwap === sk;
       const row = document.createElement("div"); row.className = "ex-row";
       const main = document.createElement("div"); main.className = "ex-main";
-      main.innerHTML = "<div class='ex-name'>" + ex.n + "</div><div class='ex-meta'>" + ex.s + " · " + (ex.l || "—") + "</div><button class='ex-chk" + (isDone ? " done" : "") + "' data-ck='" + ck + "'>✓</button>";
+      const badge = ex.added ? "<span class='ex-added-badge'>added</span>" : "";
+      main.innerHTML = "<div class='ex-name'>" + ex.n + badge + "</div><div class='ex-meta'>" + ex.s + " · " + (ex.l || "—") + "</div><button class='ex-chk" + (isDone ? " done" : "") + "' data-ck='" + ck + "'>✓</button>";
       row.appendChild(main);
+      if (ex.added) {
+        const rm = document.createElement("button");
+        rm.className = "ex-remove-btn";
+        rm.textContent = "×";
+        rm.style.cssText = "position:absolute;top:8px;right:46px";
+        row.style.position = "relative";
+        rm.addEventListener("click", (e) => { e.stopPropagation(); removeAddedExercise(day.key, ex.n); });
+        row.appendChild(rm);
+      }
       if (day.cls !== "cardio") row.appendChild(renderSetLogger(ex, ck));
       if (ex.subs && ex.subs.length) {
         const bar = document.createElement("div"); bar.className = "swap-bar";
@@ -2194,6 +2297,15 @@ function renderDashWorkout() {
       }
       body.appendChild(row);
     });
+
+    // + Add exercise (filtered to this day type)
+    const addRow = document.createElement("div"); addRow.className = "day-add-row";
+    const addBtn = document.createElement("button"); addBtn.className = "day-add-btn";
+    addBtn.textContent = "+ Add exercise";
+    addBtn.addEventListener("click", (e) => { e.stopPropagation(); openAddExercise(day); });
+    addRow.appendChild(addBtn);
+    body.appendChild(addRow);
+
     block.appendChild(body);
     host.appendChild(block);
   });
@@ -2570,7 +2682,8 @@ function renderActiveWorkout(day) {
 
     const main = document.createElement("div");
     main.className = "ex-main";
-    main.innerHTML = '<div class="ex-name">' + ex.n + '</div><div class="ex-meta">' + ex.s + ' · ' + (ex.l || "—") + '</div><button class="ex-chk' + (isDone ? " done" : "") + '" data-ck="' + ck + '">✓</button>';
+    const badge = ex.added ? '<span class="ex-added-badge">added</span>' : '';
+    main.innerHTML = '<div class="ex-name">' + ex.n + badge + '</div><div class="ex-meta">' + ex.s + ' · ' + (ex.l || "—") + '</div><button class="ex-chk' + (isDone ? " done" : "") + '" data-ck="' + ck + '">✓</button>';
     row.appendChild(main);
 
     if (day.cls !== "cardio") row.appendChild(renderSetLogger(ex, ck));
@@ -2590,6 +2703,17 @@ function renderActiveWorkout(day) {
     host.appendChild(row);
   });
 
+  // + Add exercise (filtered to this day type)
+  const addRow = document.createElement("div");
+  addRow.className = "day-add-row";
+  addRow.style.cssText = "border:none;background:none;padding:6px 0 0";
+  const addBtn = document.createElement("button");
+  addBtn.className = "day-add-btn";
+  addBtn.textContent = "+ Add exercise";
+  addBtn.addEventListener("click", () => openAddExercise(day));
+  addRow.appendChild(addBtn);
+  host.appendChild(addRow);
+
   // finish button
   const fin = document.createElement("button");
   fin.className = "wo-complete-btn";
@@ -2608,6 +2732,121 @@ function renderActiveWorkout(day) {
     });
   });
 }
+
+
+// ─── ADD EXERCISE TO A DAY (day-appropriate picker) ──────────────────────────
+let addTargetDay = null;      // the day object we're adding to
+let addModalMuscle = null;    // currently selected muscle tab
+let addModalSearch = "";
+
+function openAddExercise(day){
+  addTargetDay = day;
+  const allowed = musclesForDay(day);
+  addModalMuscle = allowed[0];
+  addModalSearch = "";
+  const s = document.getElementById("add-ex-search");
+  if (s) s.value = "";
+  document.getElementById("add-ex-title").textContent = "Add to " + day.label;
+  document.getElementById("add-ex-modal").classList.remove("hidden");
+  renderAddTabs();
+  renderAddList();
+}
+function closeAddExercise(){
+  document.getElementById("add-ex-modal").classList.add("hidden");
+  addTargetDay = null;
+}
+
+function renderAddTabs(){
+  const wrap = document.getElementById("add-ex-tabs");
+  wrap.innerHTML = "";
+  musclesForDay(addTargetDay).forEach(mg=>{
+    const t = document.createElement("div");
+    t.className = "muscle-tab" + (mg===addModalMuscle ? " on" : "");
+    t.textContent = mg;
+    t.addEventListener("click", ()=>{ addModalMuscle = mg; addModalSearch=""; 
+      const s=document.getElementById("add-ex-search"); if(s) s.value="";
+      renderAddTabs(); renderAddList(); });
+    wrap.appendChild(t);
+  });
+}
+
+function renderAddList(){
+  const list = document.getElementById("add-ex-list");
+  list.innerHTML = "";
+  const allowed = musclesForDay(addTargetDay);
+  let exs = [];
+  if (addModalSearch){
+    // search only within groups valid for this day
+    allowed.forEach(mg=>{
+      (EXERCISE_LIBRARY[mg]||[]).forEach(ex=>{
+        if (ex.n.toLowerCase().includes(addModalSearch)) exs.push({...ex, mg});
+      });
+    });
+  } else {
+    exs = (EXERCISE_LIBRARY[addModalMuscle]||[]).map(ex=>({...ex, mg:addModalMuscle}));
+  }
+
+  // mark ones already in the day
+  const currentNames = new Set(
+    (getDays().find(d=>d.key===addTargetDay.key)?.exs || []).map(e=>e.n)
+  );
+
+  if(!exs.length){ list.innerHTML = '<div class="empty">No exercises found.</div>'; return; }
+
+  exs.forEach(ex=>{
+    const already = currentNames.has(ex.n);
+    const item = document.createElement("div");
+    item.className = "modal-ex-item";
+    item.innerHTML =
+      '<div><div class="modal-ex-item-name">' + ex.n + '</div>' +
+      '<div class="modal-ex-item-meta"><span class="eq-badge ' + ex.eq + '">' + ex.eq + '</span>' + ex.mg + '</div></div>' +
+      (already
+        ? '<span style="font-size:11px;font-weight:700;color:var(--sub)">Added</span>'
+        : '<button class="modal-ex-item-add">Add</button>');
+    if(!already){
+      item.querySelector(".modal-ex-item-add").addEventListener("click", ()=>{
+        if(!dayExtras[addTargetDay.key]) dayExtras[addTargetDay.key] = [];
+        dayExtras[addTargetDay.key].push({ n:ex.n, s:ex.sets, l:"", subs:[], added:true });
+        lsSet("dayExtras", dayExtras);
+        renderDashWorkout();
+        updateDashSubtitles();
+        renderAddList();
+        const ov = document.getElementById("workout-overlay");
+        if (ov && !ov.classList.contains("hidden") && addTargetDay) {
+          const fresh = getDays().find(d => d.key === addTargetDay.key);
+          if (fresh) renderActiveWorkout(fresh);
+        }
+        toast(ex.n + " added");
+      });
+    }
+    list.appendChild(item);
+  });
+}
+
+// remove a user-added exercise
+function removeAddedExercise(dayKey, exName){
+  if(!dayExtras[dayKey]) return;
+  dayExtras[dayKey] = dayExtras[dayKey].filter(e=>e.n !== exName);
+  if(!dayExtras[dayKey].length) delete dayExtras[dayKey];
+  lsSet("dayExtras", dayExtras);
+  renderDashWorkout();
+  updateDashSubtitles();
+  const ov = document.getElementById("workout-overlay");
+  if (ov && !ov.classList.contains("hidden")) {
+    const fresh = getDays().find(d => d.key === dayKey);
+    if (fresh) renderActiveWorkout(fresh);
+  }
+  toast("Removed");
+}
+
+document.getElementById("add-ex-close").addEventListener("click", closeAddExercise);
+document.getElementById("add-ex-modal").addEventListener("click", e=>{
+  if(e.target===document.getElementById("add-ex-modal")) closeAddExercise();
+});
+document.getElementById("add-ex-search").addEventListener("input", e=>{
+  addModalSearch = e.target.value.toLowerCase();
+  renderAddList();
+});
 
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
