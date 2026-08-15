@@ -1749,8 +1749,20 @@ function renderSetLogger(ex,ck){
   wrap.appendChild(rows);
   wrap.querySelectorAll(".set-input").forEach(inp=>{
     inp.addEventListener("change",async()=>{
-      const si=+inp.dataset.si,field=inp.dataset.field;
-      setLogs[ck][si][field]=field==="w"?parseFloat(inp.value)||0:parseInt(inp.value)||0;
+      const si=+inp.dataset.si, field=inp.dataset.field;
+      const val = field==="w" ? (parseFloat(inp.value)||0) : (parseInt(inp.value)||0);
+      setLogs[ck][si][field] = val;
+
+      // propagate to every set that isn't already marked done —
+      // so entering one weight/rep fills the rest of the exercise
+      setLogs[ck].forEach((st, j) => {
+        if (j === si) return;
+        if (st.done) return;              // don't overwrite a completed set
+        st[field] = val;
+        const otherInp = wrap.querySelector('.set-input[data-si="'+j+'"][data-field="'+field+'"]');
+        if (otherInp) otherInp.value = val || "";
+      });
+
       lsSet("setLogs",setLogs);
     });
   });
