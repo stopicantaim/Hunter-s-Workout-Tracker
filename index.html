@@ -835,8 +835,6 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       </div>
 
       <!-- 3. SESSION CHIPS — always visible -->
-      <div class="sh">Today</div>
-      <div class="sess-grid" id="dash-sess-grid"></div>
 
       <!-- 4. WEEK NAV — compact -->
       <div class="dash-wk-mini">
@@ -2170,22 +2168,6 @@ document.getElementById("dash-wk-next").addEventListener("click", () => {
 
 function renderDashWorkout() {
   document.getElementById("dash-wk-lbl").textContent = "Week " + week;
-
-  // session chips
-  const sg = document.getElementById("dash-sess-grid"); sg.innerHTML = "";
-  SESSIONS.forEach(s => {
-    const ck = "w" + week + "-s-" + s.key, done = !!checks[ck];
-    const btn = document.createElement("div"); btn.className = "sess-btn" + (done ? " done" : "");
-    btn.innerHTML = '<div class="sb-lbl">' + s.lbl + '</div>';
-    btn.addEventListener("click", async () => {
-      checks[ck] = !checks[ck];
-       lsSet("checks",checks);
-       // handled above
-      renderDashWorkout(); renderWorkout(); renderDash();
-      if (checks[ck]) toast(s.lbl + " done");
-    });
-    sg.appendChild(btn);
-  });
 
   // exercise days — collapsible, only one open at a time
   const host = document.getElementById("dash-workout-days"); host.innerHTML = "";
