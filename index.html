@@ -817,6 +817,56 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .hero-spark .spark-labels{display:flex;justify-content:space-between;margin-top:3px}
 .hero-spark .spark-label{font-size:10px;color:var(--sub)}
 .hero-spark .spark-empty{text-align:center;padding:12px 0;font-size:11px;color:var(--sub)}
+
+/* ── progress tab ── */
+.psum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.psum{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 13px}
+.psum-lbl{font-size:9px;font-weight:800;letter-spacing:.09em;color:var(--sub);text-transform:uppercase;margin-bottom:4px}
+.psum-val{font-size:23px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.psum-sub{font-size:10px;color:var(--sub);margin-top:3px}
+.psum.good .psum-val{color:var(--ph)}
+.psum.warn .psum-val{color:#f59f00}
+
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.pcard-hdr{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
+.pcard-title{font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--text);text-transform:uppercase}
+.pcard-sub{font-size:11px;font-weight:700;color:var(--sub);text-align:right}
+.pcard canvas{width:100%;display:block}
+.pchart-empty{text-align:center;padding:18px 6px;font-size:12px;color:var(--sub)}
+.pchart-legend{display:flex;gap:14px;margin-top:8px;font-size:10px;color:var(--sub);align-items:center}
+.pchart-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.lg-line{background:var(--ph)}
+.lg-band{background:rgba(255,255,255,.18)}
+
+.lift-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px;margin-bottom:4px}
+.lift-chips::-webkit-scrollbar{display:none}
+.lift-chip{flex-shrink:0;background:var(--bg2);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .15s}
+.lift-chip.on{background:var(--ph-bg);border-color:var(--ph);color:var(--ph)}
+
+/* heatmap */
+.heat-wrap{display:flex;gap:6px}
+.heat-daylabels{display:grid;grid-template-rows:repeat(7,1fr);gap:3px;font-size:8px;color:var(--mute);font-weight:700;padding-top:1px}
+.heat-daylabels span{height:12px;line-height:12px}
+.heat-grid{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,12px);gap:3px;overflow-x:auto;scrollbar-width:none;flex:1}
+.heat-grid::-webkit-scrollbar{display:none}
+.heat-cell{width:12px;height:12px;border-radius:3px;background:var(--mute)}
+.heat-cell.lv0{background:#1a1f2e}
+.heat-cell.lv1{background:#0d4a34}
+.heat-cell.lv2{background:#0f8a5f}
+.heat-cell.lv3{background:#10b981}
+.heat-cell.future{background:transparent}
+.heat-legend{display:flex;align-items:center;gap:4px;margin-top:9px;font-size:10px;color:var(--sub)}
+.heat-legend i{width:11px;height:11px;border-radius:3px}
+
+/* PR timeline */
+.pr-item{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--border)}
+.pr-item:last-child{border-bottom:none}
+.pr-dot{width:8px;height:8px;border-radius:50%;background:var(--ph);flex-shrink:0;margin-top:5px;box-shadow:0 0 0 3px var(--ph-bg)}
+.pr-body{flex:1;min-width:0}
+.pr-lift{font-size:13px;font-weight:700}
+.pr-detail{font-size:11px;color:var(--sub);margin-top:1px}
+.pr-val{font-size:14px;font-weight:900;color:var(--ph);font-variant-numeric:tabular-nums;text-align:right;flex-shrink:0}
+.pr-gain{font-size:10px;color:var(--sub);text-align:right}
 </style>
 </head>
 <body class="cut">
@@ -1036,6 +1086,73 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 
     <!-- PROGRESS (Weight + Lifts + Goals combined) -->
     <section id="tab-progress" class="page">
+
+      <!-- SUMMARY STRIP -->
+      <div class="psum-grid" id="psum-grid"></div>
+
+      <!-- WEIGHT CHART -->
+      <div class="pcard">
+        <div class="pcard-hdr">
+          <span class="pcard-title">Weight vs Target Band</span>
+          <span class="pcard-sub" id="pw-sub"></span>
+        </div>
+        <canvas id="pw-canvas" height="150"></canvas>
+        <div class="pchart-legend">
+          <span><i class="lg-line"></i>Your weight</span>
+          <span><i class="lg-band"></i>Safe rate band</span>
+        </div>
+      </div>
+
+      <!-- e1RM PROGRESSION -->
+      <div class="pcard">
+        <div class="pcard-hdr">
+          <span class="pcard-title">Strength Progression</span>
+          <span class="pcard-sub" id="pe-sub"></span>
+        </div>
+        <div class="lift-chips" id="pe-chips"></div>
+        <canvas id="pe-canvas" height="140"></canvas>
+        <div class="pchart-empty" id="pe-empty" style="display:none">Log this lift at least twice to see a trend.</div>
+      </div>
+
+      <!-- VOLUME TREND -->
+      <div class="pcard">
+        <div class="pcard-hdr">
+          <span class="pcard-title">Weekly Volume</span>
+          <span class="pcard-sub" id="pv-sub"></span>
+        </div>
+        <canvas id="pv-canvas" height="120"></canvas>
+        <div class="pchart-empty" id="pv-empty" style="display:none">Log sets in a workout to track volume.</div>
+      </div>
+
+      <!-- CONSISTENCY HEATMAP -->
+      <div class="pcard">
+        <div class="pcard-hdr">
+          <span class="pcard-title">Consistency</span>
+          <span class="pcard-sub" id="ph-sub"></span>
+        </div>
+        <div class="heat-wrap">
+          <div class="heat-daylabels">
+            <span>M</span><span></span><span>W</span><span></span><span>F</span><span></span><span>S</span>
+          </div>
+          <div class="heat-grid" id="heat-grid"></div>
+        </div>
+        <div class="heat-legend">
+          <span>Less</span>
+          <i class="heat-cell lv0"></i><i class="heat-cell lv1"></i><i class="heat-cell lv2"></i><i class="heat-cell lv3"></i>
+          <span>More</span>
+        </div>
+      </div>
+
+      <!-- PR TIMELINE -->
+      <div class="pcard">
+        <div class="pcard-hdr">
+          <span class="pcard-title">Personal Records</span>
+          <span class="pcard-sub" id="ppr-sub"></span>
+        </div>
+        <div id="pr-timeline"></div>
+      </div>
+
+      <div class="sh">Log &amp; History</div>
 
       <!-- WEIGHT LOG accordion -->
       <div class="accord-block" id="accord-weight">
@@ -1770,7 +1887,7 @@ document.querySelectorAll(".tab").forEach(b=>{
     b.classList.add("on");
     document.getElementById("tab-"+b.dataset.tab).classList.add("on");
     if(b.dataset.tab==="lb") renderLB();
-    if(b.dataset.tab==="progress"){renderWeighins();renderLifts();}
+    if(b.dataset.tab==="progress"){renderWeighins();renderLifts();renderProgress();}
     if(b.dataset.tab==="settings") updateDbStatus();
   });
 });
@@ -2081,7 +2198,7 @@ document.getElementById("l-save").addEventListener("click",async()=>{
   const d=today();
   liftLogs.push({id:"l"+Date.now(),d,name,w,r});lsSet("liftLogs",liftLogs);
   document.getElementById("l-wt").value="";document.getElementById("l-rp").value="";
-  renderLifts();renderDash();renderGoals();
+  renderLifts();renderDash();renderGoals();renderProgress();
   const allForLift=liftLogs.filter(l=>l.name===name),newE=e1rm(w,r);
   const prevBest=allForLift.length>1?Math.max(...allForLift.slice(0,-1).map(l=>e1rm(l.w,l.r))):0;
   toast(newE>prevBest&&prevBest>0?"New PR — "+newE+" e1RM":"Saved");
@@ -2347,6 +2464,7 @@ document.getElementById("dash-wi-save").addEventListener("click", async () => {
   else { weighins.push({id: "w" + Date.now(), d, w}); }
   lsSet("weighins", weighins);
   document.getElementById("dash-wi-w").value = "";
+  if(document.getElementById("tab-progress").classList.contains("on")) renderProgress();
   renderDash();
   toast("Weight logged");
 });
@@ -3090,6 +3208,435 @@ document.getElementById("import-file").addEventListener("change", (e) => {
   reader.onerror = () => toast("Could not read file");
   reader.readAsText(file);
 });
+
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PROGRESS TAB
+// ═══════════════════════════════════════════════════════════════════════
+let peLift = null;   // selected lift for the e1RM chart
+
+function hiDPI(canvas, cssH){
+  const W = canvas.parentElement.clientWidth || 320;
+  const H = cssH;
+  canvas.width = W*2; canvas.height = H*2;
+  canvas.style.width = W+"px"; canvas.style.height = H+"px";
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(2,2);
+  ctx.clearRect(0,0,W,H);
+  return {ctx, W, H};
+}
+
+// ── 1. SUMMARY STRIP ────────────────────────────────────────────────────
+function renderPSummary(){
+  const host = document.getElementById("psum-grid");
+  if(!host) return;
+  const sorted = [...weighins].sort((a,b)=>a.d.localeCompare(b.d));
+  const sw = plan.start_weight || (sorted[0] ? +sorted[0].w : null);
+  const cur = sorted.length ? +sorted[sorted.length-1].w : sw;
+  const phase = plan.phase || "cut";
+
+  // total change
+  const change = sw!=null && cur!=null ? (phase==="bulk" ? cur-sw : sw-cur) : 0;
+
+  // avg rate
+  let rate = 0;
+  if(sorted.length>=2){
+    const f=sorted[0], l=sorted[sorted.length-1];
+    const days=(new Date(l.d)-new Date(f.d))/864e5;
+    if(days>0) rate = Math.abs(+f.w - +l.w)/(days/7);
+  }
+  const pctWk = sw ? rate/sw : 0;
+  const rateOk = phase==="maintain" ? pctWk<0.005 : (pctWk>=0.005 && pctWk<=0.01);
+
+  // weeks elapsed
+  const start = plan.start_date ? new Date(plan.start_date) : (sorted[0] ? new Date(sorted[0].d) : new Date());
+  const weeksIn = Math.max(0, Math.floor((Date.now()-start)/(864e5*7)));
+
+  // sessions completed (all weeks)
+  let sessions = 0;
+  Object.keys(checks).forEach(k=>{ if(/^w\d+-s-/.test(k) && checks[k]) sessions++; });
+
+  // PRs
+  const prs = computePRs();
+
+  const cards = [
+    {lbl: phase==="bulk"?"Total Gained":"Total Lost", val: change.toFixed(1), sub:"lb", cls: change>0?"good":""},
+    {lbl:"Avg Rate", val: rate.toFixed(2), sub:"lb / week", cls: rateOk?"good":"warn"},
+    {lbl:"Weeks In", val: String(weeksIn), sub:"of "+Math.round((plan.phase_length||60)/7), cls:""},
+    {lbl:"Sessions", val: String(sessions), sub:"completed", cls:"good"},
+    {lbl:"PRs Hit", val: String(prs.length), sub:"this phase", cls: prs.length?"good":""},
+    {lbl:"Weigh-ins", val: String(weighins.length), sub:"logged", cls:""},
+  ];
+
+  host.innerHTML = cards.map(c=>
+    '<div class="psum '+c.cls+'"><div class="psum-lbl">'+c.lbl+'</div>'+
+    '<div class="psum-val" data-num="'+c.val+'" data-dec="'+((c.val+"").includes(".")?( (c.val+"").split(".")[1].length ):0)+'">0</div>'+
+    '<div class="psum-sub">'+c.sub+'</div></div>'
+  ).join("");
+  animateNumsIn(host);
+}
+
+// ── 2. WEIGHT CHART WITH TARGET BAND ────────────────────────────────────
+function renderPWeightChart(){
+  const canvas = document.getElementById("pw-canvas");
+  if(!canvas) return;
+  const sorted = [...weighins].sort((a,b)=>a.d.localeCompare(b.d));
+  const sub = document.getElementById("pw-sub");
+
+  if(sorted.length<2){
+    const {ctx,W,H} = hiDPI(canvas,150);
+    ctx.fillStyle="#5a6380"; ctx.font="12px -apple-system,sans-serif"; ctx.textAlign="center";
+    ctx.fillText("Log 2+ weigh-ins to see your trend", W/2, H/2);
+    if(sub) sub.textContent="";
+    return;
+  }
+
+  const {ctx,W,H} = hiDPI(canvas,150);
+  const pad = {l:34, r:10, t:12, b:20};
+  const t0 = new Date(sorted[0].d).getTime();
+  const tEnd = new Date(sorted[sorted.length-1].d).getTime();
+  const span = Math.max(tEnd-t0, 864e5);
+
+  const sw = plan.start_weight || +sorted[0].w;
+  const phase = plan.phase || "cut";
+  const dir = phase==="bulk" ? 1 : -1;
+
+  // band bounds at 0.5%/wk and 1%/wk from start
+  const bandAt = (t, pct) => sw + dir * (sw*pct) * ((t-t0)/(864e5*7));
+  const vals = sorted.map(p=>+p.w);
+  const bandVals = [];
+  [0.005,0.01].forEach(p=>{ bandVals.push(bandAt(t0,p), bandAt(tEnd,p)); });
+  const all = vals.concat(bandVals, [sw]);
+  let mn=Math.min(...all), mx=Math.max(...all);
+  const padY=(mx-mn)*0.12||1; mn-=padY; mx+=padY;
+
+  const X = t => pad.l + ((t-t0)/span)*(W-pad.l-pad.r);
+  const Y = v => pad.t + ((mx-v)/(mx-mn))*(H-pad.t-pad.b);
+
+  // band polygon
+  ctx.beginPath();
+  ctx.moveTo(X(t0), Y(bandAt(t0,0.005)));
+  ctx.lineTo(X(tEnd), Y(bandAt(tEnd,0.005)));
+  ctx.lineTo(X(tEnd), Y(bandAt(tEnd,0.01)));
+  ctx.lineTo(X(t0), Y(bandAt(t0,0.01)));
+  ctx.closePath();
+  ctx.fillStyle="rgba(255,255,255,.07)";
+  ctx.fill();
+
+  // y gridlines
+  ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.lineWidth=1;
+  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
+  for(let i=0;i<=3;i++){
+    const v = mn + (mx-mn)*(i/3);
+    const y = Y(v);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    ctx.fillText(v.toFixed(0), pad.l-6, y+3);
+  }
+
+  // weight line
+  ctx.beginPath();
+  sorted.forEach((p,i)=>{
+    const x=X(new Date(p.d).getTime()), y=Y(+p.w);
+    if(i===0) ctx.moveTo(x,y);
+    else{
+      const px=X(new Date(sorted[i-1].d).getTime()), py=Y(+sorted[i-1].w);
+      const cx=(px+x)/2;
+      ctx.bezierCurveTo(cx,py,cx,y,x,y);
+    }
+  });
+  ctx.strokeStyle="#10b981"; ctx.lineWidth=2.2; ctx.lineJoin="round"; ctx.stroke();
+
+  // dots
+  sorted.forEach((p,i)=>{
+    const x=X(new Date(p.d).getTime()), y=Y(+p.w);
+    ctx.beginPath(); ctx.arc(x,y,i===sorted.length-1?3.5:2.4,0,Math.PI*2);
+    ctx.fillStyle=i===sorted.length-1?"#fff":"#10b981"; ctx.fill();
+    if(i===sorted.length-1){ ctx.strokeStyle="#10b981"; ctx.lineWidth=2; ctx.stroke(); }
+  });
+
+  // x labels
+  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif";
+  ctx.textAlign="left";  ctx.fillText(sorted[0].d.slice(5).replace("-","/"), pad.l, H-6);
+  ctx.textAlign="right"; ctx.fillText(sorted[sorted.length-1].d.slice(5).replace("-","/"), W-pad.r, H-6);
+
+  const diff = vals[vals.length-1]-vals[0];
+  if(sub){
+    sub.textContent = (diff<=0?"↓ ":"↑ ")+Math.abs(diff).toFixed(1)+" lb total";
+    sub.style.color = (dir<0 ? diff<=0 : diff>=0) ? "var(--ph)" : "#f59f00";
+  }
+}
+
+// ── 3. e1RM PROGRESSION ─────────────────────────────────────────────────
+function renderPStrength(){
+  const chips = document.getElementById("pe-chips");
+  const canvas = document.getElementById("pe-canvas");
+  const empty = document.getElementById("pe-empty");
+  const sub = document.getElementById("pe-sub");
+  if(!chips||!canvas) return;
+
+  // lifts that have any history
+  const withData = LIFTS.filter(n => liftLogs.some(l=>l.name===n));
+  const list = withData.length ? withData : LIFTS;
+  if(!peLift || !list.includes(peLift)) peLift = list[0];
+
+  chips.innerHTML = "";
+  list.forEach(n=>{
+    const c=document.createElement("div");
+    c.className="lift-chip"+(n===peLift?" on":"");
+    c.textContent=n;
+    c.addEventListener("click",()=>{ peLift=n; renderPStrength(); });
+    chips.appendChild(c);
+  });
+
+  const logs = liftLogs.filter(l=>l.name===peLift).sort((a,b)=>a.d.localeCompare(b.d));
+  // best e1RM per day
+  const byDay = {};
+  logs.forEach(l=>{ const e=e1rm(l.w,l.r); if(!byDay[l.d]||e>byDay[l.d]) byDay[l.d]=e; });
+  const pts = Object.keys(byDay).sort().map(d=>({d, e:byDay[d]}));
+
+  if(pts.length<2){
+    canvas.style.display="none"; empty.style.display="block";
+    if(sub) sub.textContent = pts.length ? pts[0].e.toFixed(1)+" e1RM" : "";
+    return;
+  }
+  canvas.style.display="block"; empty.style.display="none";
+
+  const {ctx,W,H} = hiDPI(canvas,140);
+  const pad={l:34,r:10,t:12,b:20};
+  const t0=new Date(pts[0].d).getTime(), tE=new Date(pts[pts.length-1].d).getTime();
+  const span=Math.max(tE-t0,864e5);
+  const goal = goalMap[peLift] || null;
+  const es = pts.map(p=>p.e);
+  let mn=Math.min(...es), mx=Math.max(...es);
+  if(goal){ mx=Math.max(mx,goal); }
+  const padY=(mx-mn)*0.15||5; mn-=padY; mx+=padY;
+  const X=t=>pad.l+((t-t0)/span)*(W-pad.l-pad.r);
+  const Y=v=>pad.t+((mx-v)/(mx-mn))*(H-pad.t-pad.b);
+
+  // gridlines
+  ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.lineWidth=1;
+  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
+  for(let i=0;i<=3;i++){
+    const v=mn+(mx-mn)*(i/3), y=Y(v);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    ctx.fillText(v.toFixed(0), pad.l-6, y+3);
+  }
+
+  // goal line
+  if(goal && goal>=mn && goal<=mx){
+    ctx.save(); ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad.l,Y(goal)); ctx.lineTo(W-pad.r,Y(goal));
+    ctx.strokeStyle="#f59f00"; ctx.lineWidth=1.5; ctx.stroke(); ctx.restore();
+    ctx.fillStyle="#f59f00"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="left";
+    ctx.fillText("goal", pad.l+3, Y(goal)-4);
+  }
+
+  // area + line
+  const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
+  grad.addColorStop(0,"rgba(16,185,129,.22)"); grad.addColorStop(1,"rgba(16,185,129,0)");
+  ctx.beginPath();
+  pts.forEach((p,i)=>{
+    const x=X(new Date(p.d).getTime()), y=Y(p.e);
+    if(i===0) ctx.moveTo(x,y);
+    else{
+      const px=X(new Date(pts[i-1].d).getTime()), py=Y(pts[i-1].e);
+      const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y);
+    }
+  });
+  const lastX=X(new Date(pts[pts.length-1].d).getTime());
+  ctx.lineTo(lastX,H-pad.b); ctx.lineTo(X(t0),H-pad.b); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+
+  ctx.beginPath();
+  pts.forEach((p,i)=>{
+    const x=X(new Date(p.d).getTime()), y=Y(p.e);
+    if(i===0) ctx.moveTo(x,y);
+    else{
+      const px=X(new Date(pts[i-1].d).getTime()), py=Y(pts[i-1].e);
+      const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y);
+    }
+  });
+  ctx.strokeStyle="#10b981"; ctx.lineWidth=2.2; ctx.lineJoin="round"; ctx.stroke();
+
+  pts.forEach((p,i)=>{
+    const x=X(new Date(p.d).getTime()), y=Y(p.e);
+    ctx.beginPath(); ctx.arc(x,y,i===pts.length-1?3.5:2.4,0,Math.PI*2);
+    ctx.fillStyle=i===pts.length-1?"#fff":"#10b981"; ctx.fill();
+    if(i===pts.length-1){ctx.strokeStyle="#10b981";ctx.lineWidth=2;ctx.stroke();}
+  });
+
+  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif";
+  ctx.textAlign="left";  ctx.fillText(pts[0].d.slice(5).replace("-","/"), pad.l, H-6);
+  ctx.textAlign="right"; ctx.fillText(pts[pts.length-1].d.slice(5).replace("-","/"), W-pad.r, H-6);
+
+  const delta = es[es.length-1]-es[0];
+  if(sub){
+    sub.textContent = es[es.length-1].toFixed(1)+" e1RM  ("+(delta>=0?"+":"")+delta.toFixed(1)+")";
+    sub.style.color = delta>=0 ? "var(--ph)" : "#ef4444";
+  }
+}
+
+// ── 4. WEEKLY VOLUME ────────────────────────────────────────────────────
+function computeWeeklyVolume(){
+  // volume from logged sets: weight × reps, grouped by the week key in setLogs
+  const byWeek = {};
+  Object.keys(setLogs).forEach(k=>{
+    const m = k.match(/^w(\d+)-/);
+    if(!m) return;
+    const wk = +m[1];
+    (setLogs[k]||[]).forEach(st=>{
+      if(!st || !st.done) return;
+      const wt = parseFloat(st.w)||0, rp = parseInt(st.r)||0;
+      if(wt>0 && rp>0) byWeek[wk] = (byWeek[wk]||0) + wt*rp;
+    });
+  });
+  return byWeek;
+}
+
+function renderPVolume(){
+  const canvas=document.getElementById("pv-canvas");
+  const empty=document.getElementById("pv-empty");
+  const sub=document.getElementById("pv-sub");
+  if(!canvas) return;
+  const byWeek = computeWeeklyVolume();
+  const weeks = Object.keys(byWeek).map(Number).sort((a,b)=>a-b);
+
+  if(!weeks.length){
+    canvas.style.display="none"; empty.style.display="block";
+    if(sub) sub.textContent=""; return;
+  }
+  canvas.style.display="block"; empty.style.display="none";
+
+  const maxWk = Math.max(...weeks, week);
+  const series = [];
+  for(let i=1;i<=maxWk;i++) series.push({wk:i, v:byWeek[i]||0});
+
+  const {ctx,W,H}=hiDPI(canvas,120);
+  const pad={l:38,r:8,t:10,b:18};
+  const mx=Math.max(...series.map(s=>s.v),1);
+  const bw=(W-pad.l-pad.r)/series.length;
+
+  // gridlines
+  ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.lineWidth=1;
+  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
+  for(let i=0;i<=2;i++){
+    const v=mx*(i/2), y=pad.t+((mx-v)/mx)*(H-pad.t-pad.b);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    ctx.fillText(v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0), pad.l-5, y+3);
+  }
+
+  series.forEach((s,i)=>{
+    const h=(s.v/mx)*(H-pad.t-pad.b);
+    const x=pad.l+i*bw+bw*0.18, y=H-pad.b-h, wpx=bw*0.64;
+    ctx.fillStyle = s.wk===week ? "#10b981" : "rgba(16,185,129,.42)";
+    const r=Math.min(3,wpx/2);
+    ctx.beginPath();
+    ctx.moveTo(x,y+h); ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.lineTo(x+wpx-r,y); ctx.quadraticCurveTo(x+wpx,y,x+wpx,y+r);
+    ctx.lineTo(x+wpx,y+h); ctx.closePath(); ctx.fill();
+    if(series.length<=12){
+      ctx.fillStyle="#5a6380"; ctx.font="8px -apple-system,sans-serif"; ctx.textAlign="center";
+      ctx.fillText("W"+s.wk, x+wpx/2, H-5);
+    }
+  });
+
+  const total=series.reduce((a,s)=>a+s.v,0);
+  const thisWk=byWeek[week]||0;
+  if(sub) sub.textContent = (thisWk>=1000?(thisWk/1000).toFixed(1)+"k":thisWk.toFixed(0))+" lb this week";
+}
+
+// ── 5. CONSISTENCY HEATMAP ──────────────────────────────────────────────
+function renderPHeatmap(){
+  const grid=document.getElementById("heat-grid");
+  const sub=document.getElementById("ph-sub");
+  if(!grid) return;
+
+  // build a set of active days: weigh-ins + any day with a done set
+  const active = {};
+  weighins.forEach(w=>{ active[w.d]=(active[w.d]||0)+1; });
+  // approximate training days from setLogs done flags — use today's date bucket per week
+  const startD = plan.start_date ? new Date(plan.start_date) : new Date();
+  Object.keys(setLogs).forEach(k=>{
+    const m=k.match(/^w(\d+)-/); if(!m) return;
+    const doneCount=(setLogs[k]||[]).filter(s=>s&&s.done).length;
+    if(!doneCount) return;
+    const d=new Date(startD); d.setDate(d.getDate()+(+m[1]-1)*7);
+    const key=d.toISOString().split("T")[0];
+    active[key]=(active[key]||0)+doneCount;
+  });
+
+  // 12 weeks ending this week, Monday-first
+  const today=new Date(); today.setHours(0,0,0,0);
+  const dow=(today.getDay()+6)%7;            // 0=Mon
+  const thisMon=new Date(today); thisMon.setDate(thisMon.getDate()-dow);
+  const start=new Date(thisMon); start.setDate(start.getDate()-11*7);
+
+  grid.innerHTML="";
+  let activeDays=0;
+  for(let wkI=0; wkI<12; wkI++){
+    for(let dI=0; dI<7; dI++){
+      const d=new Date(start); d.setDate(d.getDate()+wkI*7+dI);
+      const key=d.toISOString().split("T")[0];
+      const cell=document.createElement("div");
+      const isFuture = d>today;
+      const n = active[key]||0;
+      if(n>0) activeDays++;
+      const lv = isFuture ? "future" : n===0 ? "lv0" : n<=1 ? "lv1" : n<=4 ? "lv2" : "lv3";
+      cell.className="heat-cell "+lv;
+      cell.title=key+(n?" · "+n+" logged":"");
+      grid.appendChild(cell);
+    }
+  }
+  if(sub) sub.textContent = activeDays+" active days · 12 wks";
+}
+
+// ── 6. PR TIMELINE ──────────────────────────────────────────────────────
+function computePRs(){
+  const prs=[];
+  LIFTS.forEach(name=>{
+    const logs=liftLogs.filter(l=>l.name===name).sort((a,b)=>a.d.localeCompare(b.d));
+    let best=0;
+    logs.forEach(l=>{
+      const e=e1rm(l.w,l.r);
+      if(e>best){
+        if(best>0) prs.push({name, d:l.d, e, gain:e-best, w:l.w, r:l.r});
+        best=e;
+      }
+    });
+  });
+  return prs.sort((a,b)=>b.d.localeCompare(a.d));
+}
+
+function renderPPRs(){
+  const host=document.getElementById("pr-timeline");
+  const sub=document.getElementById("ppr-sub");
+  if(!host) return;
+  const prs=computePRs();
+  if(sub) sub.textContent = prs.length ? prs.length+" total" : "";
+  if(!prs.length){
+    host.innerHTML='<div class="pchart-empty">No PRs yet. Beat a logged lift to set one.</div>';
+    return;
+  }
+  host.innerHTML = prs.slice(0,12).map(p=>
+    '<div class="pr-item"><div class="pr-dot"></div>'+
+    '<div class="pr-body"><div class="pr-lift">'+p.name+'</div>'+
+    '<div class="pr-detail">'+p.d.slice(5).replace("-","/")+' · '+p.w+' × '+p.r+'</div></div>'+
+    '<div><div class="pr-val">'+p.e.toFixed(1)+'</div>'+
+    '<div class="pr-gain">+'+p.gain.toFixed(1)+'</div></div></div>'
+  ).join("");
+}
+
+// ── master render ───────────────────────────────────────────────────────
+function renderProgress(){
+  renderPSummary();
+  renderPWeightChart();
+  renderPStrength();
+  renderPVolume();
+  renderPHeatmap();
+  renderPPRs();
+}
 
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
