@@ -808,6 +808,15 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .rest-bar-time{transition:color .2s}
 .rest-bar-time.tick{animation:tickPulse .3s ease}
 @keyframes tickPulse{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+/* ── sparkline inside the hero card ── */
+.hero-spark{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.09)}
+.hero-spark-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px}
+.hero-spark-range{font-size:11px;font-weight:700;color:var(--sub);text-align:right}
+.hero-spark .spark-canvas{width:100%;display:block}
+.hero-spark .spark-labels{display:flex;justify-content:space-between;margin-top:3px}
+.hero-spark .spark-label{font-size:10px;color:var(--sub)}
+.hero-spark .spark-empty{text-align:center;padding:12px 0;font-size:11px;color:var(--sub)}
 </style>
 </head>
 <body class="cut">
@@ -898,7 +907,15 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
           <span class="prog-pct" id="d-pct">0%</span>
           <span id="d-pe">—</span>
         </div>
-        <div class="band-pill" id="d-band" style="margin-top:8px;display:inline-block">—</div>
+
+        <div class="hero-spark">
+          <div class="hero-spark-hdr">
+            <span class="band-pill" id="d-band">—</span>
+            <span class="hero-spark-range" id="spark-range"></span>
+          </div>
+          <canvas id="spark-canvas" class="spark-canvas" height="58"></canvas>
+          <div class="spark-labels" id="spark-labels"></div>
+        </div>
       </div>
 
       <!-- 3. SESSION CHIPS — always visible -->
@@ -928,48 +945,11 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
         </div>
       </div>
 
-      <!-- 6. COLLAPSIBLE: This Week stats -->
-      <div class="dash-accord" id="dacc-week">
-        <button class="dacc-hdr" data-dacc="dacc-week">
-          <span>This Week</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="dacc-sub" id="dacc-week-sub"></span>
-            <span class="dacc-arrow">›</span>
-          </div>
-        </button>
-        <div class="dacc-body">
-          <div class="kpi3" style="padding-top:10px">
-            <div class="kpi"><div class="kpi-lbl">Log Days</div><div class="kpi-val" id="d-log" style="font-size:22px">—</div><div class="kpi-sub">/ 7</div></div>
-            <div class="kpi hi"><div class="kpi-lbl">Sessions</div><div class="kpi-val" id="d-sess" style="font-size:22px">—</div><div class="kpi-sub">/ 6</div></div>
-            <div class="kpi"><div class="kpi-lbl">Protein</div><div class="kpi-val" id="d-prot" style="font-size:22px">—</div><div class="kpi-sub">/ 7</div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 7. COLLAPSIBLE: Weight trend -->
-      <div class="dash-accord" id="dacc-spark">
-        <button class="dacc-hdr" data-dacc="dacc-spark">
-          <span>Weight Trend</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="dacc-sub" id="spark-range"></span>
-            <span class="dacc-arrow">›</span>
-          </div>
-        </button>
-        <div class="dacc-body">
-          <canvas id="spark-canvas" class="spark-canvas" height="64" style="margin-top:10px"></canvas>
-          <div class="spark-labels" id="spark-labels"></div>
-        </div>
-      </div>
-
-      <!-- 8. COLLAPSIBLE: Lift markers -->
-      <div class="dash-accord" id="dacc-lifts">
-        <button class="dacc-hdr" data-dacc="dacc-lifts">
-          <span>Lift Markers</span>
-          <span class="dacc-arrow">›</span>
-        </button>
-        <div class="dacc-body">
-          <div id="d-lifts" class="blist" style="padding-top:10px"></div>
-        </div>
+      <!-- hidden metric holders (sections removed from view) -->
+      <div style="display:none">
+        <span id="d-log">0</span><span id="d-sess">0</span><span id="d-prot">0</span>
+        <span id="dacc-week-sub"></span>
+        <div id="d-lifts"></div>
       </div>
 
     </section>
@@ -1831,6 +1811,7 @@ function renderDash(){
   const doneSess=SESSIONS.filter(s=>checks[`w${week}-s-${s.key}`]).length;
   animateNum(document.getElementById("d-sess"), doneSess, {decimals:0, duration:500});
   renderStreaks();
+  renderSparkline();
   updateDashSubtitles();
   const el=document.getElementById("d-lifts");el.innerHTML="";
   LIFTS.forEach(name=>{
@@ -2543,8 +2524,8 @@ function renderSparkline(){
   canvas.style.display="block";
 
   // sizing — use offsetWidth or fallback
-  const W=canvas.parentElement.clientWidth-28||300;
-  const H=64;
+  const W=(canvas.parentElement && canvas.parentElement.clientWidth ? canvas.parentElement.clientWidth : 300)||300;
+  const H=58;
   canvas.width=W*2; canvas.height=H*2; // retina
   canvas.style.width=W+"px"; canvas.style.height=H+"px";
 
@@ -2627,8 +2608,10 @@ function renderSparkline(){
 
   // range label
   const diff=vals[vals.length-1]-vals[0];
-  document.getElementById("spark-range").textContent=(diff<=0?"↓ ":"↑ ")+Math.abs(diff).toFixed(1)+" lb over "+pts.length+" entries";
-  document.getElementById("spark-range").style.color=diff<=0?"var(--ph)":"#f59f00";
+  const sr=document.getElementById("spark-range");
+  if(sr) sr.textContent=(diff<=0?"↓ ":"↑ ")+Math.abs(diff).toFixed(1)+" lb · "+pts.length+" entries";
+  const srEl=document.getElementById("spark-range");
+  if(srEl) srEl.style.color=diff<=0?"var(--ph)":"#f59f00";
 }
 
 
@@ -2741,8 +2724,6 @@ document.querySelectorAll(".dacc-hdr").forEach(hdr => {
     // lazy render when opened
     const id = hdr.dataset.dacc;
     if (block.classList.contains("open")) {
-      if (id === "dacc-spark") renderSparkline();
-      if (id === "dacc-lifts") {} // d-lifts already rendered in renderDash
       if (id === "dacc-workout") renderDashWorkout();
     }
   });
