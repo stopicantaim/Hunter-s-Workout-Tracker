@@ -922,6 +922,129 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .set-tag-btn.W{background:#0d1626;border-color:#1e3a5f;color:#60a5fa}
 .ex-chip.fail{color:#ef4444;border-color:#7c0505;background:#1c0505}
 .ex-chip.drop{color:#a78bfa;border-color:#3b2a6b;background:#150e2e}
+
+/* ═══ SET COMPLETION ANIMATIONS ═══ */
+
+/* the set checkmark itself */
+.set-done-btn{position:relative;overflow:visible}
+.set-done-btn.pop{animation:setPop .42s cubic-bezier(.34,1.56,.64,1)}
+@keyframes setPop{
+  0%{transform:scale(1)}
+  35%{transform:scale(1.32) rotate(-8deg)}
+  60%{transform:scale(.94) rotate(3deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+/* expanding ring burst */
+.set-done-btn .burst{
+  position:absolute;inset:-2px;border-radius:9px;
+  border:2px solid var(--ph);pointer-events:none;
+  animation:burstOut .55s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes burstOut{
+  0%{transform:scale(1);opacity:.9}
+  100%{transform:scale(2.1);opacity:0}
+}
+/* the whole row flashes green then settles */
+.set-row.done-flash{animation:rowFlash .7s ease}
+@keyframes rowFlash{
+  0%{background:transparent}
+  18%{background:rgba(16,185,129,.22)}
+  100%{background:transparent}
+}
+/* strike-through feel: row dims once logged */
+.set-row.is-done .set-input{opacity:.62;transition:opacity .3s}
+
+/* little "+1" floater */
+.set-float{
+  position:absolute;right:6px;top:-2px;
+  font-size:11px;font-weight:900;color:var(--ph);
+  pointer-events:none;white-space:nowrap;
+  animation:floatUp .9s cubic-bezier(.3,.8,.4,1) forwards;
+}
+@keyframes floatUp{
+  0%{transform:translateY(4px);opacity:0}
+  25%{transform:translateY(-4px);opacity:1}
+  100%{transform:translateY(-22px);opacity:0}
+}
+
+/* ═══ EXERCISE COMPLETE ═══ */
+.ex-row.ex-complete{animation:exComplete .8s cubic-bezier(.34,1.4,.64,1)}
+@keyframes exComplete{
+  0%{background:var(--card)}
+  20%{background:rgba(16,185,129,.18)}
+  100%{background:var(--card)}
+}
+.ex-chk.celebrate{animation:chkCelebrate .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes chkCelebrate{
+  0%{transform:scale(1) rotate(0)}
+  30%{transform:scale(1.45) rotate(-12deg)}
+  55%{transform:scale(.9) rotate(6deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+/* sweep of light across a finished exercise */
+.ex-row{position:relative;overflow:hidden}
+.ex-sweep{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:linear-gradient(100deg,transparent 20%,rgba(16,185,129,.28) 50%,transparent 80%);
+  transform:translateX(-100%);
+  animation:sweep .85s cubic-bezier(.3,.7,.3,1) forwards;
+}
+@keyframes sweep{to{transform:translateX(100%)}}
+
+/* banner when a whole exercise is done */
+.ex-done-banner{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:9px;margin:0;font-size:12px;font-weight:900;letter-spacing:.06em;
+  color:var(--ph);background:var(--ph-bg);border-top:1px solid var(--ph-border);
+  animation:bannerIn .45s cubic-bezier(.34,1.4,.64,1);
+}
+@keyframes bannerIn{
+  from{opacity:0;transform:translateY(-8px)}
+  to{opacity:1;transform:none}
+}
+
+/* ═══ DAY COMPLETE ═══ */
+.day-complete-overlay{
+  position:fixed;inset:0;z-index:400;display:flex;
+  align-items:center;justify-content:center;flex-direction:column;
+  background:rgba(8,10,16,.86);backdrop-filter:blur(8px);
+  animation:fadeIn .3s ease;
+}
+.day-complete-overlay.out{animation:fadeOut .35s ease forwards}
+@keyframes fadeOut{to{opacity:0}}
+.dc-ring{
+  width:118px;height:118px;border-radius:50%;
+  border:4px solid var(--ph);
+  display:flex;align-items:center;justify-content:center;
+  font-size:52px;color:var(--ph);font-weight:900;
+  animation:dcRing .75s cubic-bezier(.34,1.5,.5,1);
+  box-shadow:0 0 0 0 rgba(16,185,129,.5);
+}
+@keyframes dcRing{
+  0%{transform:scale(.3) rotate(-25deg);opacity:0;box-shadow:0 0 0 0 rgba(16,185,129,.6)}
+  55%{transform:scale(1.12) rotate(5deg);opacity:1}
+  100%{transform:scale(1) rotate(0);opacity:1;box-shadow:0 0 0 26px rgba(16,185,129,0)}
+}
+.dc-title{
+  margin-top:20px;font-size:21px;font-weight:900;letter-spacing:.05em;color:var(--text);
+  animation:dcText .5s .25s both cubic-bezier(.34,1.4,.64,1);
+}
+.dc-sub{
+  margin-top:6px;font-size:13px;color:var(--sub);
+  animation:dcText .5s .38s both cubic-bezier(.34,1.4,.64,1);
+}
+@keyframes dcText{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* confetti */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:401;overflow:hidden}
+.confetti i{
+  position:absolute;top:-12px;width:8px;height:14px;border-radius:2px;
+  animation:fall linear forwards;
+}
+@keyframes fall{
+  0%{transform:translateY(-20px) rotate(0);opacity:1}
+  100%{transform:translateY(105vh) rotate(720deg);opacity:.15}
+}
 </style>
 </head>
 <body class="cut">
@@ -2324,17 +2447,33 @@ function renderSetLogger(ex,ck){
       btn.classList.toggle("done",setLogs[ck][si].done);
       lsSet("setLogs",setLogs);
       recordSession(ex.n, setLogs[ck], week);
+      const targetRow=allSetRows[si];
+
       if(setLogs[ck][si].done){
         const doneCount=setLogs[ck].filter(s=>s.done).length;
-        const targetRow=allSetRows[si];if(targetRow?._restBar)startTimer(targetRow._restBar,doneCount,numSets);
-        if(doneCount===numSets&&!checks[ck]){
+
+        // ── set completion animation ──
+        animateSetDone(btn, targetRow, doneCount, numSets);
+
+        const isLast = doneCount===numSets;
+        // don't start a rest timer after the final set
+        if(!isLast && targetRow?._restBar) startTimer(targetRow._restBar,doneCount,numSets);
+
+        if(isLast && !checks[ck]){
           checks[ck]=true;
           lsSet("checks",checks);
           const parentChk=wrap.closest(".ex-row")?.querySelector(".ex-chk");
           if(parentChk){parentChk.classList.add("done");parentChk.textContent="✓";}
+          // ── exercise completion animation ──
+          setTimeout(()=>animateExerciseComplete(wrap, ex.n), 260);
           renderDash();
+          // ── did that finish the whole day? ──
+          setTimeout(()=>checkDayComplete(), 700);
         }
-      }else{const targetRow=allSetRows[si];if(targetRow?._restBar)targetRow._restBar.classList.remove("active");}
+      }else{
+        animateSetUndone(btn, targetRow);
+        if(targetRow?._restBar) targetRow._restBar.classList.remove("active");
+      }
     });
   });
   return wrap;
@@ -3234,8 +3373,24 @@ function renderActiveWorkout(day) {
     btn.addEventListener("click", async () => {
       const ck = btn.dataset.ck;
       checks[ck] = !checks[ck];
-       lsSet("checks",checks);
-       // handled above
+      lsSet("checks",checks);
+
+      if(checks[ck]){
+        // celebrate this exercise before the list re-renders
+        const row = btn.closest(".ex-row");
+        replay(btn, "celebrate", 700);
+        if(row){
+          replay(row, "ex-complete", 900);
+          const sw=document.createElement("div"); sw.className="ex-sweep";
+          row.appendChild(sw); setTimeout(()=>sw.remove(), 900);
+        }
+        chirp(880, 0.11, 0.08);
+        if(navigator.vibrate) navigator.vibrate(20);
+
+        setTimeout(()=>{ renderActiveWorkout(day); checkDayComplete(); }, 620);
+        return;
+      }
+
       renderActiveWorkout(day);
     });
   });
@@ -4143,6 +4298,156 @@ function resumeTimers(){
 document.addEventListener("visibilitychange", () => { if(!document.hidden) resumeTimers(); });
 window.addEventListener("focus", resumeTimers);
 window.addEventListener("pageshow", resumeTimers);
+
+
+
+// fires the day-complete celebration when every exercise in the open day is ticked
+function checkDayComplete(){
+  if(!activeDayKey) return;
+  const day = getDays().find(d=>d.key===activeDayKey);
+  if(!day || !day.exs.length) return;
+  const allDone = day.exs.every((_,i)=>checks["w"+week+"-"+day.key+"-"+i]);
+  if(!allDone) return;
+  const elapsed = woStartTime ? Math.floor((Date.now()-woStartTime)/1000) : null;
+  animateDayComplete(day, elapsed);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  COMPLETION ANIMATIONS
+// ═══════════════════════════════════════════════════════════════════════
+function replay(el, cls, ms){
+  if(!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth;          // force reflow so the animation restarts
+  el.classList.add(cls);
+  if(ms) setTimeout(()=>el.classList.remove(cls), ms);
+}
+
+// ── a single set was ticked ──────────────────────────────────────────────
+function animateSetDone(btn, row, setNum, totalSets){
+  replay(btn, "pop", 500);
+
+  // expanding ring
+  const burst=document.createElement("span");
+  burst.className="burst";
+  btn.appendChild(burst);
+  setTimeout(()=>burst.remove(), 600);
+
+  // row flash
+  if(row){
+    replay(row, "done-flash", 750);
+    row.classList.add("is-done");
+    // floating counter
+    const f=document.createElement("span");
+    f.className="set-float";
+    f.textContent = setNum + "/" + totalSets;
+    row.style.position="relative";
+    row.appendChild(f);
+    setTimeout(()=>f.remove(), 950);
+  }
+
+  if(navigator.vibrate) navigator.vibrate(18);
+  chirp(660, 0.06, 0.05);
+}
+
+function animateSetUndone(btn, row){
+  if(row) row.classList.remove("is-done");
+}
+
+// short soft click for individual sets (distinct from the rest-timer chime)
+function chirp(freq, dur, vol){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(), g=ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.type="triangle"; osc.frequency.value=freq;
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(vol||0.06, ctx.currentTime+0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+(dur||0.08));
+    osc.start(); osc.stop(ctx.currentTime+(dur||0.08)+0.02);
+  }catch(e){}
+}
+
+// ── every set of an exercise is done ────────────────────────────────────
+function animateExerciseComplete(wrap, exName){
+  const row = wrap.closest(".ex-row");
+  if(!row) return;
+  replay(row, "ex-complete", 900);
+
+  const sweep=document.createElement("div");
+  sweep.className="ex-sweep";
+  row.appendChild(sweep);
+  setTimeout(()=>sweep.remove(), 900);
+
+  const chk=row.querySelector(".ex-chk");
+  if(chk) replay(chk, "celebrate", 700);
+
+  // one-off banner
+  if(!row.querySelector(".ex-done-banner")){
+    const b=document.createElement("div");
+    b.className="ex-done-banner";
+    b.textContent="✓  "+(exName||"Exercise")+" complete";
+    row.appendChild(b);
+    setTimeout(()=>{
+      b.style.transition="opacity .4s, height .4s";
+      b.style.opacity="0";
+      setTimeout(()=>b.remove(), 420);
+    }, 1600);
+  }
+
+  if(navigator.vibrate) navigator.vibrate([25,40,25]);
+  chirp(880, 0.12, 0.09);
+  setTimeout(()=>chirp(1180, 0.14, 0.08), 90);
+}
+
+// ── the whole day is done ───────────────────────────────────────────────
+let dayCelebrated = {};   // avoid firing twice for the same day/week
+
+function fireConfetti(n){
+  const wrap=document.createElement("div");
+  wrap.className="confetti";
+  const colors=["#10b981","#34d399","#fbbf24","#60a5fa","#a78bfa","#ffffff"];
+  for(let i=0;i<n;i++){
+    const p=document.createElement("i");
+    p.style.left=Math.random()*100+"vw";
+    p.style.background=colors[(Math.random()*colors.length)|0];
+    p.style.animationDuration=(1.6+Math.random()*1.4)+"s";
+    p.style.animationDelay=(Math.random()*0.35)+"s";
+    p.style.transform="rotate("+(Math.random()*360)+"deg)";
+    p.style.opacity=String(0.7+Math.random()*0.3);
+    wrap.appendChild(p);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(()=>wrap.remove(), 3400);
+}
+
+function animateDayComplete(day, elapsedSecs){
+  const key = "w"+week+"-"+day.key;
+  if(dayCelebrated[key]) return;
+  dayCelebrated[key]=true;
+
+  const ov=document.createElement("div");
+  ov.className="day-complete-overlay";
+  const mins = elapsedSecs ? Math.round(elapsedSecs/60) : null;
+  ov.innerHTML =
+    '<div class="dc-ring">✓</div>'+
+    '<div class="dc-title">'+day.label+' complete</div>'+
+    '<div class="dc-sub">'+
+      day.exs.length+' exercises'+(mins!=null? '  ·  '+mins+' min':'')+
+    '</div>';
+  document.body.appendChild(ov);
+  fireConfetti(40);
+
+  if(navigator.vibrate) navigator.vibrate([40,60,40,60,90]);
+  [0,120,260].forEach((d,i)=>setTimeout(()=>chirp([784,988,1319][i],0.22,0.10), d));
+
+  const close=()=>{
+    ov.classList.add("out");
+    setTimeout(()=>ov.remove(), 380);
+  };
+  ov.addEventListener("click", close);
+  setTimeout(close, 2600);
+}
 
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
