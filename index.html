@@ -963,6 +963,98 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .toggle .knob{position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;
   background:var(--mute);transition:all .2s}
 .toggle.on .knob{left:22px;background:var(--ph)}
+
+/* ═══ PROGRESS TAB — COLOR & MOTION ═══ */
+
+/* staggered card reveal */
+#tab-progress.on .psum-grid,
+#tab-progress.on .pcard{
+  animation:pcardIn .45s cubic-bezier(.25,.8,.3,1) both;
+}
+#tab-progress.on .psum-grid{animation-delay:.02s}
+#tab-progress.on .pcard:nth-of-type(1){animation-delay:.07s}
+#tab-progress.on .pcard:nth-of-type(2){animation-delay:.13s}
+#tab-progress.on .pcard:nth-of-type(3){animation-delay:.19s}
+#tab-progress.on .pcard:nth-of-type(4){animation-delay:.25s}
+#tab-progress.on .pcard:nth-of-type(5){animation-delay:.31s}
+@keyframes pcardIn{
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:none}
+}
+
+/* summary cards — colour-coded by metric, subtle gradient */
+.psum{position:relative;overflow:hidden;transition:transform .15s,border-color .2s}
+.psum:active{transform:scale(.98)}
+.psum::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--sub);opacity:.85;
+}
+.psum::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 90% at 0% 0%, currentColor 0%, transparent 62%);
+  opacity:.06;
+}
+.psum.c-loss  {color:#10b981}
+.psum.c-rate  {color:#3b82f6}
+.psum.c-weeks {color:#a78bfa}
+.psum.c-sess  {color:#f59f00}
+.psum.c-pr    {color:#fbbf24}
+.psum.c-logs  {color:#38bdf8}
+.psum.c-loss::before {background:#10b981}
+.psum.c-rate::before {background:#3b82f6}
+.psum.c-weeks::before{background:#a78bfa}
+.psum.c-sess::before {background:#f59f00}
+.psum.c-pr::before   {background:#fbbf24}
+.psum.c-logs::before {background:#38bdf8}
+.psum .psum-val{color:currentColor}
+.psum.warn{color:#f59f00}
+.psum.warn::before{background:#f59f00}
+.psum-lbl{position:relative;z-index:1}
+.psum-val{position:relative;z-index:1}
+.psum-sub{position:relative;z-index:1}
+
+/* card headers get a coloured accent dot */
+.pcard-title{display:flex;align-items:center;gap:7px}
+.pcard-title::before{
+  content:"";width:6px;height:6px;border-radius:50%;
+  background:var(--accent,var(--ph));flex-shrink:0;
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent,var(--ph)) 22%, transparent);
+}
+.pcard.acc-weight  {--accent:#10b981}
+.pcard.acc-strength{--accent:#3b82f6}
+.pcard.acc-volume  {--accent:#a78bfa}
+.pcard.acc-heat    {--accent:#f59f00}
+.pcard.acc-pr      {--accent:#fbbf24}
+.pcard{border-top:1px solid var(--border);position:relative;overflow:hidden}
+.pcard::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent,var(--ph)),transparent 70%);
+  opacity:.55;
+}
+
+/* lift chips — colour when active */
+.lift-chip{transition:all .18s}
+.lift-chip.on{background:#0d2440;border-color:#3b82f6;color:#60a5fa}
+
+/* heatmap cells fade in with a stagger */
+.heat-cell{transition:transform .15s}
+#tab-progress.on .heat-cell{animation:heatIn .3s both cubic-bezier(.3,.9,.4,1)}
+@keyframes heatIn{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+.heat-cell.lv1{background:#0d4a34}
+.heat-cell.lv2{background:#0f8a5f}
+.heat-cell.lv3{background:#10b981;box-shadow:0 0 6px rgba(16,185,129,.45)}
+
+/* PR rows slide in and get coloured rank dots */
+#tab-progress.on .pr-item{animation:prIn .38s both cubic-bezier(.25,.8,.3,1)}
+@keyframes prIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+.pr-item:nth-child(1) .pr-dot{background:#fbbf24;box-shadow:0 0 0 3px rgba(251,191,36,.16)}
+.pr-item:nth-child(2) .pr-dot{background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.16)}
+.pr-val{background:linear-gradient(180deg,#fff,#9ae6c4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pr-item:nth-child(n+3) .pr-val{background:none;-webkit-text-fill-color:var(--ph)}
+
+/* legend swatches */
+.pchart-legend i.lg-line{background:linear-gradient(90deg,#10b981,#34d399)}
+
 </style>
 </head>
 <body class="cut">
@@ -1187,7 +1279,7 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       <div class="psum-grid" id="psum-grid"></div>
 
       <!-- WEIGHT CHART -->
-      <div class="pcard">
+      <div class="pcard acc-weight">
         <div class="pcard-hdr">
           <span class="pcard-title">Weight vs Target Band</span>
           <span class="pcard-sub" id="pw-sub"></span>
@@ -1200,7 +1292,7 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       </div>
 
       <!-- e1RM PROGRESSION -->
-      <div class="pcard">
+      <div class="pcard acc-strength">
         <div class="pcard-hdr">
           <span class="pcard-title">Strength Progression</span>
           <span class="pcard-sub" id="pe-sub"></span>
@@ -1211,7 +1303,7 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       </div>
 
       <!-- VOLUME TREND -->
-      <div class="pcard">
+      <div class="pcard acc-volume">
         <div class="pcard-hdr">
           <span class="pcard-title">Weekly Volume</span>
           <span class="pcard-sub" id="pv-sub"></span>
@@ -1221,7 +1313,7 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       </div>
 
       <!-- CONSISTENCY HEATMAP -->
-      <div class="pcard">
+      <div class="pcard acc-heat">
         <div class="pcard-hdr">
           <span class="pcard-title">Consistency</span>
           <span class="pcard-sub" id="ph-sub"></span>
@@ -1240,7 +1332,7 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
       </div>
 
       <!-- PR TIMELINE -->
-      <div class="pcard">
+      <div class="pcard acc-pr">
         <div class="pcard-hdr">
           <span class="pcard-title">Personal Records</span>
           <span class="pcard-sub" id="ppr-sub"></span>
@@ -3514,6 +3606,22 @@ document.getElementById("import-file").addEventListener("change", (e) => {
 // ═══════════════════════════════════════════════════════════════════════
 let peLift = null;   // selected lift for the e1RM chart
 
+
+// ── drives a 0→1 progress value for animated chart drawing ──────────────
+function animateDraw(key, duration, drawFn){
+  if(!window._drawRAF) window._drawRAF={};
+  if(window._drawRAF[key]) cancelAnimationFrame(window._drawRAF[key]);
+  const start=performance.now();
+  function frame(now){
+    const p=Math.min((now-start)/duration,1);
+    const ease=1-Math.pow(1-p,3);
+    drawFn(ease);
+    if(p<1) window._drawRAF[key]=requestAnimationFrame(frame);
+    else window._drawRAF[key]=null;
+  }
+  window._drawRAF[key]=requestAnimationFrame(frame);
+}
+
 function hiDPI(canvas, cssH){
   const W = canvas.parentElement.clientWidth || 320;
   const H = cssH;
@@ -3560,12 +3668,12 @@ function renderPSummary(){
   const prs = computePRs();
 
   const cards = [
-    {lbl: phase==="bulk"?"Total Gained":"Total Lost", val: change.toFixed(1), sub:"lb", cls: change>0?"good":""},
-    {lbl:"Avg Rate", val: rate.toFixed(2), sub:"lb / week", cls: rateOk?"good":"warn"},
-    {lbl:"Weeks In", val: String(weeksIn), sub:"of "+Math.round((plan.phase_length||60)/7), cls:""},
-    {lbl:"Sessions", val: String(sessions), sub:"completed", cls:"good"},
-    {lbl:"PRs Hit", val: String(prs.length), sub:"this phase", cls: prs.length?"good":""},
-    {lbl:"Weigh-ins", val: String(weighins.length), sub:"logged", cls:""},
+    {lbl: phase==="bulk"?"Total Gained":"Total Lost", val: change.toFixed(1), sub:"lb", cls:"c-loss"},
+    {lbl:"Avg Rate", val: rate.toFixed(2), sub:"lb / week", cls: rateOk?"c-rate":"warn"},
+    {lbl:"Weeks In", val: String(weeksIn), sub:"of "+Math.round((plan.phase_length||60)/7), cls:"c-weeks"},
+    {lbl:"Sessions", val: String(sessions), sub:"completed", cls:"c-sess"},
+    {lbl:"PRs Hit", val: String(prs.length), sub:"this phase", cls:"c-pr"},
+    {lbl:"Weigh-ins", val: String(weighins.length), sub:"logged", cls:"c-logs"},
   ];
 
   host.innerHTML = cards.map(c=>
@@ -3591,7 +3699,6 @@ function renderPWeightChart(){
     return;
   }
 
-  const {ctx,W,H} = hiDPI(canvas,150);
   const pad = {l:34, r:10, t:12, b:20};
   const t0 = new Date(sorted[0].d).getTime();
   const tEnd = new Date(sorted[sorted.length-1].d).getTime();
@@ -3600,8 +3707,6 @@ function renderPWeightChart(){
   const sw = (plan.start_weight!=null && !isNaN(plan.start_weight)) ? +plan.start_weight : +sorted[0].w;
   const phase = plan.phase || "cut";
   const dir = phase==="bulk" ? 1 : -1;
-
-  // band bounds at 0.5%/wk and 1%/wk from start
   const bandAt = (t, pct) => sw + dir * (sw*pct) * ((t-t0)/(864e5*7));
   const vals = sorted.map(p=>+p.w);
   const bandVals = [];
@@ -3610,54 +3715,82 @@ function renderPWeightChart(){
   let mn=Math.min(...all), mx=Math.max(...all);
   const padY=(mx-mn)*0.12||1; mn-=padY; mx+=padY;
 
-  const X = t => pad.l + ((t-t0)/span)*(W-pad.l-pad.r);
-  const Y = v => pad.t + ((mx-v)/(mx-mn))*(H-pad.t-pad.b);
+  animateDraw("weight", 900, (prog)=>{
+    const {ctx,W,H} = hiDPI(canvas,150);
+    const X = t => pad.l + ((t-t0)/span)*(W-pad.l-pad.r);
+    const Y = v => pad.t + ((mx-v)/(mx-mn))*(H-pad.t-pad.b);
 
-  // band polygon
-  ctx.beginPath();
-  ctx.moveTo(X(t0), Y(bandAt(t0,0.005)));
-  ctx.lineTo(X(tEnd), Y(bandAt(tEnd,0.005)));
-  ctx.lineTo(X(tEnd), Y(bandAt(tEnd,0.01)));
-  ctx.lineTo(X(t0), Y(bandAt(t0,0.01)));
-  ctx.closePath();
-  ctx.fillStyle="rgba(255,255,255,.07)";
-  ctx.fill();
+    // target band with a soft gradient
+    const bg=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
+    bg.addColorStop(0,"rgba(16,185,129,.10)");
+    bg.addColorStop(1,"rgba(16,185,129,.03)");
+    ctx.beginPath();
+    ctx.moveTo(X(t0), Y(bandAt(t0,0.005)));
+    ctx.lineTo(X(tEnd), Y(bandAt(tEnd,0.005)));
+    ctx.lineTo(X(tEnd), Y(bandAt(tEnd,0.01)));
+    ctx.lineTo(X(t0), Y(bandAt(t0,0.01)));
+    ctx.closePath();
+    ctx.fillStyle=bg; ctx.fill();
+    ctx.strokeStyle="rgba(16,185,129,.22)"; ctx.lineWidth=1; ctx.stroke();
 
-  // y gridlines
-  ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.lineWidth=1;
-  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
-  for(let i=0;i<=3;i++){
-    const v = mn + (mx-mn)*(i/3);
-    const y = Y(v);
-    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
-    ctx.fillText(v.toFixed(0), pad.l-6, y+3);
-  }
-
-  // weight line
-  ctx.beginPath();
-  sorted.forEach((p,i)=>{
-    const x=X(new Date(p.d).getTime()), y=Y(+p.w);
-    if(i===0) ctx.moveTo(x,y);
-    else{
-      const px=X(new Date(sorted[i-1].d).getTime()), py=Y(+sorted[i-1].w);
-      const cx=(px+x)/2;
-      ctx.bezierCurveTo(cx,py,cx,y,x,y);
+    // gridlines
+    ctx.strokeStyle="rgba(255,255,255,.05)"; ctx.lineWidth=1;
+    ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
+    for(let i=0;i<=3;i++){
+      const v = mn + (mx-mn)*(i/3), y = Y(v);
+      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+      ctx.fillText(v.toFixed(0), pad.l-6, y+3);
     }
-  });
-  ctx.strokeStyle="#10b981"; ctx.lineWidth=2.2; ctx.lineJoin="round"; ctx.stroke();
 
-  // dots
-  sorted.forEach((p,i)=>{
-    const x=X(new Date(p.d).getTime()), y=Y(+p.w);
-    ctx.beginPath(); ctx.arc(x,y,i===sorted.length-1?3.5:2.4,0,Math.PI*2);
-    ctx.fillStyle=i===sorted.length-1?"#fff":"#10b981"; ctx.fill();
-    if(i===sorted.length-1){ ctx.strokeStyle="#10b981"; ctx.lineWidth=2; ctx.stroke(); }
-  });
+    // how many points to reveal
+    const shown = Math.max(2, Math.ceil(sorted.length*prog));
+    const pts = sorted.slice(0, shown);
 
-  // x labels
-  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif";
-  ctx.textAlign="left";  ctx.fillText(sorted[0].d.slice(5).replace("-","/"), pad.l, H-6);
-  ctx.textAlign="right"; ctx.fillText(sorted[sorted.length-1].d.slice(5).replace("-","/"), W-pad.r, H-6);
+    // area fill under the line
+    const ag=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
+    ag.addColorStop(0,"rgba(52,211,153,.28)");
+    ag.addColorStop(1,"rgba(52,211,153,0)");
+    ctx.beginPath();
+    pts.forEach((p,i)=>{
+      const x=X(new Date(p.d).getTime()), y=Y(+p.w);
+      if(i===0) ctx.moveTo(x,y);
+      else{
+        const px=X(new Date(pts[i-1].d).getTime()), py=Y(+pts[i-1].w);
+        const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y);
+      }
+    });
+    ctx.lineTo(X(new Date(pts[pts.length-1].d).getTime()), H-pad.b);
+    ctx.lineTo(X(t0), H-pad.b); ctx.closePath();
+    ctx.fillStyle=ag; ctx.fill();
+
+    // the line itself, gradient stroke
+    const lg=ctx.createLinearGradient(pad.l,0,W-pad.r,0);
+    lg.addColorStop(0,"#059669"); lg.addColorStop(1,"#34d399");
+    ctx.beginPath();
+    pts.forEach((p,i)=>{
+      const x=X(new Date(p.d).getTime()), y=Y(+p.w);
+      if(i===0) ctx.moveTo(x,y);
+      else{
+        const px=X(new Date(pts[i-1].d).getTime()), py=Y(+pts[i-1].w);
+        const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y);
+      }
+    });
+    ctx.strokeStyle=lg; ctx.lineWidth=2.4; ctx.lineJoin="round"; ctx.lineCap="round"; ctx.stroke();
+
+    // dots
+    pts.forEach((p,i)=>{
+      const x=X(new Date(p.d).getTime()), y=Y(+p.w);
+      const isLast = i===pts.length-1 && prog>=1;
+      ctx.beginPath(); ctx.arc(x,y,isLast?4:2.2,0,Math.PI*2);
+      ctx.fillStyle=isLast?"#fff":"#34d399"; ctx.fill();
+      if(isLast){ ctx.strokeStyle="#10b981"; ctx.lineWidth=2.5; ctx.stroke(); }
+    });
+
+    // x labels
+    ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif";
+    ctx.textAlign="left";  ctx.fillText(sorted[0].d.slice(5).replace("-","/"), pad.l, H-6);
+    ctx.textAlign="right"; ctx.fillText(sorted[sorted.length-1].d.slice(5).replace("-","/"), W-pad.r, H-6);
+  });
 
   const diff = vals[vals.length-1]-vals[0];
   if(sub){
@@ -3701,7 +3834,6 @@ function renderPStrength(){
   }
   canvas.style.display="block"; empty.style.display="none";
 
-  const {ctx,W,H} = hiDPI(canvas,140);
   const pad={l:34,r:10,t:12,b:20};
   const t0=new Date(pts[0].d).getTime(), tE=new Date(pts[pts.length-1].d).getTime();
   const span=Math.max(tE-t0,864e5);
@@ -3710,64 +3842,67 @@ function renderPStrength(){
   let mn=Math.min(...es), mx=Math.max(...es);
   if(goal){ mx=Math.max(mx,goal); }
   const padY=(mx-mn)*0.15||5; mn-=padY; mx+=padY;
-  const X=t=>pad.l+((t-t0)/span)*(W-pad.l-pad.r);
-  const Y=v=>pad.t+((mx-v)/(mx-mn))*(H-pad.t-pad.b);
 
-  // gridlines
-  ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.lineWidth=1;
-  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
-  for(let i=0;i<=3;i++){
-    const v=mn+(mx-mn)*(i/3), y=Y(v);
-    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
-    ctx.fillText(v.toFixed(0), pad.l-6, y+3);
-  }
+  animateDraw("strength", 850, (prog)=>{
+    const {ctx,W,H} = hiDPI(canvas,140);
+    const X=t=>pad.l+((t-t0)/span)*(W-pad.l-pad.r);
+    const Y=v=>pad.t+((mx-v)/(mx-mn))*(H-pad.t-pad.b);
 
-  // goal line
-  if(goal && goal>=mn && goal<=mx){
-    ctx.save(); ctx.setLineDash([4,4]);
-    ctx.beginPath(); ctx.moveTo(pad.l,Y(goal)); ctx.lineTo(W-pad.r,Y(goal));
-    ctx.strokeStyle="#f59f00"; ctx.lineWidth=1.5; ctx.stroke(); ctx.restore();
-    ctx.fillStyle="#f59f00"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="left";
-    ctx.fillText("goal", pad.l+3, Y(goal)-4);
-  }
-
-  // area + line
-  const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
-  grad.addColorStop(0,"rgba(16,185,129,.22)"); grad.addColorStop(1,"rgba(16,185,129,0)");
-  ctx.beginPath();
-  pts.forEach((p,i)=>{
-    const x=X(new Date(p.d).getTime()), y=Y(p.e);
-    if(i===0) ctx.moveTo(x,y);
-    else{
-      const px=X(new Date(pts[i-1].d).getTime()), py=Y(pts[i-1].e);
-      const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y);
+    ctx.strokeStyle="rgba(255,255,255,.05)"; ctx.lineWidth=1;
+    ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
+    for(let i=0;i<=3;i++){
+      const v=mn+(mx-mn)*(i/3), y=Y(v);
+      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+      ctx.fillText(v.toFixed(0), pad.l-6, y+3);
     }
-  });
-  const lastX=X(new Date(pts[pts.length-1].d).getTime());
-  ctx.lineTo(lastX,H-pad.b); ctx.lineTo(X(t0),H-pad.b); ctx.closePath();
-  ctx.fillStyle=grad; ctx.fill();
 
-  ctx.beginPath();
-  pts.forEach((p,i)=>{
-    const x=X(new Date(p.d).getTime()), y=Y(p.e);
-    if(i===0) ctx.moveTo(x,y);
-    else{
-      const px=X(new Date(pts[i-1].d).getTime()), py=Y(pts[i-1].e);
-      const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y);
+    if(goal && goal>=mn && goal<=mx){
+      ctx.save(); ctx.setLineDash([5,4]);
+      ctx.beginPath(); ctx.moveTo(pad.l,Y(goal)); ctx.lineTo(W-pad.r,Y(goal));
+      ctx.strokeStyle="rgba(245,159,0,.75)"; ctx.lineWidth=1.5; ctx.stroke(); ctx.restore();
+      ctx.fillStyle="#f59f00"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="left";
+      ctx.fillText("goal "+goal, pad.l+4, Y(goal)-5);
     }
-  });
-  ctx.strokeStyle="#10b981"; ctx.lineWidth=2.2; ctx.lineJoin="round"; ctx.stroke();
 
-  pts.forEach((p,i)=>{
-    const x=X(new Date(p.d).getTime()), y=Y(p.e);
-    ctx.beginPath(); ctx.arc(x,y,i===pts.length-1?3.5:2.4,0,Math.PI*2);
-    ctx.fillStyle=i===pts.length-1?"#fff":"#10b981"; ctx.fill();
-    if(i===pts.length-1){ctx.strokeStyle="#10b981";ctx.lineWidth=2;ctx.stroke();}
-  });
+    const shown=Math.max(2, Math.ceil(pts.length*prog));
+    const p2=pts.slice(0,shown);
 
-  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif";
-  ctx.textAlign="left";  ctx.fillText(pts[0].d.slice(5).replace("-","/"), pad.l, H-6);
-  ctx.textAlign="right"; ctx.fillText(pts[pts.length-1].d.slice(5).replace("-","/"), W-pad.r, H-6);
+    const ag=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
+    ag.addColorStop(0,"rgba(59,130,246,.30)");
+    ag.addColorStop(1,"rgba(59,130,246,0)");
+    ctx.beginPath();
+    p2.forEach((p,i)=>{
+      const x=X(new Date(p.d).getTime()), y=Y(p.e);
+      if(i===0) ctx.moveTo(x,y);
+      else{ const px=X(new Date(p2[i-1].d).getTime()), py=Y(p2[i-1].e);
+        const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y); }
+    });
+    ctx.lineTo(X(new Date(p2[p2.length-1].d).getTime()),H-pad.b);
+    ctx.lineTo(X(t0),H-pad.b); ctx.closePath(); ctx.fillStyle=ag; ctx.fill();
+
+    const lg=ctx.createLinearGradient(pad.l,0,W-pad.r,0);
+    lg.addColorStop(0,"#2563eb"); lg.addColorStop(1,"#60a5fa");
+    ctx.beginPath();
+    p2.forEach((p,i)=>{
+      const x=X(new Date(p.d).getTime()), y=Y(p.e);
+      if(i===0) ctx.moveTo(x,y);
+      else{ const px=X(new Date(p2[i-1].d).getTime()), py=Y(p2[i-1].e);
+        const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y); }
+    });
+    ctx.strokeStyle=lg; ctx.lineWidth=2.4; ctx.lineJoin="round"; ctx.lineCap="round"; ctx.stroke();
+
+    p2.forEach((p,i)=>{
+      const x=X(new Date(p.d).getTime()), y=Y(p.e);
+      const isLast=i===p2.length-1 && prog>=1;
+      ctx.beginPath(); ctx.arc(x,y,isLast?4:2.2,0,Math.PI*2);
+      ctx.fillStyle=isLast?"#fff":"#60a5fa"; ctx.fill();
+      if(isLast){ctx.strokeStyle="#3b82f6";ctx.lineWidth=2.5;ctx.stroke();}
+    });
+
+    ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif";
+    ctx.textAlign="left";  ctx.fillText(pts[0].d.slice(5).replace("-","/"), pad.l, H-6);
+    ctx.textAlign="right"; ctx.fillText(pts[pts.length-1].d.slice(5).replace("-","/"), W-pad.r, H-6);
+  });
 
   const delta = es[es.length-1]-es[0];
   if(sub){
@@ -3812,34 +3947,45 @@ function renderPVolume(){
   const series = [];
   for(let i=1;i<=maxWk;i++) series.push({wk:i, v:byWeek[i]||0});
 
-  const {ctx,W,H}=hiDPI(canvas,120);
   const pad={l:38,r:8,t:10,b:18};
   const mx=Math.max(...series.map(s=>s.v),1);
-  const bw=(W-pad.l-pad.r)/series.length;
 
-  // gridlines
-  ctx.strokeStyle="rgba(255,255,255,.06)"; ctx.lineWidth=1;
-  ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
-  for(let i=0;i<=2;i++){
-    const v=mx*(i/2), y=pad.t+((mx-v)/mx)*(H-pad.t-pad.b);
-    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
-    ctx.fillText(v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0), pad.l-5, y+3);
-  }
+  animateDraw("volume", 800, (prog)=>{
+    const {ctx,W,H}=hiDPI(canvas,120);
+    const bw=(W-pad.l-pad.r)/series.length;
 
-  series.forEach((s,i)=>{
-    const h=(s.v/mx)*(H-pad.t-pad.b);
-    const x=pad.l+i*bw+bw*0.18, y=H-pad.b-h, wpx=bw*0.64;
-    ctx.fillStyle = s.wk===week ? "#10b981" : "rgba(16,185,129,.42)";
-    const r=Math.min(3,wpx/2);
-    ctx.beginPath();
-    ctx.moveTo(x,y+h); ctx.lineTo(x,y+r);
-    ctx.quadraticCurveTo(x,y,x+r,y);
-    ctx.lineTo(x+wpx-r,y); ctx.quadraticCurveTo(x+wpx,y,x+wpx,y+r);
-    ctx.lineTo(x+wpx,y+h); ctx.closePath(); ctx.fill();
-    if(series.length<=12){
-      ctx.fillStyle="#5a6380"; ctx.font="8px -apple-system,sans-serif"; ctx.textAlign="center";
-      ctx.fillText("W"+s.wk, x+wpx/2, H-5);
+    ctx.strokeStyle="rgba(255,255,255,.05)"; ctx.lineWidth=1;
+    ctx.fillStyle="#5a6380"; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
+    for(let i=0;i<=2;i++){
+      const v=mx*(i/2), y=pad.t+((mx-v)/mx)*(H-pad.t-pad.b);
+      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+      ctx.fillText(v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0), pad.l-5, y+3);
     }
+
+    series.forEach((s,i)=>{
+      // each bar starts slightly after the previous one
+      const delay=i/Math.max(series.length,1)*0.35;
+      const local=Math.max(0, Math.min(1,(prog-delay)/(1-delay||1)));
+      const h=(s.v/mx)*(H-pad.t-pad.b)*local;
+      if(h<=0) return;
+      const x=pad.l+i*bw+bw*0.18, y=H-pad.b-h, wpx=bw*0.64;
+      const g=ctx.createLinearGradient(0,y,0,H-pad.b);
+      if(s.wk===week){ g.addColorStop(0,"#c4b5fd"); g.addColorStop(1,"#7c3aed"); }
+      else { g.addColorStop(0,"rgba(167,139,250,.75)"); g.addColorStop(1,"rgba(124,58,237,.35)"); }
+      ctx.fillStyle=g;
+      const r=Math.min(3,wpx/2);
+      ctx.beginPath();
+      ctx.moveTo(x,y+h); ctx.lineTo(x,y+r);
+      ctx.quadraticCurveTo(x,y,x+r,y);
+      ctx.lineTo(x+wpx-r,y); ctx.quadraticCurveTo(x+wpx,y,x+wpx,y+r);
+      ctx.lineTo(x+wpx,y+h); ctx.closePath(); ctx.fill();
+      if(series.length<=12){
+        ctx.fillStyle=s.wk===week?"#c4b5fd":"#5a6380";
+        ctx.font=(s.wk===week?"bold ":"")+"8px -apple-system,sans-serif";
+        ctx.textAlign="center";
+        ctx.fillText("W"+s.wk, x+wpx/2, H-5);
+      }
+    });
   });
 
   const total=series.reduce((a,s)=>a+s.v,0);
@@ -3886,6 +4032,7 @@ function renderPHeatmap(){
       const lv = isFuture ? "future" : n===0 ? "lv0" : n<=1 ? "lv1" : n<=4 ? "lv2" : "lv3";
       cell.className="heat-cell "+lv;
       cell.title=key+(n?" · "+n+" logged":"");
+      cell.style.animationDelay=((wkI*7+dI)*0.006)+"s";
       grid.appendChild(cell);
     }
   }
@@ -3919,8 +4066,8 @@ function renderPPRs(){
     host.innerHTML='<div class="pchart-empty">No PRs yet. Beat a logged lift to set one.</div>';
     return;
   }
-  host.innerHTML = prs.slice(0,12).map(p=>
-    '<div class="pr-item"><div class="pr-dot"></div>'+
+  host.innerHTML = prs.slice(0,12).map((p,i)=>
+    '<div class="pr-item" style="animation-delay:'+(i*0.05)+'s"><div class="pr-dot"></div>'+
     '<div class="pr-body"><div class="pr-lift">'+p.name+'</div>'+
     '<div class="pr-detail">'+p.d.slice(5).replace("-","/")+' · '+p.w+' × '+p.r+'</div></div>'+
     '<div><div class="pr-val">'+p.e.toFixed(1)+'</div>'+
@@ -3930,6 +4077,13 @@ function renderPPRs(){
 
 // ── master render ───────────────────────────────────────────────────────
 function renderProgress(){
+  // restart the entrance animations
+  const page=document.getElementById("tab-progress");
+  if(page){
+    page.querySelectorAll(".pcard, .psum-grid").forEach(el=>{
+      el.style.animation="none"; void el.offsetWidth; el.style.animation="";
+    });
+  }
   renderPSummary();
   renderPWeightChart();
   renderPStrength();
