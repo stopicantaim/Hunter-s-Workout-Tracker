@@ -867,6 +867,61 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 .pr-detail{font-size:11px;color:var(--sub);margin-top:1px}
 .pr-val{font-size:14px;font-weight:900;color:var(--ph);font-variant-numeric:tabular-nums;text-align:right;flex-shrink:0}
 .pr-gain{font-size:10px;color:var(--sub);text-align:right}
+
+/* ── last time / suggestion hint ── */
+.set-hint{display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:6px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:6px;flex-wrap:wrap}
+.hint-last{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.hint-sug{font-size:10px;font-weight:800;color:var(--sub);
+  background:var(--bg);border:1px solid var(--border2);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.hint-sug.up{color:var(--ph);border-color:var(--ph-border);background:var(--ph-bg)}
+
+/* ── suggestion tones ── */
+.hint-sug.up{color:var(--ph);border-color:var(--ph-border);background:var(--ph-bg)}
+.hint-sug.hold{color:var(--sub)}
+.hint-sug.down{color:#ef4444;border-color:#7c0505;background:#1c0505}
+.hint-sug.deload{color:#a78bfa;border-color:#3b2a6b;background:#150e2e}
+.hint-sug.new{color:var(--sub)}
+
+/* ── exercise status chips ── */
+.ex-chips{display:flex;gap:5px;flex-wrap:wrap;padding:0 2px 8px}
+.ex-chip{font-size:9px;font-weight:800;letter-spacing:.03em;padding:2px 7px;border-radius:99px;
+  background:var(--bg);border:1px solid var(--border2);color:var(--sub)}
+.ex-chip.range{color:var(--sub)}
+.ex-chip.up{color:var(--ph);border-color:var(--ph-border);background:var(--ph-bg)}
+.ex-chip.down{color:#f59f00;border-color:#5c3d00;background:#1c1200}
+.ex-chip.stall{color:#ef4444;border-color:#7c0505;background:#1c0505}
+.ex-chip.deload{color:#a78bfa;border-color:#3b2a6b;background:#150e2e}
+
+/* ── RPE tap row ── */
+.rpe-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:8px 2px 2px;
+  border-top:1px solid var(--border);margin-top:6px}
+.rpe-lbl{font-size:10px;font-weight:700;color:var(--sub);margin-right:2px}
+.rpe-btn{flex:1;min-width:52px;background:var(--bg);border:1px solid var(--border2);border-radius:7px;
+  color:var(--sub);font-size:10px;font-weight:800;padding:6px 4px;cursor:pointer;
+  text-transform:capitalize;transition:all .15s}
+.rpe-btn:active{transform:scale(.95)}
+.rpe-btn.on.easy{background:var(--ph-bg);border-color:var(--ph);color:var(--ph)}
+.rpe-btn.on.right{background:#071428;border-color:#3b82f6;color:#60a5fa}
+.rpe-btn.on.hard{background:#1c1200;border-color:#7c5300;color:#f59f00}
+.rpe-btn.on.failed{background:#1c0505;border-color:#7c0505;color:#ef4444}
+
+/* ── set tag button ── */
+.set-row{grid-template-columns:24px 1fr 1fr 32px 36px !important}
+.set-hdr{grid-template-columns:24px 1fr 1fr 32px 36px !important}
+.set-tag-btn{
+  width:30px;height:34px;border-radius:7px;
+  border:1px solid var(--border2);background:var(--bg);
+  color:var(--mute);font-size:11px;font-weight:900;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.set-tag-btn:active{transform:scale(.9)}
+.set-tag-btn.F{background:#1c0505;border-color:#7c0505;color:#ef4444}
+.set-tag-btn.D{background:#150e2e;border-color:#3b2a6b;color:#a78bfa}
+.set-tag-btn.W{background:#0d1626;border-color:#1e3a5f;color:#60a5fa}
+.ex-chip.fail{color:#ef4444;border-color:#7c0505;background:#1c0505}
+.ex-chip.drop{color:#a78bfa;border-color:#3b2a6b;background:#150e2e}
 </style>
 </head>
 <body class="cut">
@@ -1851,6 +1906,9 @@ function loadDataLocal(){
   setLogs = lsGet("setLogs") || {};
   friends = lsGet("friends") || [];
   dayExtras = lsGet("dayExtras") || {};
+  exHistory  = lsGet("exHistory")  || {};
+  exSessions = lsGet("exSessions") || {};
+  exRPE      = lsGet("exRPE")      || {};
 
   // first run: write the defaults down so they become real saved data
   if (!DB.data.plan) {
@@ -1859,6 +1917,7 @@ function loadDataLocal(){
     DB.data.goals = goalMap;     DB.data.checks = checks;
     DB.data.nutlog = nutlog;     DB.data.setLogs = setLogs;
     DB.data.friends = friends;   DB.data.dayExtras = dayExtras;
+    DB.data.exHistory = exHistory; DB.data.exSessions = exSessions; DB.data.exRPE = exRPE;
     dbFlush();
   }
 
@@ -1894,11 +1953,34 @@ document.querySelectorAll(".tab").forEach(b=>{
 
 // ── DASHBOARD ─────────────────────────────────────────
 function renderDash(){
-  const sw=plan.start_weight||null,gw=plan.goal_weight||null,phase=plan.phase||"cut";
-  if(!sw){document.getElementById("d-wt").textContent="—";document.getElementById("d-goal").textContent="—";document.getElementById("d-lost").textContent="Set your plan in Settings";document.getElementById("d-rate").textContent="";document.getElementById("d-pct").textContent="0%";document.getElementById("d-fill").style.width="0%";document.getElementById("d-ps").textContent="—";document.getElementById("d-pe").textContent="—";document.getElementById("d-band").textContent="—";}
+  const phase=plan.phase||"cut";
   applyPhase(phase);
-  if(!sw) return;
-  const sorted=[...weighins].sort((a,b)=>a.d.localeCompare(b.d));
+
+  const sortedW=[...weighins].sort((a,b)=>a.d.localeCompare(b.d));
+
+  // ── resolve anchors, falling back to logged data when the plan is incomplete ──
+  // (a plan migrated from an older build can have null start_weight/goal/date)
+  let sw = (plan.start_weight != null && !isNaN(plan.start_weight)) ? +plan.start_weight : null;
+  if (sw == null && sortedW.length) sw = +sortedW[0].w;
+
+  let gw = (plan.goal_weight != null && !isNaN(plan.goal_weight)) ? +plan.goal_weight : null;
+  if (gw == null && sw != null) {
+    gw = phase==="bulk" ? sw+8 : phase==="maintain" ? sw : sw-8;   // sensible placeholder
+  }
+
+  if (sw == null) {
+    // genuinely no data at all — prompt, but leave the rest of the dashboard alive
+    const set=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
+    set("d-wt","—"); set("d-goal","—"); set("d-lost","Log a weight to begin");
+    set("d-rate",""); set("d-pct","0%"); set("d-ps","—"); set("d-pe","—"); set("d-band","—");
+    const f=document.getElementById("d-fill"); if(f) f.style.width="0%";
+    renderStreaks(); renderSparkline(); updateDashSubtitles();
+    const badge=document.getElementById("day-badge");
+    if(badge) badge.textContent="Day 1 / "+(plan.phase_length||60);
+    return;
+  }
+
+  const sorted=sortedW;
   const latest=sorted.at(-1);
   const cur=latest?+latest.w:sw;
   animateNum(document.getElementById("d-wt"), cur, {decimals:1, suffix:" lb", duration:700});
@@ -1918,7 +2000,8 @@ function renderDash(){
   document.getElementById("d-pe").textContent=(+gw).toFixed(1)+" lb";
   const pill=document.getElementById("d-band");pill.className="band-pill";
   if(sorted.length>=2){const f=sorted[0],days=(new Date(latest.d)-new Date(f.d))/864e5;if(days>0){const pw=Math.abs(+f.w-cur)/(+f.w*(days/7));if(phase==="maintain"){if(pw<0.003)pill.textContent="stable";else if(pw<0.007){pill.textContent="slight drift";pill.classList.add("warn");}else{pill.textContent="drifting";pill.classList.add("bad");}}else if(phase==="cut"){if(pw<0.005){pill.textContent="slow";pill.classList.add("warn");}else if(pw>0.01){pill.textContent="fast!";pill.classList.add("bad");}else pill.textContent="on band";}else{if(pw<0.003){pill.textContent="slow bulk";pill.classList.add("warn");}else if(pw>0.015){pill.textContent="dirty bulk";pill.classList.add("bad");}else pill.textContent="clean bulk";}}}else pill.textContent="—";
-  const startD=new Date(plan.start_date||today()),now=new Date();startD.setHours(0,0,0,0);now.setHours(0,0,0,0);
+  const anchorDate = plan.start_date || (sorted.length ? sorted[0].d : today());
+  const startD=new Date(anchorDate),now=new Date();startD.setHours(0,0,0,0);now.setHours(0,0,0,0);
   const dayN=Math.max(1,Math.floor((now-startD)/864e5)+1);
   const len=plan.phase_length||60;
   document.getElementById("day-badge").textContent=`Day ${Math.min(dayN,len)} / ${len}`;
@@ -2059,13 +2142,57 @@ document.getElementById("lbf-save").addEventListener("click",()=>{
 
 // ── REST TIMER ────────────────────────────────────────
 function playDone(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[[880,0],[1100,0.18]].forEach(([freq,delay])=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="sine";osc.frequency.value=freq;gain.gain.setValueAtTime(0,ctx.currentTime+delay);gain.gain.linearRampToValueAtTime(0.35,ctx.currentTime+delay+0.01);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.5);osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.55);});}catch(e){}if(navigator.vibrate)navigator.vibrate([150,80,150]);}
-function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}if(activeBarWrap){activeBarWrap.classList.remove("active");activeBarWrap=null;}}
+// Timers are driven by wall-clock timestamps, not tick counting, so that
+// iOS suspending the page while you're in another app doesn't freeze them.
+let restEndsAt = null;      // ms epoch when the rest period finishes
+let restChimed = false;
+
+function stopTimer(){
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  // clear every active rest bar — one may be left over from a backgrounded session
+  document.querySelectorAll(".rest-bar-wrap.active").forEach(b=>b.classList.remove("active"));
+  activeBarWrap=null;
+  restEndsAt=null; restChimed=false;
+  lsSet("restTimer", null);
+}
+
+function paintRest(){
+  if(!activeBarWrap || restEndsAt==null) return;
+  const remain = Math.max(0, Math.round((restEndsAt - Date.now())/1000));
+  const timeEl = activeBarWrap.querySelector(".rest-bar-time");
+  const fillEl = activeBarWrap.querySelector(".rest-bar-fill");
+  if(!timeEl || !fillEl) return;
+  const m=Math.floor(remain/60), s=remain%60;
+  timeEl.textContent = m+":"+String(s).padStart(2,"0");
+  const low = remain<=10 && remain>0;
+  timeEl.className="rest-bar-time"+(low?" low":"");
+  if(low){ timeEl.classList.remove("tick"); void timeEl.offsetWidth; timeEl.classList.add("tick"); }
+  fillEl.style.width = ((remain/TOTAL_SECS)*100)+"%";
+  fillEl.className="rest-bar-fill"+(low?" low":"");
+
+  if(remain<=0){
+    if(!restChimed){ restChimed=true; playDone(); }
+    if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+    const bar=activeBarWrap;
+    setTimeout(()=>{ bar.classList.remove("active"); if(activeBarWrap===bar) activeBarWrap=null; },800);
+    restEndsAt=null;
+    lsSet("restTimer", null);
+  }
+}
+
 function startTimer(barWrap,setsDone,totalSets){
-  stopTimer();let secs=TOTAL_SECS;activeBarWrap=barWrap;barWrap.classList.add("active");
-  const timeEl=barWrap.querySelector(".rest-bar-time"),fillEl=barWrap.querySelector(".rest-bar-fill"),labelEl=barWrap.querySelector(".rest-bar-label");
-  labelEl.textContent=setsDone<totalSets?`Rest — Set ${setsDone+1} of ${totalSets} next`:"Last set done — rest up";
-  function tick(){const m=Math.floor(secs/60),s=secs%60;timeEl.textContent=`${m}:${s.toString().padStart(2,"0")}`;const low=secs<=10;timeEl.className="rest-bar-time"+(low?" low":"");fillEl.style.width=((secs/TOTAL_SECS)*100)+"%";fillEl.className="rest-bar-fill"+(low?" low":"");if(secs<=0){clearInterval(timerInterval);timerInterval=null;playDone();setTimeout(()=>{barWrap.classList.remove("active");activeBarWrap=null;},800);return;}secs--;}
-  tick();timerInterval=setInterval(tick,1000);if(navigator.vibrate)navigator.vibrate(40);
+  stopTimer();
+  activeBarWrap=barWrap; barWrap.classList.add("active");
+  restEndsAt = Date.now() + TOTAL_SECS*1000;
+  restChimed = false;
+  const labelEl=barWrap.querySelector(".rest-bar-label");
+  if(labelEl) labelEl.textContent = setsDone<totalSets
+    ? "Rest — Set "+(setsDone+1)+" of "+totalSets+" next"
+    : "Last set done — rest up";
+  lsSet("restTimer", {endsAt:restEndsAt, label:labelEl?labelEl.textContent:""});
+  paintRest();
+  timerInterval=setInterval(paintRest,250);
+  if(navigator.vibrate)navigator.vibrate(40);
 }
 
 // ── WORKOUT ───────────────────────────────────────────
@@ -2073,20 +2200,52 @@ function getSetCount(s){const m=s.match(/^(\d+)×/);return m?parseInt(m[1]):3;}
 function getDefaultReps(s){const m=s.match(/×(\d+)/);return m?parseInt(m[1]):8;}
 
 function renderSetLogger(ex,ck){
-  const numSets=getSetCount(ex.s),defReps=getDefaultReps(ex.s),defWt=0;
+  const numSets=getSetCount(ex.s),defReps=getDefaultReps(ex.s);
+  const sug = suggestNext(ex);                      // {w, r, note}
   const existing=setLogs[ck]||[];
+
+  // fill any blank/missing set with the suggested numbers
   while(existing.length<numSets) existing.push({w:"",r:"",done:false});
+  let prefilled=false;
+  existing.forEach(st=>{
+    if(!st.done){
+      if(st.w===""||st.w===null||st.w===undefined||+st.w===0){ st.w = sug.w; prefilled=true; }
+      if(st.r===""||st.r===null||st.r===undefined||+st.r===0){ st.r = sug.r; prefilled=true; }
+    }
+  });
   setLogs[ck]=existing;
+  if(prefilled) lsSet("setLogs",setLogs);
+
   const wrap=document.createElement("div");wrap.className="set-logger";
+
+  // last-time / suggestion banner
+  const lastTxt = lastTimeText(ex.n);
+  const hint=document.createElement("div");
+  hint.className="set-hint";
+  hint.innerHTML =
+    '<span class="hint-last">' + (lastTxt || "First time — enter your working weight") + '</span>' +
+    (sug.note ? '<span class="hint-sug '+(sug.tone||"")+'">'+sug.note+'</span>' : '');
+  wrap.appendChild(hint);
+
+  const chipsHtml = exStatusChips(ex);
+  if(chipsHtml){
+    const chipRow=document.createElement("div");
+    chipRow.className="ex-chips";
+    chipRow.innerHTML=chipsHtml;
+    wrap.appendChild(chipRow);
+  }
+
   const hdr=document.createElement("div");hdr.className="set-hdr";
-  hdr.innerHTML=`<span>#</span><span>Weight</span><span>Reps</span><span></span>`;
+  hdr.innerHTML=`<span>#</span><span>Weight</span><span>Reps</span><span>Tag</span><span></span>`;
   wrap.appendChild(hdr);
   const rows=document.createElement("div");rows.className="set-rows";
   existing.forEach((st,si)=>{
     const row=document.createElement("div");row.className="set-row";
+    const tag = st.tag || "";
     row.innerHTML=`<div class="set-num">${si+1}</div>
       <input class="set-input" type="number" step="2.5" placeholder="lb" value="${st.w||""}" data-si="${si}" data-field="w"/>
       <input class="set-input" type="number" placeholder="reps" value="${st.r||""}" data-si="${si}" data-field="r"/>
+      <button class="set-tag-btn ${tag}" data-si="${si}" title="${TAG_LABEL[tag]||'Working set'}">${TAG_ICON[tag]||"–"}</button>
       <button class="set-done-btn${st.done?" done":""}" data-si="${si}">✓</button>`;
     const restBar=document.createElement("div");restBar.className="rest-bar-wrap";
     restBar.innerHTML=`<div class="rest-bar-top"><div class="rest-bar-label">Rest</div><div class="rest-bar-time">2:00</div></div><div class="rest-bar-track"><div class="rest-bar-fill" style="width:100%"></div></div><button class="rest-bar-skip">Skip rest</button>`;
@@ -2095,23 +2254,67 @@ function renderSetLogger(ex,ck){
     const frag=document.createDocumentFragment();frag.appendChild(row);frag.appendChild(restBar);rows.appendChild(frag);
   });
   wrap.appendChild(rows);
+
+  // ── RPE tap: how did that feel? ──
+  const rpeRow=document.createElement("div");
+  rpeRow.className="rpe-row";
+  const cur=(exRPE[ex.n]&&exRPE[ex.n].week===week)?exRPE[ex.n].value:null;
+  rpeRow.innerHTML='<span class="rpe-lbl">How did it feel?</span>'+
+    ["easy","right","hard","failed"].map(v=>
+      '<button class="rpe-btn '+v+(cur===v?" on":"")+'" data-rpe="'+v+'">'+v+'</button>'
+    ).join("");
+  rpeRow.querySelectorAll(".rpe-btn").forEach(b=>{
+    b.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      const v=b.dataset.rpe;
+      const already=(exRPE[ex.n]&&exRPE[ex.n].week===week&&exRPE[ex.n].value===v);
+      setRPE(ex.n, week, already?null:v);
+      rpeRow.querySelectorAll(".rpe-btn").forEach(x=>x.classList.remove("on"));
+      if(!already) b.classList.add("on");
+      toast(already?"Cleared":"Noted: "+v);
+    });
+  });
+  wrap.appendChild(rpeRow);
+  wrap.querySelectorAll(".set-tag-btn").forEach(btn=>{
+    btn.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      const si=+btn.dataset.si;
+      const cur=setLogs[ck][si].tag||"";
+      const next=TAG_CYCLE[(TAG_CYCLE.indexOf(cur)+1)%TAG_CYCLE.length];
+      setLogs[ck][si].tag = next;
+      lsSet("setLogs",setLogs);
+      btn.className="set-tag-btn "+next;
+      btn.textContent=TAG_ICON[next]||"–";
+      btn.title=TAG_LABEL[next]||"Working set";
+      if(setLogs[ck][si].done) recordSession(ex.n, setLogs[ck], week);
+      if(next) toast(TAG_LABEL[next]);
+    });
+  });
+
   wrap.querySelectorAll(".set-input").forEach(inp=>{
     inp.addEventListener("change",async()=>{
       const si=+inp.dataset.si, field=inp.dataset.field;
       const val = field==="w" ? (parseFloat(inp.value)||0) : (parseInt(inp.value)||0);
       setLogs[ck][si][field] = val;
 
+      // drop sets and warm-ups are deliberately different loads —
+      // editing one must never overwrite the working sets
+      const srcTag = setLogs[ck][si].tag;
+      if (srcTag === "D" || srcTag === "W") { lsSet("setLogs",setLogs); recordSession(ex.n, setLogs[ck], week); return; }
+
       // propagate to every set that isn't already marked done —
       // so entering one weight/rep fills the rest of the exercise
       setLogs[ck].forEach((st, j) => {
         if (j === si) return;
         if (st.done) return;              // don't overwrite a completed set
+        if (st.tag === "D" || st.tag === "W") return;   // drop/warm-up sets keep their own numbers
         st[field] = val;
         const otherInp = wrap.querySelector('.set-input[data-si="'+j+'"][data-field="'+field+'"]');
         if (otherInp) otherInp.value = val || "";
       });
 
       lsSet("setLogs",setLogs);
+      recordSession(ex.n, setLogs[ck], week);
     });
   });
   const allSetRows=[...rows.querySelectorAll(".set-row")];
@@ -2120,6 +2323,7 @@ function renderSetLogger(ex,ck){
       const si=+btn.dataset.si;setLogs[ck][si].done=!setLogs[ck][si].done;
       btn.classList.toggle("done",setLogs[ck][si].done);
       lsSet("setLogs",setLogs);
+      recordSession(ex.n, setLogs[ck], week);
       if(setLogs[ck][si].done){
         const doneCount=setLogs[ck].filter(s=>s.done).length;
         const targetRow=allSetRows[si];if(targetRow?._restBar)startTimer(targetRow._restBar,doneCount,numSets);
@@ -2869,22 +3073,30 @@ let activeDayKey = null;
 let woTimerInterval = null;
 let woStartTime = null;
 
-function startWoTimer() {
-  woStartTime = Date.now();
-  woTimerInterval = setInterval(() => {
-    const el = document.getElementById("wo-timer");
-    if (!el) return;
-    const secs = Math.floor((Date.now() - woStartTime) / 1000);
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    el.textContent = m + ":" + String(s).padStart(2, "0");
-  }, 1000);
+function paintWoTimer(){
+  const el = document.getElementById("wo-timer");
+  if (!el || !woStartTime) return;
+  const secs = Math.floor((Date.now() - woStartTime) / 1000);
+  const h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60), s = secs % 60;
+  el.textContent = h>0
+    ? h + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0")
+    : m + ":" + String(s).padStart(2, "0");
+}
+
+function startWoTimer(resumeFrom) {
+  // resumeFrom lets an interrupted session pick up where it really was
+  woStartTime = resumeFrom || Date.now();
+  lsSet("woTimer", {startedAt: woStartTime, day: activeDayKey});
+  clearInterval(woTimerInterval);
+  paintWoTimer();
+  woTimerInterval = setInterval(paintWoTimer, 1000);
 }
 
 function stopWoTimer() {
   clearInterval(woTimerInterval);
   woTimerInterval = null;
   woStartTime = null;
+  lsSet("woTimer", null);
   const el = document.getElementById("wo-timer");
   if (el) el.textContent = "0:00";
 }
@@ -2896,7 +3108,10 @@ function openDayWorkout(day) {
   overlay.classList.add("entering");
   setTimeout(() => overlay.classList.remove("entering"), 300);
   document.body.style.overflow = "hidden";
-  startWoTimer();
+  const saved = lsGet("woTimer");
+  const resume = (saved && saved.day === day.key && (Date.now()-saved.startedAt) < 4*3600*1000)
+    ? saved.startedAt : null;
+  startWoTimer(resume);
   renderActiveWorkout(day);
 }
 
@@ -3232,7 +3447,7 @@ function renderPSummary(){
   const host = document.getElementById("psum-grid");
   if(!host) return;
   const sorted = [...weighins].sort((a,b)=>a.d.localeCompare(b.d));
-  const sw = plan.start_weight || (sorted[0] ? +sorted[0].w : null);
+  const sw = (plan.start_weight!=null && !isNaN(plan.start_weight)) ? +plan.start_weight : (sorted[0] ? +sorted[0].w : null);
   const cur = sorted.length ? +sorted[sorted.length-1].w : sw;
   const phase = plan.phase || "cut";
 
@@ -3298,7 +3513,7 @@ function renderPWeightChart(){
   const tEnd = new Date(sorted[sorted.length-1].d).getTime();
   const span = Math.max(tEnd-t0, 864e5);
 
-  const sw = plan.start_weight || +sorted[0].w;
+  const sw = (plan.start_weight!=null && !isNaN(plan.start_weight)) ? +plan.start_weight : +sorted[0].w;
   const phase = plan.phase || "cut";
   const dir = phase==="bulk" ? 1 : -1;
 
@@ -3487,6 +3702,7 @@ function computeWeeklyVolume(){
     const wk = +m[1];
     (setLogs[k]||[]).forEach(st=>{
       if(!st || !st.done) return;
+      if(st.tag === "W") return;                 // warm-ups aren't working volume
       const wt = parseFloat(st.w)||0, rp = parseInt(st.r)||0;
       if(wt>0 && rp>0) byWeek[wk] = (byWeek[wk]||0) + wt*rp;
     });
@@ -3638,6 +3854,296 @@ function renderProgress(){
   renderPPRs();
 }
 
+
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PROGRESSION ENGINE
+//  double progression · stall detection · deloads · phase-aware · RPE
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── rep ranges by movement type ─────────────────────────────────────────
+
+// ── set tags: working / failure / drop / warmup ─────────────────────────
+const TAG_CYCLE = ["", "F", "D", "W"];
+const TAG_ICON  = {"":"–", "F":"F", "D":"D", "W":"W"};
+const TAG_LABEL = {"":"Working set", "F":"Taken to failure", "D":"Drop set", "W":"Warm-up set"};
+// which tags count as real working sets for progression
+const isWorkingSet = st => !st.tag || st.tag === "F";
+
+const COMPOUND_RX = /(bench|squat|deadlift|overhead press|barbell row|bent-over row|t-bar|pull-up|pull up|dip|hack squat|leg press|front squat|romanian)/i;
+const ISO_RX      = /(lateral raise|rear delt|fly|curl|extension|pushdown|kickback|calf|shrug|face pull|crunch|plank|leg curl|leg extension)/i;
+
+function repRange(ex){
+  // explicit range in the plan e.g. "3×8-12"
+  const m = String(ex.s||"").match(/×\s*(\d+)\s*[-–]\s*(\d+)/);
+  if (m) return {lo:+m[1], hi:+m[2]};
+  const base = getDefaultReps(ex.s);
+  if (COMPOUND_RX.test(ex.n)) return {lo:base, hi:base+2};      // 6 → 6-8
+  if (ISO_RX.test(ex.n))      return {lo:base, hi:base+5};      // 12 → 12-17
+  return {lo:base, hi:base+3};                                   // 8 → 8-11
+}
+
+function loadStep(wt, exName){
+  if (wt <= 0) return 5;
+  if (ISO_RX.test(exName||"")) return wt < 30 ? 2.5 : 5;
+  if (wt < 30)  return 2.5;
+  if (wt < 100) return 5;
+  return COMPOUND_RX.test(exName||"") ? 10 : 5;
+}
+
+// ── session history: keep the last N sessions per exercise ──────────────
+// exSessions = { "Bench Press": [ {date, week, topW, minReps, sets, e1rm, rpe} ] }
+let exHistory = {};
+let exSessions = {};
+const MAX_SESSIONS = 12;
+
+function recordSession(exName, sets, week){
+  if(!exName) return;
+  const done=(sets||[]).filter(s=>s&&s.done&&(parseFloat(s.w)||0)>0&&(parseInt(s.r)||0)>0);
+  if(!done.length) return;
+
+  // only untagged + failure sets count as working sets;
+  // warm-ups and drop sets are logged but excluded from progression maths
+  const working = done.filter(isWorkingSet);
+  const basis = working.length ? working : done;
+
+  const topW=Math.max(...basis.map(s=>parseFloat(s.w)||0));
+  const atTop=basis.filter(s=>(parseFloat(s.w)||0)===topW);
+  const minReps=Math.min(...atTop.map(s=>parseInt(s.r)||0));
+  const best=Math.max(...basis.map(s=>e1rm(parseFloat(s.w)||0, parseInt(s.r)||0)));
+  const toFailure = done.some(s=>s.tag==="F");
+  const hasDrops  = done.some(s=>s.tag==="D");
+
+  const entry={
+    date: today(), week: week,
+    topW, minReps,
+    setsDone: done.filter(s=>s.tag!=="W").length,   // warm-ups excluded; drop sets still count as work
+    totalSets: done.length,
+    toFailure, hasDrops,
+    sets: done.map(s=>({w:parseFloat(s.w)||0, r:parseInt(s.r)||0, tag:s.tag||""})),
+    e1rm: +best.toFixed(1),
+    rpe: (exRPE[exName] && exRPE[exName].week===week) ? exRPE[exName].value : null
+  };
+
+  if(!exSessions[exName]) exSessions[exName]=[];
+  // one entry per week — replace if the same week is logged again
+  const i = exSessions[exName].findIndex(s=>s.week===week);
+  if(i>=0) exSessions[exName][i]=entry; else exSessions[exName].push(entry);
+  exSessions[exName] = exSessions[exName].sort((a,b)=>a.week-b.week).slice(-MAX_SESSIONS);
+  lsSet("exSessions", exSessions);
+
+  // keep the simple history in sync (used by the hint line)
+  exHistory[exName]={w:topW,r:minReps,sets:entry.sets,date:entry.date,completed:done.length};
+  lsSet("exHistory", exHistory);
+}
+
+// ── RPE store: { exName: {week, value} }  value: easy|right|hard|failed ──
+let exRPE = {};
+function setRPE(exName, week, value){
+  exRPE[exName]={week, value};
+  lsSet("exRPE", exRPE);
+  // fold into the recorded session if one exists
+  const arr=exSessions[exName]||[];
+  const s=arr.find(x=>x.week===week);
+  if(s){ s.rpe=value; lsSet("exSessions", exSessions); }
+}
+
+// ── rolling trend over the last 3 sessions ──────────────────────────────
+function rollingTrend(exName){
+  const arr=(exSessions[exName]||[]).filter(s=>!isDeloadWeek(s.week)).slice(-3);
+  if(arr.length<2) return {slope:0, avg: arr.length?arr[0].e1rm:0, n:arr.length};
+  const first=arr[0].e1rm, last=arr[arr.length-1].e1rm;
+  const avg=arr.reduce((a,s)=>a+s.e1rm,0)/arr.length;
+  return {slope:(last-first)/(arr.length-1), avg:+avg.toFixed(1), n:arr.length};
+}
+
+// ── stall counter: consecutive sessions failing to beat the top set ─────
+function stallCount(exName){
+  // deload weeks are intentionally lighter — they must not count as stalls
+  const arr=(exSessions[exName]||[]).filter(s=>!isDeloadWeek(s.week));
+  if(arr.length<2) return 0;
+  let stalls=0;
+  for(let i=arr.length-1;i>0;i--){
+    const cur=arr[i], prev=arr[i-1];
+    const improved = cur.e1rm > prev.e1rm + 0.4;   // small tolerance
+    if(improved) break;
+    stalls++;
+  }
+  return stalls;
+}
+
+// ── scheduled deload: every 5th week ────────────────────────────────────
+const DELOAD_EVERY = 5;
+function isDeloadWeek(wk){ return wk>0 && wk % DELOAD_EVERY === 0; }
+
+// ── the recommendation ──────────────────────────────────────────────────
+// returns { w, r, note, tone }  tone: up | hold | down | deload | new
+function suggestNext(ex){
+  const range = repRange(ex);
+  const targetSets = getSetCount(ex.s);
+  const phase = plan.phase || "cut";
+  const arr = exSessions[ex.n] || [];
+  const last = arr.length ? arr[arr.length-1] : null;
+
+  // ── no history: use the plan's load if it has one ──
+  if(!last){
+    const planned = parseFloat(ex.l);
+    return {
+      w: isNaN(planned) ? "" : planned,
+      r: range.lo,
+      note: isNaN(planned) ? "" : "from plan",
+      tone: "new"
+    };
+  }
+
+  // ── scheduled deload week ──
+  if(isDeloadWeek(week)){
+    const dw = Math.max(loadStep(last.topW, ex.n), Math.round(last.topW*0.6/2.5)*2.5);
+    return { w: dw, r: range.lo, note: "deload week · 60%", tone:"deload" };
+  }
+
+  // ── coming off a deload: resume the pre-deload working load ──
+  if(isDeloadWeek(last.week) && !isDeloadWeek(week)){
+    const prior = arr.filter(s=>!isDeloadWeek(s.week));
+    if(prior.length){
+      const back = Math.max(...prior.map(s=>s.topW));
+      return { w: back, r: range.lo, note:"back to "+back+" lb after deload", tone:"up" };
+    }
+  }
+
+  const stalls = stallCount(ex.n);
+  const trend  = rollingTrend(ex.n);
+  const rpe    = last.rpe;
+
+  // ── 3 stalls, or an outright failure, → back off 10% ──
+  if(stalls >= 3 || rpe === "failed"){
+    const dw = Math.round((last.topW*0.9)/2.5)*2.5;
+    return { w: dw, r: range.lo,
+             note: (rpe==="failed" ? "failed last time · " : "3 stalls · ") + "back off to "+dw,
+             tone:"down" };
+  }
+
+  // ── 2 stalls: stop asking for more, repeat and consolidate ──
+  if(stalls === 2){
+    return { w:last.topW, r:last.minReps,
+             note:"2nd stall · repeat "+last.topW+" × "+last.minReps, tone:"hold" };
+  }
+
+  const hitAllSets = last.setsDone >= targetSets;
+  const atTopOfRange = last.minReps >= range.hi;
+  const belowTop = last.minReps < range.hi;
+
+  // ── phase-aware gating ──
+  // On a cut, holding is the win — require two clean sessions before adding load,
+  // and never push reps beyond the range.
+  const cutHold = phase === "cut";
+  const twoCleanSessions = arr.length>=2 &&
+    arr.slice(-2).every(s => s.setsDone >= targetSets && s.minReps >= range.hi);
+
+  // ── RPE overrides ──
+  if(rpe === "hard" && !atTopOfRange){
+    return { w:last.topW, r:Math.min(last.minReps+1, range.hi),
+             note:"felt hard · hold "+last.topW+" lb", tone:"hold" };
+  }
+  if(rpe === "easy" && hitAllSets){
+    const step = loadStep(last.topW, ex.n);
+    const nw = last.topW + step;
+    return { w:nw, r:range.lo, note:"felt easy · ↑ "+last.topW+" → "+nw, tone:"up" };
+  }
+
+  // ── taken to failure and still short of the range → hold, you are already maxed ──
+  if(last.toFailure && last.minReps < range.hi){
+    return { w:last.topW, r:range.hi,
+             note:"hit failure · hold "+last.topW+" lb", tone:"hold" };
+  }
+
+  // ── double progression: add reps first, then load ──
+  if(hitAllSets && atTopOfRange){
+    if(cutHold && !twoCleanSessions){
+      return { w:last.topW, r:range.hi,
+               note:"cut · hold "+last.topW+" lb (1 more clean session)", tone:"hold" };
+    }
+    const step = loadStep(last.topW, ex.n);
+    const nw = last.topW + step;
+    return { w:nw, r:range.lo, note:"↑ "+last.topW+" → "+nw+" lb", tone:"up" };
+  }
+
+  if(hitAllSets && belowTop){
+    const nextReps = Math.min(last.minReps + 1, range.hi);
+    return { w:last.topW, r:nextReps,
+             note:"+1 rep · "+last.topW+" lb × "+nextReps, tone:"up" };
+  }
+
+  // ── trending down on a cut is expected, not a problem ──
+  if(trend.slope < -1 && phase === "cut"){
+    return { w:last.topW, r:range.lo,
+             note:"holding through the cut", tone:"hold" };
+  }
+
+  return { w:last.topW, r:range.lo, note:"repeat "+last.topW+" lb", tone:"hold" };
+}
+
+// ── hint text ───────────────────────────────────────────────────────────
+function lastTimeText(exName){
+  const arr = exSessions[exName]||[];
+  if(!arr.length) return "";
+  const h = arr[arr.length-1];
+  const setStr = h.sets.map(s=>s.r + (s.tag ? s.tag.toLowerCase() : "")).join(", ");
+  return "Last: "+h.topW+" lb × "+setStr+"  ·  W"+h.week;
+}
+
+function exStatusChips(ex){
+  const arr = exSessions[ex.n]||[];
+  if(!arr.length) return "";
+  const chips=[];
+  const range=repRange(ex);
+  chips.push('<span class="ex-chip range">'+range.lo+'–'+range.hi+' reps</span>');
+  const st=stallCount(ex.n);
+  if(st>=2) chips.push('<span class="ex-chip stall">'+st+' stalls</span>');
+  const t=rollingTrend(ex.n);
+  if(t.n>=2 && Math.abs(t.slope)>0.3){
+    chips.push('<span class="ex-chip '+(t.slope>0?"up":"down")+'">'+
+      (t.slope>0?"↑":"↓")+' '+Math.abs(t.slope).toFixed(1)+'/session</span>');
+  }
+  const lastS = arr[arr.length-1];
+  if(lastS && lastS.toFailure) chips.push('<span class="ex-chip fail">hit failure</span>');
+  if(lastS && lastS.hasDrops)  chips.push('<span class="ex-chip drop">drop set</span>');
+  if(isDeloadWeek(week)) chips.push('<span class="ex-chip deload">deload wk</span>');
+  return chips.join("");
+}
+
+
+// ── resume timers after the app returns from the background ──────────────
+function resumeTimers(){
+  // rest timer
+  const rt = lsGet("restTimer");
+  if(rt && rt.endsAt){
+    if(Date.now() >= rt.endsAt){
+      // it finished while we were away
+      if(!restChimed){ restChimed=true; playDone(); }
+      stopTimer();
+    } else {
+      restEndsAt = rt.endsAt;
+      if(activeBarWrap){
+        if(!timerInterval) timerInterval=setInterval(paintRest,250);
+        paintRest();
+      }
+    }
+  }
+  // workout timer
+  const wt = lsGet("woTimer");
+  const overlayOpen = !document.getElementById("workout-overlay").classList.contains("hidden");
+  if(wt && wt.startedAt && overlayOpen){
+    woStartTime = wt.startedAt;
+    if(!woTimerInterval) woTimerInterval=setInterval(paintWoTimer,1000);
+    paintWoTimer();
+  }
+}
+
+document.addEventListener("visibilitychange", () => { if(!document.hidden) resumeTimers(); });
+window.addEventListener("focus", resumeTimers);
+window.addEventListener("pageshow", resumeTimers);
+
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
   try {
@@ -3654,6 +4160,12 @@ function renderProgress(){
     renderDashWorkout();
     updatePlanName();
     renderLB();
+    // if a workout was left running, restore its elapsed time when reopened
+    const savedWo = lsGet("woTimer");
+    if(savedWo && savedWo.startedAt){
+      const mins = Math.floor((Date.now()-savedWo.startedAt)/60000);
+      if(mins > 240) lsSet("woTimer", null);   // stale, older than 4h — discard
+    }
     updateDbStatus();
     updateDashSubtitles();
   } catch(err) {
