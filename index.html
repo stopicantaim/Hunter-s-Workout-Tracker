@@ -1045,6 +1045,15 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
   0%{transform:translateY(-20px) rotate(0);opacity:1}
   100%{transform:translateY(105vh) rotate(720deg);opacity:.15}
 }
+
+/* ── sound toggle ── */
+.sound-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.toggle{width:46px;height:27px;border-radius:99px;border:1px solid var(--border2);
+  background:var(--bg2);position:relative;cursor:pointer;transition:all .2s;flex-shrink:0;padding:0}
+.toggle.on{background:var(--ph-bg);border-color:var(--ph)}
+.toggle .knob{position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;
+  background:var(--mute);transition:all .2s}
+.toggle.on .knob{left:22px;background:var(--ph)}
 </style>
 </head>
 <body class="cut">
@@ -1437,6 +1446,22 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
         <div class="frow2"><label>Protein-hit days</label><input type="number" min="0" max="7" id="nl-p" placeholder="6"/></div>
         <button class="btn" id="nl-save">Save Week</button>
       </div>
+      <div class="sh">Sound</div>
+      <div class="fcard">
+        <div class="sound-row">
+          <div>
+            <div style="font-size:13px;font-weight:700">Sound effects</div>
+            <div style="font-size:11px;color:var(--sub);margin-top:2px">Set, exercise and rest-timer cues</div>
+          </div>
+          <button class="toggle" id="sound-toggle"><span class="knob"></span></button>
+        </div>
+        <button class="btn ghost" id="test-sound" style="margin-top:12px">Test Sound</button>
+        <div style="font-size:11px;color:var(--sub);line-height:1.6;margin-top:10px">
+          No sound on iPhone? Check the ring/silent switch on the side of the phone &mdash;
+          it mutes web audio. Turn the ringer on, then press Test Sound.
+        </div>
+      </div>
+
       <div class="sh">Data & Backup</div>
       <div class="fcard">
         <div style="font-size:12px;color:var(--sub);line-height:1.6;margin-bottom:12px">
@@ -2029,6 +2054,8 @@ function loadDataLocal(){
   setLogs = lsGet("setLogs") || {};
   friends = lsGet("friends") || [];
   dayExtras = lsGet("dayExtras") || {};
+  const savedSound = lsGet("soundOn");
+  soundOn = (savedSound === null || savedSound === undefined) ? true : !!savedSound;
   exHistory  = lsGet("exHistory")  || {};
   exSessions = lsGet("exSessions") || {};
   exRPE      = lsGet("exRPE")      || {};
@@ -2264,7 +2291,6 @@ document.getElementById("lbf-save").addEventListener("click",()=>{
 });
 
 // ── REST TIMER ────────────────────────────────────────
-function playDone(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[[880,0],[1100,0.18]].forEach(([freq,delay])=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="sine";osc.frequency.value=freq;gain.gain.setValueAtTime(0,ctx.currentTime+delay);gain.gain.linearRampToValueAtTime(0.35,ctx.currentTime+delay+0.01);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.5);osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.55);});}catch(e){}if(navigator.vibrate)navigator.vibrate([150,80,150]);}
 // Timers are driven by wall-clock timestamps, not tick counting, so that
 // iOS suspending the page while you're in another app doesn't freeze them.
 let restEndsAt = null;      // ms epoch when the rest period finishes
@@ -3384,7 +3410,7 @@ function renderActiveWorkout(day) {
           const sw=document.createElement("div"); sw.className="ex-sweep";
           row.appendChild(sw); setTimeout(()=>sw.remove(), 900);
         }
-        chirp(880, 0.11, 0.08);
+        playSfx("exDone");
         if(navigator.vibrate) navigator.vibrate(20);
 
         setTimeout(()=>{ renderActiveWorkout(day); checkDayComplete(); }, 620);
@@ -4011,6 +4037,127 @@ function renderProgress(){
 
 
 
+
+// ═══════════════════════════════════════════════════════════════════════
+//  AUDIO  —  iOS-safe
+//  Web Audio is silenced by the iPhone ring/silent switch, and Safari caps
+//  the number of AudioContexts. So we synthesise small WAVs once and play
+//  them through <audio> elements, which use the media channel instead.
+// ═══════════════════════════════════════════════════════════════════════
+let soundOn = true;
+let audioUnlocked = false;
+
+// ── tiny WAV encoder ─────────────────────────────────────────────────
+function makeWav(notes, sampleRate){
+  sampleRate = sampleRate || 22050;
+  const total = notes.reduce((a,n)=>a+n.dur, 0);
+  const len = Math.floor(sampleRate*total);
+  const buf = new ArrayBuffer(44 + len*2);
+  const view = new DataView(buf);
+  const wr = (off,s)=>{ for(let i=0;i<s.length;i++) view.setUint8(off+i, s.charCodeAt(i)); };
+  wr(0,"RIFF"); view.setUint32(4, 36+len*2, true); wr(8,"WAVE");
+  wr(12,"fmt "); view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,1,true); view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*2,true); view.setUint16(32,2,true);
+  view.setUint16(34,16,true); wr(36,"data"); view.setUint32(40,len*2,true);
+
+  let off=44, t=0;
+  notes.forEach(n=>{
+    const ns = Math.floor(sampleRate*n.dur);
+    for(let i=0;i<ns;i++){
+      const p = i/ns;
+      // quick attack, exponential decay — reads as a soft chime
+      const env = Math.min(1, p*40) * Math.pow(1-p, 2.2);
+      let s = Math.sin(2*Math.PI*n.f*(i/sampleRate));
+      s += 0.28*Math.sin(4*Math.PI*n.f*(i/sampleRate));   // gentle harmonic
+      const v = Math.max(-1, Math.min(1, s*env*(n.vol==null?0.5:n.vol)));
+      view.setInt16(off, v*32767, true); off+=2;
+    }
+    t+=n.dur;
+  });
+
+  // base64 without blowing the stack on large buffers
+  const bytes = new Uint8Array(buf);
+  let bin=""; const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
+  }
+  return "data:audio/wav;base64," + btoa(bin);
+}
+
+// ── the three sounds, built once ─────────────────────────────────────
+const SFX_DEFS = {
+  set:    [{f:660, dur:0.09, vol:0.42}],
+  exDone: [{f:784, dur:0.13, vol:0.5}, {f:1046, dur:0.20, vol:0.45}],
+  rest:   [{f:880, dur:0.18, vol:0.55}, {f:1100, dur:0.30, vol:0.5}],
+  dayDone:[{f:784, dur:0.15, vol:0.5}, {f:988, dur:0.15, vol:0.5},
+           {f:1319, dur:0.40, vol:0.55}]
+};
+const SFX = {};       // name -> pool of <audio>
+const POOL = 3;       // allows overlapping playback
+
+function buildSfx(){
+  Object.keys(SFX_DEFS).forEach(name=>{
+    let uri;
+    try { uri = makeWav(SFX_DEFS[name]); } catch(e){ return; }
+    SFX[name] = [];
+    for(let i=0;i<POOL;i++){
+      const a = new Audio(uri);
+      a.preload = "auto";
+      a.setAttribute("playsinline","");
+      a.volume = 0.9;
+      SFX[name].push(a);
+    }
+  });
+}
+
+// iOS requires the first play() to originate from a user gesture.
+// Prime every element silently on the first touch, then they're free to play.
+function unlockAudio(){
+  if(audioUnlocked) return;
+  audioUnlocked = true;
+  Object.values(SFX).forEach(pool=>{
+    pool.forEach(a=>{
+      const v=a.volume;
+      a.volume=0;
+      const p=a.play();
+      if(p && p.then) p.then(()=>{ a.pause(); a.currentTime=0; a.volume=v; })
+                       .catch(()=>{ a.volume=v; });
+      else { try{a.pause();a.currentTime=0;}catch(e){} a.volume=v; }
+    });
+  });
+}
+["touchend","click","keydown"].forEach(ev=>
+  document.addEventListener(ev, unlockAudio, {once:false, passive:true})
+);
+
+let sfxIdx = {};
+function playSfx(name){
+  if(!soundOn) return;
+  const pool = SFX[name];
+  if(!pool || !pool.length) return;
+  sfxIdx[name] = ((sfxIdx[name]||0)+1) % pool.length;
+  const a = pool[sfxIdx[name]];
+  try{
+    a.currentTime = 0;
+    const p = a.play();
+    if(p && p.catch) p.catch(()=>{});
+  }catch(e){}
+}
+
+// keep the old call sites working
+function chirp(freq, dur, vol){
+  if(freq >= 1000) playSfx("exDone");
+  else if(freq >= 800) playSfx("exDone");
+  else playSfx("set");
+}
+function playDone(){
+  playSfx("rest");
+  if(navigator.vibrate) navigator.vibrate([150,80,150]);
+}
+
+buildSfx();
+
 // ═══════════════════════════════════════════════════════════════════════
 //  PROGRESSION ENGINE
 //  double progression · stall detection · deloads · phase-aware · RPE
@@ -4347,26 +4494,14 @@ function animateSetDone(btn, row, setNum, totalSets){
   }
 
   if(navigator.vibrate) navigator.vibrate(18);
-  chirp(660, 0.06, 0.05);
+  playSfx("set");
 }
 
 function animateSetUndone(btn, row){
   if(row) row.classList.remove("is-done");
 }
 
-// short soft click for individual sets (distinct from the rest-timer chime)
-function chirp(freq, dur, vol){
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const osc=ctx.createOscillator(), g=ctx.createGain();
-    osc.connect(g); g.connect(ctx.destination);
-    osc.type="triangle"; osc.frequency.value=freq;
-    g.gain.setValueAtTime(0, ctx.currentTime);
-    g.gain.linearRampToValueAtTime(vol||0.06, ctx.currentTime+0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+(dur||0.08));
-    osc.start(); osc.stop(ctx.currentTime+(dur||0.08)+0.02);
-  }catch(e){}
-}
+
 
 // ── every set of an exercise is done ────────────────────────────────────
 function animateExerciseComplete(wrap, exName){
@@ -4396,8 +4531,7 @@ function animateExerciseComplete(wrap, exName){
   }
 
   if(navigator.vibrate) navigator.vibrate([25,40,25]);
-  chirp(880, 0.12, 0.09);
-  setTimeout(()=>chirp(1180, 0.14, 0.08), 90);
+  playSfx("exDone");
 }
 
 // ── the whole day is done ───────────────────────────────────────────────
@@ -4439,7 +4573,7 @@ function animateDayComplete(day, elapsedSecs){
   fireConfetti(40);
 
   if(navigator.vibrate) navigator.vibrate([40,60,40,60,90]);
-  [0,120,260].forEach((d,i)=>setTimeout(()=>chirp([784,988,1319][i],0.22,0.10), d));
+  playSfx("dayDone");
 
   const close=()=>{
     ov.classList.add("out");
@@ -4448,6 +4582,29 @@ function animateDayComplete(day, elapsedSecs){
   ov.addEventListener("click", close);
   setTimeout(close, 2600);
 }
+
+
+// ── sound settings ───────────────────────────────────────────────────────
+function refreshSoundToggle(){
+  const t=document.getElementById("sound-toggle");
+  if(t) t.classList.toggle("on", soundOn);
+}
+document.getElementById("sound-toggle").addEventListener("click", ()=>{
+  soundOn = !soundOn;
+  lsSet("soundOn", soundOn);
+  refreshSoundToggle();
+  if(soundOn){ unlockAudio(); playSfx("set"); toast("Sound on"); }
+  else toast("Sound off");
+});
+document.getElementById("test-sound").addEventListener("click", ()=>{
+  unlockAudio();
+  soundOn = true; lsSet("soundOn", true); refreshSoundToggle();
+  playSfx("set");
+  setTimeout(()=>playSfx("exDone"), 400);
+  setTimeout(()=>playSfx("dayDone"), 950);
+  if(navigator.vibrate) navigator.vibrate([30,60,30]);
+  toast("Playing test sounds");
+});
 
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
@@ -4464,6 +4621,7 @@ function animateDayComplete(day, elapsedSecs){
     renderDashWorkout();
     renderDashWorkout();
     updatePlanName();
+    refreshSoundToggle();
     renderLB();
     // if a workout was left running, restore its elapsed time when reopened
     const savedWo = lsGet("woTimer");
