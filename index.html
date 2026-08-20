@@ -1223,6 +1223,58 @@ body.t-paper .lb-tag.pr{background:#fdf3e3;color:#b45309}
 body.t-paper .lb-tag.streak{background:#f0eafd;color:#6d28d9}
 body.t-paper .lb-tag.band{background:#e8f0fe;color:#1d4ed8}
 body.t-paper .pr-val{background:none;-webkit-text-fill-color:var(--ph)}
+
+/* ── first-run setup ── */
+.ob-overlay{position:fixed;inset:0;z-index:600;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;padding:22px;
+  overflow-y:auto;animation:fadeIn .3s ease}
+.ob-overlay.hidden{display:none !important}
+.ob-card{width:100%;max-width:420px}
+.ob-brand{font-size:15px;font-weight:900;letter-spacing:.12em;color:var(--ph);
+  text-align:center;margin-bottom:26px}
+.ob-step.hidden{display:none}
+.ob-title{font-size:21px;font-weight:900;letter-spacing:-.01em;margin-bottom:6px}
+.ob-sub{font-size:13px;color:var(--sub);margin-bottom:20px;line-height:1.5}
+.ob-lbl{display:block;font-size:10px;font-weight:800;letter-spacing:.08em;
+  color:var(--sub);text-transform:uppercase;margin:14px 0 5px}
+.ob-input{width:100%;background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--rs);color:var(--text);padding:13px 14px;font-size:16px;
+  outline:none;-webkit-appearance:none;transition:border-color .15s}
+.ob-input:focus{border-color:var(--ph)}
+.ob-next{margin-top:20px}
+.ob-back{display:block;width:100%;background:none;border:none;color:var(--sub);
+  font-size:13px;font-weight:700;padding:12px;cursor:pointer;margin-top:4px}
+.ob-err{font-size:12px;color:#ef4444;min-height:16px;margin-top:8px}
+.ob-phases{display:flex;flex-direction:column;gap:9px}
+.ob-phase{display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  width:100%;text-align:left;background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:border-color .18s}
+.ob-phase.on{border-color:var(--ph);background:var(--ph-bg)}
+.ob-phase b{font-size:15px;font-weight:800;color:var(--text)}
+.ob-phase span{font-size:12px;color:var(--sub)}
+.ob-templates{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
+.ob-tmpl{width:100%;text-align:left;background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:12px 15px;cursor:pointer;transition:border-color .18s}
+.ob-tmpl.on{border-color:var(--ph);background:var(--ph-bg)}
+.ob-tmpl b{display:block;font-size:14px;font-weight:800}
+.ob-tmpl span{display:block;font-size:11px;color:var(--sub);margin-top:2px}
+.ob-dots{display:flex;justify-content:center;gap:6px;margin-top:24px}
+.ob-dots i{width:6px;height:6px;border-radius:50%;background:var(--mute);transition:all .25s}
+.ob-dots i.on{background:var(--ph);width:18px;border-radius:99px}
+
+/* profile switcher */
+.prof-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--rs);
+  padding:11px 13px;margin-bottom:7px}
+.prof-row.on{border-color:var(--ph);background:var(--ph-bg)}
+.prof-name{font-size:13px;font-weight:800}
+.prof-meta{font-size:11px;color:var(--sub);margin-top:1px}
+.prof-actions{display:flex;gap:6px;flex-shrink:0}
+.prof-btn{background:none;border:1px solid var(--border2);border-radius:6px;
+  color:var(--sub);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer}
+.prof-btn.danger{border-color:#7c0505;color:#ef4444}
+.prof-btn.use{border-color:var(--ph-border);color:var(--ph)}
+body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
 </style>
 </head>
 <body class="t-paper phase-cut">
@@ -1258,6 +1310,7 @@ body.t-paper .pr-val{background:none;-webkit-text-fill-color:var(--ph)}
     <div class="hdr-inner">
       <div class="hdr-left">
         <div class="app-logo">STOPICANTGROW</div>
+        <div class="phase-pill" id="who-pill" style="display:none"></div>
         <div class="phase-pill" id="phase-pill">CUT</div>
       </div>
       <div class="hdr-right">
@@ -1623,6 +1676,13 @@ body.t-paper .pr-val{background:none;-webkit-text-fill-color:var(--ph)}
         <div class="frow2"><label>Protein-hit days</label><input type="number" min="0" max="7" id="nl-p" placeholder="6"/></div>
         <button class="btn" id="nl-save">Save Week</button>
       </div>
+      <div class="sh">Profiles</div>
+      <div id="profile-list"></div>
+      <button class="btn ghost" id="add-profile-btn" style="margin-top:4px">Add Another Person</button>
+      <div style="font-size:11px;color:var(--sub);line-height:1.6;margin-top:9px">
+        Each profile keeps its own weight, lifts and program on this device.
+      </div>
+
       <div class="sh">Theme</div>
       <div class="theme-grid" id="theme-grid"></div>
 
@@ -1694,6 +1754,57 @@ body.t-paper .pr-val{background:none;-webkit-text-fill-color:var(--ph)}
     <button class="wo-close" id="wo-close">✕</button>
   </div>
   <div class="wo-body" id="wo-body"></div>
+</div>
+
+
+<!-- FIRST-RUN SETUP -->
+<div id="onboard" class="ob-overlay hidden">
+  <div class="ob-card">
+    <div class="ob-brand">STOPICANTGROW</div>
+
+    <div class="ob-step" data-step="1">
+      <div class="ob-title">What should we call you?</div>
+      <div class="ob-sub">Shown on your dashboard and the leaderboard.</div>
+      <input class="ob-input" id="ob-name" placeholder="Your name" autocomplete="name"/>
+      <button class="btn ob-next" data-next="2">Continue</button>
+    </div>
+
+    <div class="ob-step hidden" data-step="2">
+      <div class="ob-title">What are you training for?</div>
+      <div class="ob-sub">This sets how the app reads your progress.</div>
+      <div class="ob-phases">
+        <button class="ob-phase on" data-phase="cut"><b>Cut</b><span>Lose fat, hold muscle</span></button>
+        <button class="ob-phase" data-phase="bulk"><b>Bulk</b><span>Build size and strength</span></button>
+        <button class="ob-phase" data-phase="maintain"><b>Maintain</b><span>Hold weight, progress lifts</span></button>
+      </div>
+      <button class="btn ob-next" data-next="3">Continue</button>
+      <button class="ob-back" data-back="1">Back</button>
+    </div>
+
+    <div class="ob-step hidden" data-step="3">
+      <div class="ob-title">Your starting numbers</div>
+      <div class="ob-sub">You can change any of this later in Settings.</div>
+      <label class="ob-lbl">Current weight (lb)</label>
+      <input class="ob-input" type="number" step="0.1" id="ob-sw" placeholder="e.g. 185"/>
+      <label class="ob-lbl">Goal weight (lb)</label>
+      <input class="ob-input" type="number" step="0.1" id="ob-gw" placeholder="e.g. 178"/>
+      <label class="ob-lbl">Phase length (days)</label>
+      <input class="ob-input" type="number" id="ob-len" placeholder="60" value="60"/>
+      <div class="ob-err" id="ob-err"></div>
+      <button class="btn ob-next" data-next="4">Continue</button>
+      <button class="ob-back" data-back="2">Back</button>
+    </div>
+
+    <div class="ob-step hidden" data-step="4">
+      <div class="ob-title">Pick a starting program</div>
+      <div class="ob-sub">Swap it or build your own any time.</div>
+      <div class="ob-templates" id="ob-templates"></div>
+      <button class="btn" id="ob-finish">Start Training</button>
+      <button class="ob-back" data-back="3">Back</button>
+    </div>
+
+    <div class="ob-dots" id="ob-dots"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2134,8 +2245,25 @@ async function initApp(user){
 //  STORAGE LAYER  —  versioned, migrating, backup-able
 //  All app data lives under ONE key so updates can never orphan it.
 // ═══════════════════════════════════════════════════════════════════════
-const DB_KEY = "stopicantgrow.db";
+const DB_ROOT    = "stopicantgrow.db";     // the original / first profile
+const PROFILES_KEY = "stopicantgrow.profiles";
+const ACTIVE_KEY   = "stopicantgrow.active";
 const DB_VERSION = 2;
+
+// profiles = [{id, name, created}]
+function loadProfiles(){
+  try{ return JSON.parse(localStorage.getItem(PROFILES_KEY)) || []; }catch(e){ return []; }
+}
+function saveProfiles(list){ localStorage.setItem(PROFILES_KEY, JSON.stringify(list)); }
+function activeProfileId(){ return localStorage.getItem(ACTIVE_KEY) || "default"; }
+function setActiveProfile(id){ localStorage.setItem(ACTIVE_KEY, id); }
+function activeProfile(){
+  const id = activeProfileId();
+  return loadProfiles().find(p=>p.id===id) || {id:"default", name:"You"};
+}
+// the first profile keeps the original key so existing data is never orphaned
+function dbKeyFor(id){ return id==="default" ? DB_ROOT : DB_ROOT + "." + id; }
+let DB_KEY = dbKeyFor(activeProfileId());
 
 // keys used by older builds — migrated once, then left alone
 const LEGACY_PREFIXES = ["sicg_", ""];
@@ -2237,36 +2365,19 @@ function importData(jsonText){
 
 function loadDataLocal(){
   dbLoad();
-  plan = lsGet("plan") || {
-    phase:"cut", start_date:"2026-07-31",
-    start_weight:185.4, goal_weight:178, phase_length:60,
+  // A brand-new profile starts empty and is taken through setup.
+  // Anything already stored is loaded untouched.
+  plan     = lsGet("plan") || {
+    phase:"cut", start_date:null,
+    start_weight:null, goal_weight:null, phase_length:60,
     active_template:"ppua", custom_workout:null
   };
-  targets = lsGet("targets") || {cal:2264, pro:199, fat:75, carb:199};
-  weighins = lsGet("weighins") || [
-    {id:"w1",d:"2026-06-01",w:188.2},{id:"w2",d:"2026-06-04",w:187.8},
-    {id:"w3",d:"2026-06-06",w:187.2},{id:"w4",d:"2026-06-09",w:189.2},
-    {id:"w5",d:"2026-06-12",w:189.0},{id:"w6",d:"2026-06-15",w:187.8},
-    {id:"w7",d:"2026-06-16",w:187.4},{id:"w8",d:"2026-06-17",w:187.6},
-    {id:"w9",d:"2026-06-18",w:188.4},{id:"w10",d:"2026-06-19",w:187.2},
-    {id:"w11",d:"2026-06-21",w:185.4}
-  ];
-  liftLogs = lsGet("liftLogs") || [
-    {id:"l1",d:"2026-06-18",name:"Bench Press",w:225,r:2},
-    {id:"l2",d:"2026-06-18",name:"Bench Press",w:205,r:8},
-    {id:"l3",d:"2026-06-17",name:"Overhead Press",w:95,r:8},
-    {id:"l4",d:"2026-06-17",name:"Overhead Press",w:100,r:4},
-    {id:"l5",d:"2026-06-28",name:"Lat Pulldown",w:160,r:10},
-    {id:"l6",d:"2026-06-28",name:"Assisted Pull-up",w:-85,r:12},
-    {id:"l7",d:"2026-06-28",name:"Seated Row",w:160,r:8},
-    {id:"l8",d:"2026-06-28",name:"T-Bar Row",w:125,r:10}
-  ];
-  goalMap = lsGet("goals") || {
-    "Bench Press":280, "Overhead Press":135,
-    "Lat Pulldown":200, "Seated Row":200
-  };
+  targets  = lsGet("targets")  || {cal:2264, pro:199, fat:75, carb:199};
+  weighins = lsGet("weighins") || [];
+  liftLogs = lsGet("liftLogs") || [];
+  goalMap  = lsGet("goals")    || {};
   checks  = lsGet("checks")  || {};
-  nutlog  = lsGet("nutlog")  || {"1":{c:3,p:2}};
+  nutlog  = lsGet("nutlog")  || {};
   setLogs = lsGet("setLogs") || {};
   friends = lsGet("friends") || [];
   dayExtras = lsGet("dayExtras") || {};
@@ -2318,7 +2429,7 @@ document.querySelectorAll(".tab").forEach(b=>{
     document.getElementById("tab-"+b.dataset.tab).classList.add("on");
     if(b.dataset.tab==="lb") renderLB();
     if(b.dataset.tab==="progress"){renderWeighins();renderLifts();renderProgress();}
-    if(b.dataset.tab==="settings"){ updateDbStatus(); renderRecalCard(); renderThemePicker(); refreshSilentToggle(); }
+    if(b.dataset.tab==="settings"){ updateDbStatus(); renderRecalCard(); renderThemePicker(); refreshSilentToggle(); renderProfileList(); }
   });
 });
 
@@ -5187,6 +5298,203 @@ document.getElementById("silent-toggle").addEventListener("click", ()=>{
   toast(silentSwitchMode ? "Plays through silent mode" : "Won't interrupt music");
 });
 
+
+// ═══════════════════════════════════════════════════════════════════════
+//  FIRST-RUN SETUP + PROFILES
+// ═══════════════════════════════════════════════════════════════════════
+let obStep = 1, obPhase = "cut", obTemplate = "ppua";
+
+function needsOnboarding(){
+  // no plan anchor and nothing logged = a fresh profile
+  return !plan.start_weight && !weighins.length && !liftLogs.length;
+}
+
+function showOnboarding(){
+  obStep = 1; obPhase = plan.phase || "cut"; obTemplate = plan.active_template || "ppua";
+  document.getElementById("onboard").classList.remove("hidden");
+  document.getElementById("ob-name").value = activeProfile().name === "You" ? "" : activeProfile().name;
+  renderObTemplates();
+  goObStep(1);
+}
+function hideOnboarding(){
+  document.getElementById("onboard").classList.add("hidden");
+}
+
+function goObStep(n){
+  obStep = n;
+  document.querySelectorAll(".ob-step").forEach(s=>{
+    s.classList.toggle("hidden", +s.dataset.step !== n);
+  });
+  const dots=document.getElementById("ob-dots");
+  dots.innerHTML = [1,2,3,4].map(i=>'<i class="'+(i===n?"on":"")+'"></i>').join("");
+}
+
+function renderObTemplates(){
+  const host=document.getElementById("ob-templates");
+  host.innerHTML="";
+  TEMPLATES.forEach(t=>{
+    const b=document.createElement("button");
+    b.className="ob-tmpl"+(t.id===obTemplate?" on":"");
+    b.innerHTML='<b>'+t.name+'</b><span>'+t.desc+'</span>';
+    b.addEventListener("click",()=>{
+      obTemplate=t.id;
+      host.querySelectorAll(".ob-tmpl").forEach(x=>x.classList.remove("on"));
+      b.classList.add("on");
+    });
+    host.appendChild(b);
+  });
+}
+
+document.querySelectorAll(".ob-next").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    const next=+b.dataset.next;
+    const err=document.getElementById("ob-err");
+    if(err) err.textContent="";
+    if(next===2){
+      const n=document.getElementById("ob-name").value.trim();
+      if(!n){ toast("Enter a name"); return; }
+    }
+    if(next===4){
+      const sw=parseFloat(document.getElementById("ob-sw").value);
+      const gw=parseFloat(document.getElementById("ob-gw").value);
+      if(isNaN(sw)||sw<60||sw>800){ err.textContent="Enter your current weight in pounds."; return; }
+      if(isNaN(gw)||gw<60||gw>800){ err.textContent="Enter a goal weight in pounds."; return; }
+      const pct=Math.abs(sw-gw)/sw;
+      if(obPhase==="cut" && gw>=sw){ err.textContent="On a cut your goal should be below your current weight."; return; }
+      if(obPhase==="bulk" && gw<=sw){ err.textContent="On a bulk your goal should be above your current weight."; return; }
+      if(pct>0.25){ err.textContent="That's a very large change for one phase — try a nearer target first."; return; }
+    }
+    goObStep(next);
+  });
+});
+document.querySelectorAll(".ob-back").forEach(b=>{
+  b.addEventListener("click", ()=>goObStep(+b.dataset.back));
+});
+document.querySelectorAll(".ob-phase").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    obPhase=b.dataset.phase;
+    document.querySelectorAll(".ob-phase").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+  });
+});
+
+document.getElementById("ob-finish").addEventListener("click", ()=>{
+  const name = document.getElementById("ob-name").value.trim() || "You";
+  const sw   = parseFloat(document.getElementById("ob-sw").value);
+  const gw   = parseFloat(document.getElementById("ob-gw").value);
+  const len  = parseInt(document.getElementById("ob-len").value) || 60;
+
+  // name this profile
+  const id = activeProfileId();
+  let list = loadProfiles();
+  if(!list.some(p=>p.id===id)){
+    list.push({id, name, created:new Date().toISOString().split("T")[0]});
+  } else {
+    list = list.map(p=>p.id===id ? {...p, name} : p);
+  }
+  saveProfiles(list);
+
+  plan = {
+    phase: obPhase,
+    start_date: new Date().toISOString().split("T")[0],
+    start_weight: sw, goal_weight: gw, phase_length: len,
+    active_template: obTemplate, custom_workout: null
+  };
+  lsSet("plan", plan);
+
+  // seed sensible starting targets from their own bodyweight
+  const pro = Math.round(sw * (obPhase==="cut" ? 1.10 : 1.00));
+  const fat = Math.round(sw * 0.35);
+  const mult = obPhase==="cut" ? 12 : obPhase==="bulk" ? 17 : 15;
+  const cal = Math.max(1600, Math.round((sw*mult)/10)*10);
+  const carb= Math.max(50, Math.round((cal - pro*4 - fat*9)/4));
+  targets = {cal, pro, fat, carb};
+  lsSet("targets", targets);
+
+  // log today's weight so the dashboard has something immediately
+  weighins = [{id:"w"+Date.now(), d: plan.start_date, w: sw}];
+  lsSet("weighins", weighins);
+
+  activeTemplate = TEMPLATES.find(t=>t.id===obTemplate) || TEMPLATES[0];
+  customWorkout = null;
+
+  hideOnboarding();
+  applyPhase(plan.phase);
+  loadSettingsForm();
+  renderDash(); renderDashWorkout(); updatePlanName(); updateDashSubtitles();
+  renderProfileList();
+  const whoP=document.getElementById("who-pill");
+  if(whoP && loadProfiles().length>1){ whoP.textContent=name; whoP.style.display=""; }
+  toast("Welcome, " + name);
+});
+
+// ── profile management (Settings) ───────────────────────────────────────
+function renderProfileList(){
+  const host=document.getElementById("profile-list");
+  if(!host) return;
+  let list=loadProfiles();
+  if(!list.length){
+    list=[{id:"default", name:"You", created:new Date().toISOString().split("T")[0]}];
+    saveProfiles(list);
+  }
+  const active=activeProfileId();
+  host.innerHTML="";
+  list.forEach(p=>{
+    // read that profile's own store to show a summary
+    let n=0, w=null;
+    try{
+      const raw=localStorage.getItem(dbKeyFor(p.id));
+      if(raw){ const d=JSON.parse(raw).data||{};
+        n=(d.weighins||[]).length;
+        if(n) w=(d.weighins[d.weighins.length-1]||{}).w; }
+    }catch(e){}
+    const row=document.createElement("div");
+    row.className="prof-row"+(p.id===active?" on":"");
+    row.innerHTML=
+      '<div style="min-width:0"><div class="prof-name">'+p.name+
+        (p.id===active?' <span style="font-size:10px;color:var(--ph)">· active</span>':'')+'</div>'+
+      '<div class="prof-meta">'+(n? n+' weigh-ins'+(w?' · '+w+' lb':'') : 'no data yet')+'</div></div>'+
+      '<div class="prof-actions">'+
+        (p.id===active?'':'<button class="prof-btn use" data-use="'+p.id+'">Switch</button>')+
+        (list.length>1 && p.id!==active?'<button class="prof-btn danger" data-del="'+p.id+'">Delete</button>':'')+
+      '</div>';
+    host.appendChild(row);
+  });
+
+  host.querySelectorAll("[data-use]").forEach(b=>b.addEventListener("click",()=>{
+    switchProfile(b.dataset.use);
+  }));
+  host.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.del;
+    const p=loadProfiles().find(x=>x.id===id);
+    if(!confirm("Delete "+(p?p.name:"this profile")+" and all their data? This cannot be undone."))return;
+    localStorage.removeItem(dbKeyFor(id));
+    saveProfiles(loadProfiles().filter(x=>x.id!==id));
+    renderProfileList();
+    toast("Profile deleted");
+  }));
+}
+
+function switchProfile(id){
+  dbFlush();
+  setActiveProfile(id);
+  DB_KEY = dbKeyFor(id);
+  DB = null;
+  location.reload();
+}
+
+document.getElementById("add-profile-btn").addEventListener("click", ()=>{
+  dbFlush();
+  const id = "p" + Date.now();
+  const list = loadProfiles();
+  list.push({id, name:"New user", created:new Date().toISOString().split("T")[0]});
+  saveProfiles(list);
+  setActiveProfile(id);
+  DB_KEY = dbKeyFor(id);
+  DB = null;
+  location.reload();
+});
+
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
   try {
@@ -5203,6 +5511,11 @@ document.getElementById("silent-toggle").addEventListener("click", ()=>{
     renderDashWorkout();
     updatePlanName();
     applyTheme(currentTheme);
+    renderProfileList();
+    const who=document.getElementById("who-pill");
+    const list=loadProfiles();
+    if(who && list.length>1){ who.textContent=activeProfile().name; who.style.display=""; }
+    if(needsOnboarding()) showOnboarding();
     refreshSoundToggle();
     refreshSilentToggle();
     renderRecalCard();
