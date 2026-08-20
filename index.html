@@ -1635,10 +1635,23 @@ body.t-paper .pr-val{background:none;-webkit-text-fill-color:var(--ph)}
           </div>
           <button class="toggle" id="sound-toggle"><span class="knob"></span></button>
         </div>
-        <button class="btn ghost" id="test-sound" style="margin-top:12px">Test Sound</button>
+        <div class="divider" style="margin:14px 0"></div>
+
+        <div class="sound-row">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700">Play through silent mode</div>
+            <div style="font-size:11px;color:var(--sub);margin-top:2px;line-height:1.5">
+              Works with the ringer off, but pauses music from other apps
+            </div>
+          </div>
+          <button class="toggle" id="silent-toggle"><span class="knob"></span></button>
+        </div>
+
+        <button class="btn ghost" id="test-sound" style="margin-top:14px">Test Sound</button>
         <div style="font-size:11px;color:var(--sub);line-height:1.6;margin-top:10px">
-          No sound on iPhone? Check the ring/silent switch on the side of the phone &mdash;
-          it mutes web audio. Turn the ringer on, then press Test Sound.
+          By default the app mixes with your music and won&rsquo;t interrupt it &mdash; but iOS
+          silences it when the ring/silent switch is on. Turn that switch on above, and
+          sound plays either way at the cost of pausing whatever else is playing.
         </div>
       </div>
 
@@ -2259,6 +2272,8 @@ function loadDataLocal(){
   dayExtras = lsGet("dayExtras") || {};
   const savedTheme = lsGet("theme");
   if(savedTheme) currentTheme = savedTheme;
+  const savedSilent = lsGet("silentSwitchMode");
+  silentSwitchMode = savedSilent === true;
   const savedSound = lsGet("soundOn");
   soundOn = (savedSound === null || savedSound === undefined) ? true : !!savedSound;
   exHistory  = lsGet("exHistory")  || {};
@@ -2303,7 +2318,7 @@ document.querySelectorAll(".tab").forEach(b=>{
     document.getElementById("tab-"+b.dataset.tab).classList.add("on");
     if(b.dataset.tab==="lb") renderLB();
     if(b.dataset.tab==="progress"){renderWeighins();renderLifts();renderProgress();}
-    if(b.dataset.tab==="settings"){ updateDbStatus(); renderRecalCard(); renderThemePicker(); }
+    if(b.dataset.tab==="settings"){ updateDbStatus(); renderRecalCard(); renderThemePicker(); refreshSilentToggle(); }
   });
 });
 
@@ -4374,16 +4389,18 @@ const SFX_DEFS = {
   dayDone:[{f:784, dur:0.15, vol:0.5}, {f:988, dur:0.15, vol:0.5},
            {f:1319, dur:0.40, vol:0.55}]
 };
-// A short genuinely-silent WAV. iOS ignores element.volume, so unlocking has
-// to be done by playing actual silence — not by muting a real sound.
+// ── PLAYBACK STRATEGY ────────────────────────────────────────────────
+// Web Audio *mixes* with other apps, so your music keeps playing. The cost is
+// that iOS silences it when the ring/silent switch is on. HTML <audio> is the
+// opposite: it plays through the silent switch but seizes the audio session and
+// pauses Spotify/Apple Music. Web Audio is the default; the other is opt-in.
 const SILENT_WAV = makeWav([{f:1, dur:0.02, vol:0}]);
-
-// One small pool of generic players; we swap src per sound. Only these few
-// elements ever need unlocking, and none of them holds a real sound at unlock.
 const SFX_URI = {};
-const POOL = 3;
-let sfxPool = [];
-let sfxTurn = 0;
+let   silentSwitchMode = false;      // true -> use <audio>, overrides mute switch
+let   audioCtx = null;
+let   sfxPool  = [];
+const POOL     = 3;
+let   sfxTurn  = 0;
 
 function buildSfx(){
   Object.keys(SFX_DEFS).forEach(name=>{
@@ -4394,16 +4411,32 @@ function buildSfx(){
     const a = new Audio();
     a.preload = "auto";
     a.setAttribute("playsinline","");
-    a.src = SILENT_WAV;          // start silent so an early play can't make noise
+    a.src = SILENT_WAV;
     sfxPool.push(a);
   }
 }
 
-// iOS needs the first play() of each element to come from a user gesture.
-// We prime them with silence, which is inaudible even though volume is ignored.
+// Tell Safari we're ambient audio — this is what stops other apps being
+// interrupted. Supported from Safari 16.4; harmless everywhere else.
+function setAmbientSession(){
+  try{
+    if (navigator.audioSession) navigator.audioSession.type = "ambient";
+  }catch(e){}
+}
+
 function unlockAudio(){
   if(audioUnlocked) return;
   audioUnlocked = true;
+  setAmbientSession();
+  // Web Audio: create once and resume from the gesture
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(AC){
+      if(!audioCtx) audioCtx = new AC();
+      if(audioCtx.state === "suspended") audioCtx.resume().catch(()=>{});
+    }
+  }catch(e){}
+  // prime the <audio> elements with silence in case silent-switch mode is used
   sfxPool.forEach(a=>{
     try{
       a.src = SILENT_WAV;
@@ -4416,18 +4449,49 @@ function unlockAudio(){
   document.addEventListener(ev, unlockAudio, {passive:true})
 );
 
-function playSfx(name){
-  if(!soundOn) return;
+// synthesise the same notes through Web Audio so nothing else is interrupted
+function playViaWebAudio(name){
+  const notes = SFX_DEFS[name];
+  if(!notes || !audioCtx) return false;
+  if(audioCtx.state === "suspended") audioCtx.resume().catch(()=>{});
+  try{
+    let t = audioCtx.currentTime + 0.01;
+    notes.forEach(n=>{
+      const osc = audioCtx.createOscillator();
+      const g   = audioCtx.createGain();
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(n.f, t);
+      const vol = (n.vol==null?0.5:n.vol) * 0.5;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + n.dur);
+      osc.start(t);
+      osc.stop(t + n.dur + 0.02);
+      t += n.dur;
+    });
+    return true;
+  }catch(e){ return false; }
+}
+
+function playViaElement(name){
   const uri = SFX_URI[name];
-  if(!uri || !sfxPool.length) return;
+  if(!uri || !sfxPool.length) return false;
   const a = sfxPool[sfxTurn];
   sfxTurn = (sfxTurn + 1) % sfxPool.length;
   try{
-    a.src = uri;               // swap in the sound we actually want
+    a.src = uri;
     a.currentTime = 0;
     const p = a.play();
     if(p && p.catch) p.catch(()=>{});
-  }catch(e){}
+    return true;
+  }catch(e){ return false; }
+}
+
+function playSfx(name){
+  if(!soundOn) return;
+  if(silentSwitchMode){ playViaElement(name); return; }
+  if(!playViaWebAudio(name)) playViaElement(name);   // fall back if unsupported
 }
 
 // keep the old call sites working
@@ -5108,6 +5172,21 @@ function renderThemePicker(){
   });
 }
 
+
+// ── silent-switch override ───────────────────────────────────────────────
+function refreshSilentToggle(){
+  const t=document.getElementById("silent-toggle");
+  if(t) t.classList.toggle("on", silentSwitchMode);
+}
+document.getElementById("silent-toggle").addEventListener("click", ()=>{
+  silentSwitchMode = !silentSwitchMode;
+  lsSet("silentSwitchMode", silentSwitchMode);
+  refreshSilentToggle();
+  unlockAudio();
+  playSfx("set");
+  toast(silentSwitchMode ? "Plays through silent mode" : "Won't interrupt music");
+});
+
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
   try {
@@ -5125,6 +5204,7 @@ function renderThemePicker(){
     updatePlanName();
     applyTheme(currentTheme);
     refreshSoundToggle();
+    refreshSilentToggle();
     renderRecalCard();
     renderRecalNudge();
     renderLB();
