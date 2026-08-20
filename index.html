@@ -1290,6 +1290,9 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
   color:var(--sub);font-size:11px;font-weight:700;padding:4px 11px;cursor:pointer;
 }
 .wk-jump:active{background:var(--card)}
+
+.build-line{font-size:11px;color:var(--sub);text-align:right;margin:-4px 0 10px}
+.build-line b{color:var(--text);font-weight:800}
 </style>
 </head>
 <body class="t-paper phase-cut">
@@ -1691,6 +1694,8 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
         <div class="frow2"><label>Protein-hit days</label><input type="number" min="0" max="7" id="nl-p" placeholder="6"/></div>
         <button class="btn" id="nl-save">Save Week</button>
       </div>
+      <div class="build-line">Build <b id="build-tag">—</b></div>
+
       <div class="sh">Profiles</div>
       <div id="profile-list"></div>
       <button class="btn ghost" id="add-profile-btn" style="margin-top:4px">Add Another Person</button>
@@ -2280,6 +2285,7 @@ const DB_ROOT    = "stopicantgrow.db";     // the original / first profile
 const PROFILES_KEY = "stopicantgrow.profiles";
 const ACTIVE_KEY   = "stopicantgrow.active";
 const DB_VERSION = 2;
+const BUILD = "2026.08.20";   // shown in Settings so you can confirm what is deployed
 
 // profiles = [{id, name, created}]
 function loadProfiles(){
@@ -2424,16 +2430,10 @@ function loadDataLocal(){
   exSessions = lsGet("exSessions") || {};
   exRPE      = lsGet("exRPE")      || {};
 
-  // first run: write the defaults down so they become real saved data
-  if (!DB.data.plan) {
-    DB.data.plan = plan;         DB.data.targets = targets;
-    DB.data.weighins = weighins; DB.data.liftLogs = liftLogs;
-    DB.data.goals = goalMap;     DB.data.checks = checks;
-    DB.data.nutlog = nutlog;     DB.data.setLogs = setLogs;
-    DB.data.friends = friends;   DB.data.dayExtras = dayExtras;
-    DB.data.exHistory = exHistory; DB.data.exSessions = exSessions; DB.data.exRPE = exRPE;
-    dbFlush();
-  }
+  // Nothing is written on first run. A profile only gets a stored record once
+  // the person actually completes setup or logs something — otherwise merely
+  // opening the app would create data (and, because these are object
+  // references, later edits would leak into storage before setup finished).
 
   applyPhase(plan.phase||"cut");
   loadSettingsForm();
@@ -2727,7 +2727,8 @@ function renderSetLogger(ex,ck){
     }
   });
   setLogs[ck]=existing;
-  if(prefilled) lsSet("setLogs",setLogs);
+  // don't persist placeholder rows for a profile that hasn't finished setup
+  if(prefilled && plan && plan.start_weight) lsSet("setLogs",setLogs);
 
   const wrap=document.createElement("div");wrap.className="set-logger";
 
@@ -5570,6 +5571,7 @@ document.getElementById("wk-jump").addEventListener("click", ()=>{
     renderDashWorkout();
     updatePlanName();
     applyTheme(currentTheme);
+    const bt=document.getElementById("build-tag"); if(bt) bt.textContent=BUILD;
     renderProfileList();
     const who=document.getElementById("who-pill");
     const list=loadProfiles();
