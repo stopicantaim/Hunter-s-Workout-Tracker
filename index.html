@@ -1055,6 +1055,33 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 /* legend swatches */
 .pchart-legend i.lg-line{background:linear-gradient(90deg,#10b981,#34d399)}
 
+
+/* ── target recalibration ── */
+.recal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+.recal-verdict{font-size:13px;font-weight:800;letter-spacing:.02em}
+.recal-verdict.good{color:var(--ph)}
+.recal-verdict.warn{color:#f59f00}
+.recal-verdict.bad{color:#ef4444}
+.recal-since{font-size:10px;color:var(--mute);font-weight:700}
+.recal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.rs-lbl{font-size:9px;font-weight:800;letter-spacing:.07em;color:var(--sub);text-transform:uppercase}
+.rs-val{font-size:15px;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums}
+.rs-val.muted{color:var(--sub)}
+.recal-prop{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
+.rp-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;color:var(--sub)}
+.rp-row b{color:var(--text);font-weight:800}
+.rp-row b.arr{color:var(--mute);font-weight:400;margin:0 2px}
+.rp-row i{font-style:normal;font-size:10px;color:var(--sub);margin-left:5px}
+.recal-note{font-size:11px;color:var(--sub);line-height:1.6;margin-top:10px}
+.recal-note.warn{color:#f59f00}
+.recal-empty{font-size:12px;color:var(--sub);line-height:1.6}
+
+.recal-nudge{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:#1c1200;border:1px solid #5c3d00;border-radius:10px;
+  padding:10px 13px;margin:10px 0 2px;font-size:12px;font-weight:700;color:#f59f00}
+.recal-nudge-btn{background:none;border:1px solid #7c5300;border-radius:7px;color:#f59f00;
+  font-size:11px;font-weight:800;padding:5px 12px;cursor:pointer;flex-shrink:0}
+.recal-nudge-btn:active{background:#2d1f00}
 </style>
 </head>
 <body class="cut">
@@ -1163,6 +1190,11 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
         <button class="wk-btn" id="dash-wk-prev" style="width:28px;height:28px;font-size:16px">‹</button>
         <span class="wk-lbl" id="dash-wk-lbl" style="font-size:13px">Week 1</span>
         <button class="wk-btn" id="dash-wk-next" style="width:28px;height:28px;font-size:16px">›</button>
+      </div>
+
+      <div class="recal-nudge" id="recal-nudge" style="display:none">
+        <span>Target check-in due</span>
+        <button class="recal-nudge-btn" id="recal-nudge-btn">Review</button>
       </div>
 
       <!-- 5. COLLAPSIBLE: Exercises -->
@@ -1426,6 +1458,9 @@ body.maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
         <button class="btn" id="p-save">Save Plan</button>
         <div class="saving-indicator" id="plan-saving"></div>
       </div>
+      <div class="sh">Target Check-in</div>
+      <div class="fcard" id="recal-card"></div>
+
       <div class="sh">Nutrition Targets</div>
       <div class="fcard">
         <div class="frow2"><label>Calories</label><input type="number" id="t-cal" placeholder="2264"/></div>
@@ -2098,7 +2133,7 @@ document.querySelectorAll(".tab").forEach(b=>{
     document.getElementById("tab-"+b.dataset.tab).classList.add("on");
     if(b.dataset.tab==="lb") renderLB();
     if(b.dataset.tab==="progress"){renderWeighins();renderLifts();renderProgress();}
-    if(b.dataset.tab==="settings") updateDbStatus();
+    if(b.dataset.tab==="settings"){ updateDbStatus(); renderRecalCard(); }
   });
 });
 
@@ -2834,6 +2869,7 @@ document.getElementById("dash-wi-save").addEventListener("click", async () => {
   lsSet("weighins", weighins);
   document.getElementById("dash-wi-w").value = "";
   if(document.getElementById("tab-progress").classList.contains("on")) renderProgress();
+  renderRecalNudge();
   renderDash();
   toast("Weight logged");
 });
@@ -4150,52 +4186,56 @@ const SFX_DEFS = {
   dayDone:[{f:784, dur:0.15, vol:0.5}, {f:988, dur:0.15, vol:0.5},
            {f:1319, dur:0.40, vol:0.55}]
 };
-const SFX = {};       // name -> pool of <audio>
-const POOL = 3;       // allows overlapping playback
+// A short genuinely-silent WAV. iOS ignores element.volume, so unlocking has
+// to be done by playing actual silence — not by muting a real sound.
+const SILENT_WAV = makeWav([{f:1, dur:0.02, vol:0}]);
+
+// One small pool of generic players; we swap src per sound. Only these few
+// elements ever need unlocking, and none of them holds a real sound at unlock.
+const SFX_URI = {};
+const POOL = 3;
+let sfxPool = [];
+let sfxTurn = 0;
 
 function buildSfx(){
   Object.keys(SFX_DEFS).forEach(name=>{
-    let uri;
-    try { uri = makeWav(SFX_DEFS[name]); } catch(e){ return; }
-    SFX[name] = [];
-    for(let i=0;i<POOL;i++){
-      const a = new Audio(uri);
-      a.preload = "auto";
-      a.setAttribute("playsinline","");
-      a.volume = 0.9;
-      SFX[name].push(a);
-    }
+    try { SFX_URI[name] = makeWav(SFX_DEFS[name]); } catch(e){}
   });
+  sfxPool = [];
+  for(let i=0;i<POOL;i++){
+    const a = new Audio();
+    a.preload = "auto";
+    a.setAttribute("playsinline","");
+    a.src = SILENT_WAV;          // start silent so an early play can't make noise
+    sfxPool.push(a);
+  }
 }
 
-// iOS requires the first play() to originate from a user gesture.
-// Prime every element silently on the first touch, then they're free to play.
+// iOS needs the first play() of each element to come from a user gesture.
+// We prime them with silence, which is inaudible even though volume is ignored.
 function unlockAudio(){
   if(audioUnlocked) return;
   audioUnlocked = true;
-  Object.values(SFX).forEach(pool=>{
-    pool.forEach(a=>{
-      const v=a.volume;
-      a.volume=0;
-      const p=a.play();
-      if(p && p.then) p.then(()=>{ a.pause(); a.currentTime=0; a.volume=v; })
-                       .catch(()=>{ a.volume=v; });
-      else { try{a.pause();a.currentTime=0;}catch(e){} a.volume=v; }
-    });
+  sfxPool.forEach(a=>{
+    try{
+      a.src = SILENT_WAV;
+      const p = a.play();
+      if(p && p.then) p.then(()=>{ try{a.pause(); a.currentTime=0;}catch(e){} }).catch(()=>{});
+    }catch(e){}
   });
 }
 ["touchend","click","keydown"].forEach(ev=>
-  document.addEventListener(ev, unlockAudio, {once:false, passive:true})
+  document.addEventListener(ev, unlockAudio, {passive:true})
 );
 
-let sfxIdx = {};
 function playSfx(name){
   if(!soundOn) return;
-  const pool = SFX[name];
-  if(!pool || !pool.length) return;
-  sfxIdx[name] = ((sfxIdx[name]||0)+1) % pool.length;
-  const a = pool[sfxIdx[name]];
+  const uri = SFX_URI[name];
+  if(!uri || !sfxPool.length) return;
+  const a = sfxPool[sfxTurn];
+  sfxTurn = (sfxTurn + 1) % sfxPool.length;
   try{
+    a.src = uri;               // swap in the sound we actually want
     a.currentTime = 0;
     const p = a.play();
     if(p && p.catch) p.catch(()=>{});
@@ -4603,6 +4643,230 @@ document.getElementById("test-sound").addEventListener("click", ()=>{
   toast("Playing test sounds");
 });
 
+
+// ═══════════════════════════════════════════════════════════════════════
+//  TARGET RECALIBRATION
+//  Recomputes calorie / macro targets from actual trend weight rather than
+//  the original anchor, so the plan stays honest as bodyweight changes.
+// ═══════════════════════════════════════════════════════════════════════
+const RECAL_INTERVAL_DAYS = 14;     // reassess every 2 weeks
+const RECAL_MAX_STEP      = 200;    // never move calories more than this at once
+const RECAL_MIN_CALS      = 1600;   // hard floor — do not recommend below this
+const RECAL_WINDOW_DAYS   = 21;     // look back this far to measure actual rate
+
+// exponentially-weighted trend weight — resists single-day water swings
+function trendWeight(){
+  const s=[...weighins].sort((a,b)=>a.d.localeCompare(b.d));
+  if(!s.length) return null;
+  const recent=s.slice(-10);
+  const k=0.25;                       // smoothing factor
+  let ema=+recent[0].w;
+  recent.forEach((p,i)=>{ if(i) ema = k*(+p.w) + (1-k)*ema; });
+  return +ema.toFixed(1);
+}
+
+// least-squares slope over the recent window, in lb/week
+function actualRateLbWk(){
+  const cutoff = Date.now() - RECAL_WINDOW_DAYS*864e5;
+  const s=[...weighins]
+    .filter(p=>new Date(p.d).getTime()>=cutoff)
+    .sort((a,b)=>a.d.localeCompare(b.d));
+  if(s.length<3) return null;         // not enough signal to act on
+  const t0=new Date(s[0].d).getTime();
+  const xs=s.map(p=>(new Date(p.d).getTime()-t0)/864e5);   // days
+  const ys=s.map(p=>+p.w);
+  const n=xs.length;
+  const mx=xs.reduce((a,b)=>a+b,0)/n, my=ys.reduce((a,b)=>a+b,0)/n;
+  let num=0, den=0;
+  for(let i=0;i<n;i++){ num+=(xs[i]-mx)*(ys[i]-my); den+=(xs[i]-mx)**2; }
+  if(!den) return null;
+  return +((num/den)*7).toFixed(2);   // lb per week (negative = losing)
+}
+
+// the rate we want, as lb/week, given phase and current weight
+function targetRateLbWk(tw){
+  const phase = plan.phase || "cut";
+  if(!tw) return 0;
+  if(phase==="cut")      return -(tw*0.0075);   // middle of the 0.5–1% band
+  if(phase==="bulk")     return  (tw*0.0035);   // conservative lean gain
+  return 0;                                     // maintain
+}
+
+function daysSinceRecal(){
+  const last = lsGet("lastRecal");
+  if(!last) return 999;
+  return Math.floor((Date.now()-new Date(last).getTime())/864e5);
+}
+function recalDue(){
+  return daysSinceRecal() >= RECAL_INTERVAL_DAYS && actualRateLbWk() !== null;
+}
+
+// build a recommendation — returns null if there isn't enough data
+function buildRecalibration(){
+  const tw = trendWeight();
+  const actual = actualRateLbWk();
+  if(tw==null || actual==null) return null;
+
+  const phase = plan.phase || "cut";
+  const target = targetRateLbWk(tw);
+  const cur = targets.cal || 2264;
+
+  // ~500 kcal/day ≈ 1 lb/week. Positive delta = eating too much for the goal.
+  let adjust = Math.round(((actual - target) * 500) / 10) * 10;
+  adjust = Math.max(-RECAL_MAX_STEP, Math.min(RECAL_MAX_STEP, adjust));
+
+  let newCal = cur - adjust;
+  let floored = false;
+  if(newCal < RECAL_MIN_CALS){ newCal = RECAL_MIN_CALS; floored = true; }
+  newCal = Math.round(newCal/5)*5;
+  adjust = cur - newCal;
+  // keep the recompute inside the cap even after rounding
+  if(Math.abs(adjust) > RECAL_MAX_STEP){
+    newCal = cur - (adjust>0 ? RECAL_MAX_STEP : -RECAL_MAX_STEP);
+    newCal = Math.round(newCal/5)*5;
+    adjust = cur - newCal;
+  }
+
+  // Macros scale off trend weight rather than the original anchor.
+  // Protein is deliberately sticky on a cut — dropping it while in a deficit
+  // works against the whole point of the phase.
+  const proPerLb = phase==="cut" ? 1.10 : 1.00;
+  let newPro = Math.round(tw * proPerLb);
+  if(phase==="cut") newPro = Math.max(newPro, Math.round(tw*1.0));
+  const newFat  = Math.max(Math.round(tw * 0.35), Math.round(tw * 0.30));
+  const kcalFromPF = newPro*4 + newFat*9;
+  let newCarb = Math.round((newCal - kcalFromPF) / 4);
+  if(newCarb < 50){ newCarb = 50; }               // don't strip carbs to nothing
+
+  // how far off band are we?
+  const pctWk = tw ? Math.abs(actual)/tw : 0;
+  let verdict, tone;
+  if(phase==="maintain"){
+    verdict = pctWk < 0.003 ? "Holding steady" : "Drifting — adjust intake";
+    tone    = pctWk < 0.003 ? "good" : "warn";
+  } else if(phase==="cut"){
+    if(actual > -0.1)            { verdict="Loss has stalled";        tone="warn"; }
+    else if(pctWk < 0.005)       { verdict="Losing slower than plan"; tone="warn"; }
+    else if(pctWk > 0.01)        { verdict="Losing too fast";         tone="bad";  }
+    else                          { verdict="On track";                tone="good"; }
+  } else {
+    if(actual < 0.05)            { verdict="Not gaining";             tone="warn"; }
+    else if(pctWk > 0.007)       { verdict="Gaining too fast";        tone="bad";  }
+    else                          { verdict="On track";                tone="good"; }
+  }
+
+  return {
+    trend: tw, actual, target: +target.toFixed(2),
+    pctWk: +(pctWk*100).toFixed(2),
+    curCal: cur, newCal, adjust: cur-newCal,
+    newPro, newFat, newCarb, floored, verdict, tone,
+    dataPoints: weighins.filter(p=>new Date(p.d).getTime()>=Date.now()-RECAL_WINDOW_DAYS*864e5).length
+  };
+}
+
+function applyRecalibration(r){
+  targets = {cal:r.newCal, pro:r.newPro, fat:r.newFat, carb:r.newCarb};
+  lsSet("targets", targets);
+  lsSet("lastRecal", new Date().toISOString().split("T")[0]);
+  // keep a short audit trail
+  const hist = lsGet("recalHistory") || [];
+  hist.push({date:new Date().toISOString().split("T")[0], trend:r.trend,
+             actual:r.actual, cal:r.newCal, pro:r.newPro});
+  lsSet("recalHistory", hist.slice(-24));
+  loadSettingsForm();
+  renderRecalCard();
+  renderRecalNudge();
+  renderDash();
+  toast("Targets updated");
+}
+
+// ── the Settings card ───────────────────────────────────────────────────
+function renderRecalCard(){
+  const host=document.getElementById("recal-card");
+  if(!host) return;
+  const r=buildRecalibration();
+  const since=daysSinceRecal();
+  const sinceTxt = since>=999 ? "never" : since===0 ? "today" : since+"d ago";
+
+  if(!r){
+    host.innerHTML =
+      '<div class="recal-empty">Log at least 3 weigh-ins over a couple of weeks '+
+      'and this will recompute your targets from your actual trend.</div>';
+    return;
+  }
+
+  const dirWord = r.adjust>0 ? "lower" : r.adjust<0 ? "raise" : "keep";
+  const adjTxt  = r.adjust===0 ? "no change"
+                : (r.adjust>0?"−":"+")+Math.abs(r.adjust)+" kcal";
+
+  host.innerHTML =
+    '<div class="recal-head">'+
+      '<span class="recal-verdict '+r.tone+'">'+r.verdict+'</span>'+
+      '<span class="recal-since">checked '+sinceTxt+'</span>'+
+    '</div>'+
+
+    '<div class="recal-stats">'+
+      '<div><div class="rs-lbl">Trend weight</div><div class="rs-val">'+r.trend.toFixed(1)+' lb</div></div>'+
+      '<div><div class="rs-lbl">Actual rate</div><div class="rs-val">'+
+        (r.actual<=0?"":"+")+r.actual.toFixed(2)+' /wk</div></div>'+
+      '<div><div class="rs-lbl">Target rate</div><div class="rs-val muted">'+
+        (r.target<=0?"":"+")+r.target.toFixed(2)+' /wk</div></div>'+
+    '</div>'+
+
+    '<div class="recal-prop">'+
+      '<div class="rp-row"><span>Calories</span><span>'+r.curCal+
+        ' <b class="arr">→</b> <b>'+r.newCal+'</b> <i>'+adjTxt+'</i></span></div>'+
+      '<div class="rp-row"><span>Protein</span><span>'+(targets.pro||0)+
+        ' <b class="arr">→</b> <b>'+r.newPro+' g</b></span></div>'+
+      '<div class="rp-row"><span>Fat</span><span>'+(targets.fat||0)+
+        ' <b class="arr">→</b> <b>'+r.newFat+' g</b></span></div>'+
+      '<div class="rp-row"><span>Net carbs</span><span>'+(targets.carb||0)+
+        ' <b class="arr">→</b> <b>'+r.newCarb+' g</b></span></div>'+
+    '</div>'+
+
+    (r.floored
+      ? '<div class="recal-note warn">Held at the '+RECAL_MIN_CALS+
+        ' kcal floor — the maths asked for less, which is not a sensible target. '+
+        'If loss has stalled here, add activity rather than cutting further.</div>'
+      : '')+
+
+    (r.dataPoints<4
+      ? '<div class="recal-note">Based on only '+r.dataPoints+
+        ' weigh-ins — more data makes this more reliable.</div>'
+      : '')+
+
+    '<button class="btn" id="recal-apply" style="margin-top:12px">Apply New Targets</button>'+
+    '<button class="btn ghost" id="recal-skip" style="margin-top:8px">Keep Current Targets</button>';
+
+  const ap=document.getElementById("recal-apply");
+  if(ap) ap.addEventListener("click", ()=>applyRecalibration(r));
+  const sk=document.getElementById("recal-skip");
+  if(sk) sk.addEventListener("click", ()=>{
+    lsSet("lastRecal", new Date().toISOString().split("T")[0]);
+    renderRecalCard();
+    renderRecalNudge();
+    toast("Targets kept");
+  });
+}
+
+// small nudge on the dashboard when a check is due
+function renderRecalNudge(){
+  const el=document.getElementById("recal-nudge");
+  if(!el) return;
+  el.style.display = recalDue() ? "flex" : "none";
+}
+
+
+// nudge -> jump to Settings and show the card
+document.getElementById("recal-nudge-btn").addEventListener("click", ()=>{
+  const tab=[...document.querySelectorAll(".tab")].find(t=>t.dataset.tab==="settings");
+  if(tab) tab.click();
+  setTimeout(()=>{
+    const c=document.getElementById("recal-card");
+    if(c) c.scrollIntoView({behavior:"smooth", block:"center"});
+  }, 120);
+});
+
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
   try {
@@ -4619,6 +4883,8 @@ document.getElementById("test-sound").addEventListener("click", ()=>{
     renderDashWorkout();
     updatePlanName();
     refreshSoundToggle();
+    renderRecalCard();
+    renderRecalNudge();
     renderLB();
     // if a workout was left running, restore its elapsed time when reopened
     const savedWo = lsGet("woTimer");
