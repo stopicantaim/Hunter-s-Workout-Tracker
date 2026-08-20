@@ -1275,6 +1275,21 @@ body.t-paper .pr-val{background:none;-webkit-text-fill-color:var(--ph)}
 .prof-btn.danger{border-color:#7c0505;color:#ef4444}
 .prof-btn.use{border-color:var(--ph-border);color:var(--ph)}
 body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
+
+/* ── current-week marker ── */
+.wk-lbl.is-current::after{
+  content:"this week";
+  display:inline-block;margin-left:7px;
+  font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ph);background:var(--ph-bg);border:1px solid var(--ph-border);
+  border-radius:99px;padding:2px 7px;vertical-align:middle;
+}
+.wk-jump{
+  display:block;margin:0 0 8px auto;
+  background:none;border:1px solid var(--border2);border-radius:99px;
+  color:var(--sub);font-size:11px;font-weight:700;padding:4px 11px;cursor:pointer;
+}
+.wk-jump:active{background:var(--card)}
 </style>
 </head>
 <body class="t-paper phase-cut">
@@ -1384,6 +1399,7 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
         <span class="wk-lbl" id="dash-wk-lbl" style="font-size:13px">Week 1</span>
         <button class="wk-btn" id="dash-wk-next" style="width:28px;height:28px;font-size:16px">›</button>
       </div>
+      <button class="wk-jump" id="wk-jump" style="display:none">Back to current week</button>
 
       <div class="recal-nudge" id="recal-nudge" style="display:none">
         <span>Target check-in due</span>
@@ -2201,6 +2217,17 @@ let nutlog={};
 let friends=[];
 let setLogs={};
 let week=1;
+
+// Which training week is it today, counted from the plan's start date?
+function computeCurrentWeek(){
+  if(!plan || !plan.start_date) return 1;
+  const start = new Date(plan.start_date + "T00:00:00");
+  if(isNaN(start)) return 1;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = Math.floor((today - start) / 864e5);
+  if(days < 0) return 1;                    // plan starts in the future
+  return Math.max(1, Math.min(52, Math.floor(days/7) + 1));
+}
 let openSwap=null;
 const TOTAL_SECS=120;
 let timerInterval=null;
@@ -2936,6 +2963,7 @@ document.getElementById("p-save").addEventListener("click",async()=>{
   plan.phase_length=parseInt(document.getElementById("p-len").value)||60;
   document.getElementById("plan-saving").textContent="Saving...";
   lsSet("plan",plan);
+  week = computeCurrentWeek();
   document.getElementById("plan-saving").textContent="Saved";
   setTimeout(()=>document.getElementById("plan-saving").textContent="",2000);
   renderDash();
@@ -3185,7 +3213,21 @@ document.getElementById("dash-wk-next").addEventListener("click", () => {
 });
 
 function renderDashWorkout() {
-  document.getElementById("dash-wk-lbl").textContent = "Week " + week;
+  const cur = computeCurrentWeek();
+  const lbl = document.getElementById("dash-wk-lbl");
+  lbl.textContent = "Week " + week;
+  lbl.classList.toggle("is-current", week === cur);
+
+  // offer a way back when you've navigated off the current week
+  const jump = document.getElementById("wk-jump");
+  if(jump){
+    if(week !== cur){
+      jump.style.display = "";
+      jump.textContent = "Back to week " + cur;
+    } else {
+      jump.style.display = "none";
+    }
+  }
 
   // exercise days — collapsible, only one open at a time
   const host = document.getElementById("dash-workout-days"); host.innerHTML = "";
@@ -5423,6 +5465,7 @@ document.getElementById("ob-finish").addEventListener("click", ()=>{
 
   activeTemplate = TEMPLATES.find(t=>t.id===obTemplate) || TEMPLATES[0];
   customWorkout = null;
+  week = computeCurrentWeek();
 
   hideOnboarding();
   applyPhase(plan.phase);
@@ -5501,6 +5544,15 @@ document.getElementById("add-profile-btn").addEventListener("click", ()=>{
   location.reload();
 });
 
+
+// jump back to whatever week the calendar says it is
+document.getElementById("wk-jump").addEventListener("click", ()=>{
+  week = computeCurrentWeek();
+  openSwap = null;
+  renderDashWorkout(); renderDash(); updateDashSubtitles();
+  toast("Week " + week);
+});
+
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
   try {
@@ -5512,6 +5564,7 @@ document.getElementById("add-profile-btn").addEventListener("click", ()=>{
     if(ma) ma.style.display = "block";
     loadDataLocal();
     await loadWorkoutConfig();
+    week = computeCurrentWeek();
     renderDash();
     renderDashWorkout();
     renderDashWorkout();
