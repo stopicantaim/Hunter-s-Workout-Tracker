@@ -1315,7 +1315,6 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
       </div>
       <div class="hdr-right">
         <div class="hdr-badge" id="day-badge">Day — / 60</div>
-        <button class="sign-out-btn" id="signout-btn">Sign out</button>
       </div>
     </div>
   </header>
@@ -1736,7 +1735,7 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
       </div>
 
       <div class="divider"></div>
-      <button class="btn ghost" id="signout-btn2" style="margin-bottom:8px">Reset All Data</button>
+      <button class="btn ghost" id="signout-btn2" style="margin-bottom:8px">Erase This Profile’s Data</button>
     </section>
 
   </main>
@@ -2218,12 +2217,17 @@ function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t
 // Auth is bypassed; these handlers are intentionally omitted.
 
 // ── SIGN OUT ──────────────────────────────────────────
-async function signOut(){
-  if(!confirm("Reset ALL data? Download a backup first — this cannot be undone.")) return;
+async function resetProfileData(){
+  const who = activeProfile().name;
+  if(!confirm("Erase all data for "+who+"? Download a backup first — this cannot be undone.")) return;
+  // stop the unload auto-save from writing the in-memory copy back over the wipe
+  suppressFlush = true;
+  DB = null;
   localStorage.removeItem(DB_KEY);
   location.reload();
 }
-try{document.getElementById("signout-btn").addEventListener("click",signOut);document.getElementById("signout-btn2").addEventListener("click",signOut);}catch(e){}
+const signOut = resetProfileData;   // legacy name
+try{ const rb=document.getElementById("signout-btn2"); if(rb) rb.addEventListener("click", resetProfileData); }catch(e){}
 
 // ── INIT APP ──────────────────────────────────────────
 async function initApp(user){
@@ -2318,7 +2322,9 @@ function dbLoad(){
   dbFlush();
 }
 
+let suppressFlush = false;     // set while wiping, so the unload save can't undo it
 function dbFlush(){
+  if (suppressFlush) return;
   if (!DB) return;
   DB.__updated = Date.now();
   DB.__v = DB_VERSION;
