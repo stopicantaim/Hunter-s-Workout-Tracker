@@ -550,12 +550,12 @@ body.t-paper .warn-box{background:#fdecec;border-color:#f3b7b7;color:#b91c1c}
   max-height:0;
   transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s ease;
   opacity:0;
-  display:block !important; /* override display:none — use max-height instead */
+  display:block !important;
 }
-.day-block.open .day-body {
-  max-height:2000px;
-  opacity:1;
-}
+.day-block.open .day-body { opacity:1; }
+/* once the open animation finishes the clamp is removed entirely, so a long
+   day can never be cut off no matter how many exercises it holds */
+.day-block.open .day-body.settled { max-height:none; overflow:visible; }
 
 /* ex-chk done pop */
 .ex-chk { transition: background .15s, border-color .15s, color .15s, transform .12s; }
@@ -627,11 +627,8 @@ body.t-paper .warn-box{background:#fdecec;border-color:#f3b7b7;color:#b91c1c}
   display:block !important;
   padding:0 13px;
 }
-.accord-block.open .accord-body {
-  max-height:3000px;
-  opacity:1;
-  padding:12px 13px 14px;
-}
+.accord-block.open .accord-body { opacity:1; padding:12px 13px 14px; }
+.accord-block.open .accord-body.settled { max-height:none; overflow:visible; }
 
 /* builder day block */
 .builder-day {
@@ -672,7 +669,8 @@ body.t-paper .warn-box{background:#fdecec;border-color:#f3b7b7;color:#b91c1c}
 .dacc-arrow{font-size:16px;color:var(--sub);transition:transform .22s;display:inline-block;margin-left:4px}
 .dash-accord.open .dacc-arrow{transform:rotate(90deg)}
 .dacc-body{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease;display:block !important;padding:0 12px}
-.dash-accord.open .dacc-body{max-height:3000px;opacity:1;padding:0 12px 12px}
+.dash-accord.open .dacc-body{opacity:1;padding:0 12px 12px}
+.dash-accord.open .dacc-body.settled{max-height:none;overflow:visible}
 
 /* ── start workout button ── */
 .start-workout-btn{
@@ -2234,6 +2232,7 @@ function computeCurrentWeek(){
   return Math.max(1, Math.min(52, Math.floor(days/7) + 1));
 }
 let openSwap=null;
+let openDayKey=null;   // which day is expanded on the dashboard
 const TOTAL_SECS=120;
 let timerInterval=null;
 let activeBarWrap=null;
@@ -2848,7 +2847,7 @@ function renderSetLogger(ex,ck){
 
         const isLast = doneCount===numSets;
         // don't start a rest timer after the final set
-        if(!isLast && targetRow?._restBar) startTimer(targetRow._restBar,doneCount,numSets);
+        if(!isLast && targetRow?._restBar) startTimer(targetRow._restBar,doneCount,numSets); setTimeout(refreshOpenPanels,20);
 
         if(isLast && !checks[ck]){
           checks[ck]=true;
@@ -2990,9 +2989,13 @@ document.addEventListener("click", e => {
   const block = hdr.closest(".accord-block");
   const wasOpen = block.classList.contains("open");
   // close all in same page first
-  block.closest(".page").querySelectorAll(".accord-block").forEach(b => b.classList.remove("open"));
+  block.closest(".page").querySelectorAll(".accord-block").forEach(b => {
+    b.classList.remove("open");
+    setPanelOpen(b.querySelector(".accord-body"), false);
+  });
   if (!wasOpen) {
     block.classList.add("open");
+    setPanelOpen(block.querySelector(".accord-body"), true);
     // lazy-render contents if needed
     const target = hdr.dataset.target;
     if (target === "accord-lifts") renderLifts();
@@ -3245,9 +3248,17 @@ function renderDashWorkout() {
     hdr.innerHTML = "<span>" + day.label + "</span><div style='display:flex;align-items:center;gap:8px'><span class='day-done'>" + done + "/" + total + "</span><span class='day-chevron'>›</span></div>";
     hdr.addEventListener("click", () => {
       const wasSelected = block.classList.contains("selected");
-      // deselect all
-      host.querySelectorAll(".day-block").forEach(b => b.classList.remove("selected","open"));
-      if (!wasSelected) { block.classList.add("selected","open"); }
+      host.querySelectorAll(".day-block").forEach(b => {
+        b.classList.remove("selected","open");
+        setPanelOpen(b.querySelector(".day-body"), false);
+      });
+      if (!wasSelected) {
+        block.classList.add("selected","open");
+        openDayKey = day.key;
+        setPanelOpen(block.querySelector(".day-body"), true);
+      } else {
+        openDayKey = null;
+      }
     });
     block.appendChild(hdr);
 
@@ -3259,6 +3270,11 @@ function renderDashWorkout() {
     startBar.appendChild(startBtn); block.appendChild(startBar);
 
     const body = document.createElement("div"); body.className = "day-body";
+    if (day.key === openDayKey) {
+      block.classList.add("open","selected");
+      // already open before the re-render — show it at full height with no animation
+      body.classList.add("settled");
+    }
     day.exs.forEach((ex, i) => {
       const ck = "w" + week + "-" + day.key + "-" + i;
       const isDone = !!checks[ck];
@@ -3283,7 +3299,7 @@ function renderDashWorkout() {
         const bar = document.createElement("div"); bar.className = "swap-bar";
         const sb2 = document.createElement("button"); sb2.className = "swap-btn" + (isOpen ? " active" : "");
         sb2.textContent = isOpen ? "Hide substitutes" : "Substitute machines";
-        sb2.addEventListener("click", (e) => { e.stopPropagation(); openSwap = isOpen ? null : sk; renderDashWorkout(); });
+        sb2.addEventListener("click", (e) => { e.stopPropagation(); openSwap = isOpen ? null : sk; renderDashWorkout(); setTimeout(refreshOpenPanels,20); });
         bar.appendChild(sb2); row.appendChild(bar);
         const box = document.createElement("div"); box.className = "swap-box" + (isOpen ? " open" : "");
         box.innerHTML = "<div class='swap-title'>Substitute Options</div>" + ex.subs.map(s => "<div class='sub-item'><div><div class='sub-name'>" + s.n + "</div><div class='sub-why'>" + s.w + "</div></div><div class='sub-meta'>" + s.s + "<br>" + s.l + "</div></div>").join("");
@@ -3304,6 +3320,11 @@ function renderDashWorkout() {
     host.appendChild(block);
   });
 
+  // restored panels open instantly at natural height
+  host.querySelectorAll(".day-block.open .day-body").forEach(p=>{
+    p.classList.add("settled"); p.style.maxHeight="";
+  });
+  setTimeout(refreshOpenPanels, 20);
   host.querySelectorAll(".ex-chk").forEach(btn => {
     btn.addEventListener("click", async () => {
       const ck = btn.dataset.ck; checks[ck] = !checks[ck];
@@ -3588,7 +3609,9 @@ function animateNumsIn(root) {
 document.querySelectorAll(".dacc-hdr").forEach(hdr => {
   hdr.addEventListener("click", () => {
     const block = hdr.closest(".dash-accord");
-    block.classList.toggle("open");
+    const willOpen = !block.classList.contains("open");
+    block.classList.toggle("open", willOpen);
+    setPanelOpen(block.querySelector(".dacc-body"), willOpen);
     // lazy render when opened
     const id = hdr.dataset.dacc;
     if (block.classList.contains("open")) {
@@ -3776,6 +3799,11 @@ function renderActiveWorkout(day) {
   host.appendChild(fin);
 
   // wire checkboxes
+  // restored panels open instantly at natural height
+  host.querySelectorAll(".day-block.open .day-body").forEach(p=>{
+    p.classList.add("settled"); p.style.maxHeight="";
+  });
+  setTimeout(refreshOpenPanels, 20);
   host.querySelectorAll(".ex-chk").forEach(btn => {
     btn.addEventListener("click", async () => {
       const ck = btn.dataset.ck;
@@ -5554,6 +5582,39 @@ document.getElementById("wk-jump").addEventListener("click", ()=>{
   toast("Week " + week);
 });
 
+
+// ── expand/collapse without ever clipping content ───────────────────────
+// CSS can't transition to `height:auto`, so we animate to the measured height
+// and then drop the clamp so the panel can grow freely afterwards.
+function setPanelOpen(panel, open){
+  if(!panel) return;
+  panel.classList.remove("settled");
+  if(open){
+    panel.style.maxHeight = panel.scrollHeight + "px";
+    clearTimeout(panel._settleT);
+    panel._settleT = setTimeout(()=>{
+      panel.classList.add("settled");
+      panel.style.maxHeight = "";
+    }, 360);
+  } else {
+    // from `none` back to a number, so the collapse actually animates
+    panel.style.maxHeight = panel.scrollHeight + "px";
+    void panel.offsetHeight;
+    panel.style.maxHeight = "0px";
+    clearTimeout(panel._settleT);
+  }
+}
+
+// if a panel's contents change while it's open (rest bar, swap list, added
+// exercise), re-measure so nothing is hidden
+function refreshOpenPanels(){
+  document.querySelectorAll(".day-block.open .day-body, .dash-accord.open .dacc-body, .accord-block.open .accord-body")
+    .forEach(p=>{
+      if(p.classList.contains("settled")) return;
+      p.style.maxHeight = p.scrollHeight + "px";
+    });
+}
+
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
   try {
@@ -5568,6 +5629,7 @@ document.getElementById("wk-jump").addEventListener("click", ()=>{
     week = computeCurrentWeek();
     renderDash();
     renderDashWorkout();
+    setTimeout(()=>{document.querySelectorAll('.dash-accord.open .dacc-body').forEach(p=>{p.classList.add('settled');p.style.maxHeight='';});},50);
     renderDashWorkout();
     updatePlanName();
     applyTheme(currentTheme);
