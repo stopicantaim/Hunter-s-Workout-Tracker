@@ -1291,6 +1291,60 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
 
 .build-line{font-size:11px;color:var(--sub);text-align:right;margin:-4px 0 10px}
 .build-line b{color:var(--text);font-weight:800}
+
+/* ═══ TOUCH FEEDBACK ═══ */
+
+/* exercise row: presses in slightly and tints */
+.ex-main{
+  position:relative;overflow:hidden;
+  transition:background .18s ease, transform .12s cubic-bezier(.3,.8,.4,1);
+  cursor:pointer;
+}
+.ex-main.pressing{
+  transform:scale(.988);
+  background:color-mix(in srgb, var(--ph) 7%, transparent);
+}
+
+/* day header: subtle press + the chevron nudges */
+.day-hdr{position:relative;overflow:hidden;transition:filter .16s ease,transform .12s ease}
+.day-hdr.pressing{transform:scale(.995);filter:brightness(1.06)}
+.day-hdr .day-chevron{transition:transform .22s cubic-bezier(.3,.8,.4,1)}
+.day-hdr.pressing .day-chevron{transform:translateX(2px)}
+.day-block.open .day-hdr.pressing .day-chevron{transform:rotate(90deg) translateX(2px)}
+
+/* the ripple itself — one shared element style */
+.tap-ripple{
+  position:absolute;border-radius:50%;pointer-events:none;
+  background:currentColor;opacity:.16;
+  transform:translate(-50%,-50%) scale(0);
+  animation:tapRipple .5s cubic-bezier(.25,.8,.35,1) forwards;
+}
+@keyframes tapRipple{
+  0%  {transform:translate(-50%,-50%) scale(0);   opacity:.18}
+  70% {opacity:.10}
+  100%{transform:translate(-50%,-50%) scale(1);   opacity:0}
+}
+
+/* pressable controls get a consistent squeeze */
+.swap-btn,.day-add-btn,.plan-edit-btn,.rpe-btn,.set-tag-btn,
+.theme-card,.ob-tmpl,.ob-phase,.lift-chip,.muscle-tab,.wk-jump{
+  transition:transform .12s cubic-bezier(.3,.8,.4,1),background .16s,border-color .16s,color .16s;
+}
+.swap-btn:active,.day-add-btn:active,.plan-edit-btn:active,
+.theme-card:active,.ob-tmpl:active,.ob-phase:active,
+.lift-chip:active,.muscle-tab:active,.wk-jump:active{transform:scale(.97)}
+
+/* inputs: a soft focus ring rather than a hard border flip */
+.set-input,.hero-wi-input,.frow2 input,.frow2 select,.ob-input{
+  transition:border-color .16s, box-shadow .18s;
+}
+.set-input:focus,.hero-wi-input:focus,.frow2 input:focus,.frow2 select:focus,.ob-input:focus{
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--ph) 18%, transparent);
+}
+
+/* exercise name shifts a touch when its row is pressed */
+.ex-main.pressing .ex-name{transform:translateX(2px)}
+.ex-name{transition:transform .16s cubic-bezier(.3,.8,.4,1)}
 </style>
 </head>
 <body class="t-paper phase-cut">
@@ -5614,6 +5668,61 @@ function refreshOpenPanels(){
       p.style.maxHeight = p.scrollHeight + "px";
     });
 }
+
+
+// ═══════════════════════════════════════════════════════════════════════
+//  TOUCH FEEDBACK
+//  One delegated handler, so it keeps working through every re-render.
+// ═══════════════════════════════════════════════════════════════════════
+const PRESSABLE = ".ex-main, .day-hdr, .dacc-hdr, .accord-hdr";
+
+function spawnRipple(host, clientX, clientY){
+  if(!host) return;
+  const r = host.getBoundingClientRect();
+  // large enough to cover the element from wherever it was touched
+  const size = Math.max(r.width, r.height) * 2.1;
+  const dot = document.createElement("span");
+  dot.className = "tap-ripple";
+  dot.style.width = dot.style.height = size + "px";
+  dot.style.left = (clientX - r.left) + "px";
+  dot.style.top  = (clientY - r.top)  + "px";
+  host.appendChild(dot);
+  setTimeout(()=>dot.remove(), 520);
+}
+
+let pressTarget = null;
+function pressStart(e){
+  const t = e.target.closest(PRESSABLE);
+  if(!t) return;
+  // ignore presses that land on a control inside the row
+  if(e.target.closest("button, input, select, textarea") &&
+     !e.target.closest(".day-hdr, .dacc-hdr, .accord-hdr")) return;
+  pressTarget = t;
+  t.classList.add("pressing");
+  const p = e.touches ? e.touches[0] : e;
+  spawnRipple(t, p.clientX, p.clientY);
+}
+function pressEnd(){
+  if(pressTarget){ pressTarget.classList.remove("pressing"); pressTarget = null; }
+}
+
+document.addEventListener("touchstart", pressStart, {passive:true});
+document.addEventListener("touchend",   pressEnd,   {passive:true});
+document.addEventListener("touchcancel",pressEnd,   {passive:true});
+document.addEventListener("mousedown",  pressStart);
+document.addEventListener("mouseup",    pressEnd);
+document.addEventListener("mouseleave", pressEnd);
+
+// tapping anywhere on an exercise row opens its substitutes, so the whole row
+// is a target rather than just the small button
+document.addEventListener("click", (e)=>{
+  const main = e.target.closest(".ex-main");
+  if(!main) return;
+  if(e.target.closest("button, input, select")) return;   // checkbox etc. handled already
+  const row = main.closest(".ex-row");
+  const swap = row && row.querySelector(".swap-btn");
+  if(swap) swap.click();
+});
 
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
