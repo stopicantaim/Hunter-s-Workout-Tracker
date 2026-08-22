@@ -1345,6 +1345,39 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
 /* exercise name shifts a touch when its row is pressed */
 .ex-main.pressing .ex-name{transform:translateX(2px)}
 .ex-name{transition:transform .16s cubic-bezier(.3,.8,.4,1)}
+
+/* ── create-your-own exercise ── */
+.create-ex-toggle{width:100%;background:none;border:none;border-bottom:1px solid var(--border);
+  color:var(--ph);font-size:13px;font-weight:800;padding:12px 16px;text-align:left;cursor:pointer}
+.create-ex-toggle:active{background:var(--card2)}
+.create-ex-panel{display:none;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.create-ex-panel.open{display:block}
+.ce-lbl{display:block;font-size:10px;font-weight:800;letter-spacing:.07em;color:var(--sub);
+  text-transform:uppercase;margin:12px 0 5px}
+.ce-lbl:first-child{margin-top:0}
+.ce-input{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:8px;
+  color:var(--text);padding:10px 12px;font-size:15px;outline:none;-webkit-appearance:none;
+  font-family:inherit;resize:vertical}
+.ce-input:focus{border-color:var(--ph)}
+.ce-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ce-formats{display:flex;gap:6px;flex-wrap:wrap}
+.ce-fmt{background:var(--card);border:1px solid var(--border2);border-radius:99px;
+  color:var(--sub);font-size:11px;font-weight:700;padding:6px 12px;cursor:pointer;transition:all .15s}
+.ce-fmt.on{background:var(--ph-bg);border-color:var(--ph);color:var(--ph)}
+.ce-err{font-size:12px;color:#ef4444;min-height:14px;margin-top:8px}
+
+/* WOD-style rows render differently from sets&reps */
+.wod-box{background:var(--bg2);border-top:1px solid var(--border);padding:11px 13px}
+.wod-head{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.wod-badge{font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 8px;border-radius:99px;background:var(--ph-bg);color:var(--ph);border:1px solid var(--ph-border)}
+.wod-target{font-size:11px;color:var(--sub);font-weight:700}
+.wod-notes{font-size:12px;color:var(--sub);line-height:1.5;white-space:pre-wrap;margin-bottom:9px}
+.wod-result{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.wod-input{background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--text);
+  padding:9px 11px;font-size:15px;font-weight:700;outline:none;width:100%;-webkit-appearance:none}
+.wod-input:focus{border-color:var(--ph)}
+.wod-prev{font-size:10px;font-weight:700;color:var(--sub);margin-top:6px}
 </style>
 </head>
 <body class="t-paper phase-cut">
@@ -1548,6 +1581,43 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
           <button class="modal-close" id="add-ex-close">×</button>
         </div>
         <div class="modal-search"><input type="text" id="add-ex-search" placeholder="Search exercises..."/></div>
+
+        <button class="create-ex-toggle" id="create-ex-toggle">＋ Create your own exercise</button>
+
+        <div class="create-ex-panel" id="create-ex-panel">
+          <label class="ce-lbl">Exercise name</label>
+          <input class="ce-input" id="ce-name" placeholder="e.g. Fran, Thruster, Sled Push"/>
+
+          <label class="ce-lbl">How is it measured?</label>
+          <div class="ce-formats" id="ce-formats">
+            <button class="ce-fmt on" data-fmt="sets">Sets &amp; reps</button>
+            <button class="ce-fmt" data-fmt="fortime">For time</button>
+            <button class="ce-fmt" data-fmt="amrap">AMRAP</button>
+            <button class="ce-fmt" data-fmt="emom">EMOM</button>
+            <button class="ce-fmt" data-fmt="rounds">Rounds</button>
+          </div>
+
+          <div id="ce-sets-fields">
+            <div class="ce-row">
+              <div><label class="ce-lbl">Sets</label><input class="ce-input" type="number" id="ce-sets" value="3"/></div>
+              <div><label class="ce-lbl">Reps</label><input class="ce-input" type="number" id="ce-reps" value="10"/></div>
+            </div>
+          </div>
+          <div id="ce-time-fields" style="display:none">
+            <label class="ce-lbl" id="ce-time-lbl">Duration (minutes)</label>
+            <input class="ce-input" type="number" id="ce-mins" value="12"/>
+            <label class="ce-lbl">Movements / notes (optional)</label>
+            <textarea class="ce-input" id="ce-notes" rows="3"
+              placeholder="21-15-9 thrusters &amp; pull-ups"></textarea>
+          </div>
+
+          <label class="ce-lbl">Category</label>
+          <select class="ce-input" id="ce-group"></select>
+
+          <div class="ce-err" id="ce-err"></div>
+          <button class="btn" id="ce-save" style="margin-top:12px">Add to workout</button>
+        </div>
+
         <div class="modal-muscle-tabs" id="add-ex-tabs"></div>
         <div class="modal-ex-list" id="add-ex-list"></div>
       </div>
@@ -1915,7 +1985,7 @@ const LIFTS=["Bench Press","Overhead Press","Lat Pulldown","Assisted Pull-up","S
 const BASELINES={"Bench Press":null,"Overhead Press":null,"Lat Pulldown":null,"Assisted Pull-up":null,"Seated Row":null,"T-Bar Row":null};
 const SESSIONS=[{key:"push",lbl:"Push"},{key:"pull",lbl:"Pull"},{key:"upper",lbl:"Upper"},{key:"arms",lbl:"Arms"},{key:"run",lbl:"Run"},{key:"walk",lbl:"Walk"}];
 // ─── EXERCISE LIBRARY ────────────────────────────────────────────────────────
-const MUSCLE_GROUPS=["Chest","Back","Shoulders","Biceps","Triceps","Legs","Core","Cardio"];
+const MUSCLE_GROUPS=["Chest","Back","Shoulders","Biceps","Triceps","Legs","Core","Cardio","Olympic & CrossFit","My Exercises"];
 
 // which muscle groups belong to which day type — keeps the picker relevant
 const DAY_MUSCLES={
@@ -1937,6 +2007,8 @@ const DAY_MUSCLES={
   lowerb: ["Legs","Core"],
 };
 // fall back to the visual class if the key isn't mapped
+// CrossFit-style days should surface the functional library too
+const ALL_GROUPS_DAYS = ["wod","crossfit","metcon","full","conditioning"];
 const CLS_MUSCLES={
   push:["Chest","Shoulders","Triceps"],
   pull:["Back","Biceps"],
@@ -1945,7 +2017,13 @@ const CLS_MUSCLES={
   cardio:["Cardio","Legs","Core"],
 };
 function musclesForDay(day){
-  return DAY_MUSCLES[day.key] || CLS_MUSCLES[day.cls] || MUSCLE_GROUPS;
+  const key=(day.key||"").toLowerCase(), label=(day.label||"").toLowerCase();
+  // a WOD / conditioning / custom day gets the whole library, not a slice of it
+  if(ALL_GROUPS_DAYS.some(k=>key.includes(k)||label.includes(k))) return MUSCLE_GROUPS;
+  const base = DAY_MUSCLES[day.key] || CLS_MUSCLES[day.cls];
+  if(!base) return MUSCLE_GROUPS;
+  // always allow the functional list and anything they made themselves
+  return base.concat(["Olympic & CrossFit","My Exercises"]);
 }
 const EXERCISE_LIBRARY={
   Chest:[
@@ -2049,6 +2127,40 @@ const EXERCISE_LIBRARY={
     {n:"Weighted Sit-Up",          eq:"dumbbell",sets:"3×15", load:""},
     {n:"Wood Chop (Cable)",        eq:"cable",   sets:"3×12", load:""},
   ],
+  "Olympic & CrossFit":[
+    {n:"Snatch",                  eq:"barbell",   sets:"5×2",  load:""},
+    {n:"Power Snatch",            eq:"barbell",   sets:"5×3",  load:""},
+    {n:"Clean & Jerk",            eq:"barbell",   sets:"5×2",  load:""},
+    {n:"Power Clean",             eq:"barbell",   sets:"5×3",  load:""},
+    {n:"Hang Clean",              eq:"barbell",   sets:"5×3",  load:""},
+    {n:"Front Squat",             eq:"barbell",   sets:"5×5",  load:""},
+    {n:"Overhead Squat",          eq:"barbell",   sets:"4×5",  load:""},
+    {n:"Push Jerk",               eq:"barbell",   sets:"5×3",  load:""},
+    {n:"Split Jerk",              eq:"barbell",   sets:"5×2",  load:""},
+    {n:"Thruster",                eq:"barbell",   sets:"5×5",  load:""},
+    {n:"Wall Ball",               eq:"machine",   sets:"3×20", load:""},
+    {n:"Kettlebell Swing",        eq:"dumbbell",  sets:"3×20", load:""},
+    {n:"Turkish Get-Up",          eq:"dumbbell",  sets:"3×5",  load:""},
+    {n:"Box Jump",                eq:"bodyweight",sets:"5×10", load:""},
+    {n:"Burpee",                  eq:"bodyweight",sets:"3×15", load:""},
+    {n:"Burpee Box Jump Over",    eq:"bodyweight",sets:"3×12", load:""},
+    {n:"Toes-to-Bar",             eq:"bodyweight",sets:"3×12", load:""},
+    {n:"Chest-to-Bar Pull-Up",    eq:"bodyweight",sets:"4×8",  load:""},
+    {n:"Muscle-Up",               eq:"bodyweight",sets:"4×4",  load:""},
+    {n:"Handstand Push-Up",       eq:"bodyweight",sets:"4×6",  load:""},
+    {n:"Handstand Walk",          eq:"bodyweight",sets:"4×50ft",load:""},
+    {n:"Wall Walk",               eq:"bodyweight",sets:"3×5",  load:""},
+    {n:"Double-Under",            eq:"bodyweight",sets:"3×50", load:""},
+    {n:"Rope Climb",              eq:"bodyweight",sets:"4×2",  load:""},
+    {n:"Sled Push",               eq:"machine",   sets:"4×50ft",load:""},
+    {n:"Farmer Carry",            eq:"dumbbell",  sets:"4×100ft",load:""},
+    {n:"Devil Press",             eq:"dumbbell",  sets:"3×12", load:""},
+    {n:"Deadlift (Touch & Go)",   eq:"barbell",   sets:"5×5",  load:""},
+    {n:"Assault Bike",            eq:"cardio",    sets:"1×10min",load:""},
+    {n:"Row Erg (Interval)",      eq:"cardio",    sets:"5×500m",load:""},
+    {n:"Ski Erg",                 eq:"cardio",    sets:"5×500m",load:""},
+  ],
+  "My Exercises":[],
   Cardio:[
     {n:"Treadmill Run",            eq:"cardio",  sets:"1×45min",load:""},
     {n:"Treadmill Walk (Incline)", eq:"cardio",  sets:"1×60min",load:""},
@@ -2249,6 +2361,13 @@ let activeTemplate=null;
 let customWorkout=null; // overrides template when user builds custom
 
 // DAYS loaded dynamically from active template
+let customExercises = [];   // user-created movements, reusable everywhere
+function mergeCustomExercises(){
+  EXERCISE_LIBRARY["My Exercises"] = customExercises.map(e=>({
+    n:e.n, eq:e.eq||"other", sets:e.sets||"3×10", load:"", format:e.format||"sets", custom:true
+  }));
+}
+
 let dayExtras = {};   // { dayKey: [ {n,s,l,subs,added:true} ] }
 
 function getBaseDays(){
@@ -2473,6 +2592,8 @@ function loadDataLocal(){
   setLogs = lsGet("setLogs") || {};
   friends = lsGet("friends") || [];
   dayExtras = lsGet("dayExtras") || {};
+  customExercises = lsGet("customExercises") || [];
+  mergeCustomExercises();
   const savedTheme = lsGet("theme");
   if(savedTheme) currentTheme = savedTheme;
   const savedSilent = lsGet("silentSwitchMode");
@@ -3348,7 +3469,8 @@ function renderDashWorkout() {
         rm.addEventListener("click", (e) => { e.stopPropagation(); removeAddedExercise(day.key, ex.n); });
         row.appendChild(rm);
       }
-      if (day.cls !== "cardio") row.appendChild(renderSetLogger(ex, ck));
+      if (isWod(ex)) row.appendChild(renderWodLogger(ex, ck));
+      else if (day.cls !== "cardio") row.appendChild(renderSetLogger(ex, ck));
       if (ex.subs && ex.subs.length) {
         const bar = document.createElement("div"); bar.className = "swap-bar";
         const sb2 = document.createElement("button"); sb2.className = "swap-btn" + (isOpen ? " active" : "");
@@ -3817,7 +3939,8 @@ function renderActiveWorkout(day) {
     main.innerHTML = '<div class="ex-name">' + ex.n + badge + '</div><div class="ex-meta">' + ex.s + ' · ' + (ex.l || "—") + '</div><button class="ex-chk' + (isDone ? " done" : "") + '" data-ck="' + ck + '">✓</button>';
     row.appendChild(main);
 
-    if (day.cls !== "cardio") row.appendChild(renderSetLogger(ex, ck));
+    if (isWod(ex)) row.appendChild(renderWodLogger(ex, ck));
+    else if (day.cls !== "cardio") row.appendChild(renderSetLogger(ex, ck));
 
     if (ex.subs && ex.subs.length) {
       const bar = document.createElement("div"); bar.className = "swap-bar";
@@ -3895,6 +4018,8 @@ function openAddExercise(day){
   if (s) s.value = "";
   document.getElementById("add-ex-title").textContent = "Add to " + day.label;
   document.getElementById("add-ex-modal").classList.remove("hidden");
+  openCreatePanel(false);
+  document.getElementById("ce-err").textContent="";
   renderAddTabs();
   renderAddList();
 }
@@ -5724,6 +5849,150 @@ document.addEventListener("click", (e)=>{
   if(swap) swap.click();
 });
 
+
+// ═══════════════════════════════════════════════════════════════════════
+//  CREATE-YOUR-OWN EXERCISE  (incl. CrossFit-style formats)
+// ═══════════════════════════════════════════════════════════════════════
+let ceFormat = "sets";
+
+const FMT_LABEL = {
+  sets:"Sets & reps", fortime:"For time", amrap:"AMRAP", emom:"EMOM", rounds:"Rounds"
+};
+const FMT_RESULT_PLACEHOLDER = {
+  fortime:"Your time, e.g. 8:42",
+  amrap:"Rounds + reps, e.g. 7+12",
+  emom:"Completed? e.g. 10/10",
+  rounds:"Rounds + reps, e.g. 5+8"
+};
+
+function isWod(ex){ return ex && ex.format && ex.format !== "sets"; }
+
+function openCreatePanel(open){
+  const p=document.getElementById("create-ex-panel");
+  const t=document.getElementById("create-ex-toggle");
+  p.classList.toggle("open", open);
+  t.textContent = open ? "✕ Cancel" : "＋ Create your own exercise";
+  if(open){
+    // categories to file it under
+    const sel=document.getElementById("ce-group");
+    sel.innerHTML = MUSCLE_GROUPS.filter(g=>g!=="My Exercises")
+      .map(g=>'<option value="'+g+'">'+g+'</option>').join("");
+    // default to something sensible for the day we're adding to
+    const allowed = addTargetDay ? musclesForDay(addTargetDay) : MUSCLE_GROUPS;
+    const pref = allowed.find(g=>g!=="My Exercises");
+    if(pref) sel.value = pref;
+    document.getElementById("ce-name").focus();
+  }
+}
+document.getElementById("create-ex-toggle").addEventListener("click", ()=>{
+  openCreatePanel(!document.getElementById("create-ex-panel").classList.contains("open"));
+});
+
+document.querySelectorAll(".ce-fmt").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    ceFormat=b.dataset.fmt;
+    document.querySelectorAll(".ce-fmt").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    const setsF=document.getElementById("ce-sets-fields");
+    const timeF=document.getElementById("ce-time-fields");
+    const lbl=document.getElementById("ce-time-lbl");
+    if(ceFormat==="sets"){ setsF.style.display=""; timeF.style.display="none"; }
+    else{
+      setsF.style.display="none"; timeF.style.display="";
+      lbl.textContent = ceFormat==="fortime" ? "Time cap (minutes)"
+                      : ceFormat==="emom"    ? "How many minutes?"
+                      : ceFormat==="rounds"  ? "How many rounds?"
+                      : "Duration (minutes)";
+    }
+  });
+});
+
+document.getElementById("ce-save").addEventListener("click", ()=>{
+  const err=document.getElementById("ce-err"); err.textContent="";
+  const name=document.getElementById("ce-name").value.trim();
+  if(!name){ err.textContent="Give it a name."; return; }
+  if(name.length>60){ err.textContent="That name is a bit long."; return; }
+
+  let scheme, mins=null, notes="";
+  if(ceFormat==="sets"){
+    const s=parseInt(document.getElementById("ce-sets").value)||3;
+    const r=parseInt(document.getElementById("ce-reps").value)||10;
+    if(s<1||s>20){ err.textContent="Sets should be between 1 and 20."; return; }
+    if(r<1||r>200){ err.textContent="Reps should be between 1 and 200."; return; }
+    scheme = s+"×"+r;
+  } else {
+    mins=parseInt(document.getElementById("ce-mins").value)||10;
+    if(mins<1||mins>180){ err.textContent="Use a number of minutes between 1 and 180."; return; }
+    notes=document.getElementById("ce-notes").value.trim();
+    scheme = ceFormat==="rounds" ? mins+" rounds" : mins+" min";
+  }
+
+  const group=document.getElementById("ce-group").value;
+
+  // remember it so it can be reused in any workout later
+  if(!customExercises.some(e=>e.n.toLowerCase()===name.toLowerCase())){
+    customExercises.push({n:name, eq:"other", sets:scheme, format:ceFormat, group});
+    lsSet("customExercises", customExercises);
+    mergeCustomExercises();
+  }
+
+  // and drop it straight into the day we're editing
+  if(addTargetDay){
+    if(!dayExtras[addTargetDay.key]) dayExtras[addTargetDay.key]=[];
+    dayExtras[addTargetDay.key].push({
+      n:name, s:scheme, l:"", subs:[], added:true,
+      format:ceFormat, notes:notes, mins:mins
+    });
+    lsSet("dayExtras", dayExtras);
+    renderDashWorkout(); updateDashSubtitles();
+    const ov=document.getElementById("workout-overlay");
+    if(ov && !ov.classList.contains("hidden")){
+      const fresh=getDays().find(d=>d.key===addTargetDay.key);
+      if(fresh) renderActiveWorkout(fresh);
+    }
+  }
+
+  // reset the form for the next one
+  document.getElementById("ce-name").value="";
+  document.getElementById("ce-notes").value="";
+  openCreatePanel(false);
+  closeAddExercise();
+  toast(name+" added");
+});
+
+// ── logging a WOD-style entry (time / rounds instead of sets) ───────────
+function renderWodLogger(ex, ck){
+  const wrap=document.createElement("div");
+  wrap.className="wod-box";
+  const saved=(lsGet("wodResults")||{})[ck];
+
+  const target = ex.mins
+    ? (ex.format==="rounds" ? ex.mins+" rounds" : ex.mins+" min")
+    : (ex.s||"");
+
+  wrap.innerHTML =
+    '<div class="wod-head">'+
+      '<span class="wod-badge">'+(FMT_LABEL[ex.format]||"WOD")+'</span>'+
+      (target?'<span class="wod-target">'+target+'</span>':'')+
+    '</div>'+
+    (ex.notes?'<div class="wod-notes">'+ex.notes+'</div>':'')+
+    '<div class="wod-result">'+
+      '<input class="wod-input" id="wod-'+ck+'" placeholder="'+
+        (FMT_RESULT_PLACEHOLDER[ex.format]||"Result")+'" value="'+(saved?saved.result:"")+'"/>'+
+    '</div>'+
+    (saved&&saved.date?'<div class="wod-prev">Last logged '+saved.date.slice(5).replace("-","/")+'</div>':'');
+
+  const inp=wrap.querySelector(".wod-input");
+  inp.addEventListener("change", ()=>{
+    const all=lsGet("wodResults")||{};
+    const v=inp.value.trim();
+    if(v) all[ck]={result:v, date:today()};
+    else delete all[ck];
+    lsSet("wodResults", all);
+    toast(v?"Result saved":"Cleared");
+  });
+  return wrap;
+}
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
   try {
