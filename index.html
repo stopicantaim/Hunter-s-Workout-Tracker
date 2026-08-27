@@ -4430,7 +4430,16 @@ function themeInk(){
 }
 
 function hiDPI(canvas, cssH){
-  const W = canvas.parentElement.clientWidth || 320;
+  // clientWidth includes padding — measure the content box or the chart overflows
+  const host = canvas.parentElement;
+  let W = 320;
+  if(host){
+    const cs = getComputedStyle(host);
+    W = (host.clientWidth || 320)
+        - (parseFloat(cs.paddingLeft)||0)
+        - (parseFloat(cs.paddingRight)||0);
+  }
+  if(!(W>0)) W = 320;
   const H = cssH;
   canvas.width = W*2; canvas.height = H*2;
   canvas.style.width = W+"px"; canvas.style.height = H+"px";
@@ -4608,13 +4617,40 @@ function renderPWeightChart(){
 }
 
 // ── 3. e1RM PROGRESSION ─────────────────────────────────────────────────
+
+// The Lift Log form is optional — most people just log sets during a workout.
+// Merge both so the strength chart reflects what was actually trained.
+function strengthSeries(name){
+  const byDay = {};
+  (liftLogs||[]).filter(l=>l.name===name).forEach(l=>{
+    const e=e1rm(l.w,l.r);
+    if(!byDay[l.d] || e>byDay[l.d]) byDay[l.d]=e;
+  });
+  (exSessions[name]||[]).forEach(s=>{
+    if(!s || s.e1rm==null || !s.date) return;
+    if(!byDay[s.date] || s.e1rm>byDay[s.date]) byDay[s.date]=s.e1rm;
+  });
+  return Object.keys(byDay).sort().map(d=>({d, e:byDay[d]}));
+}
+
+// every exercise with any strength history, from either source
+function strengthLifts(){
+  const names = new Set();
+  (liftLogs||[]).forEach(l=>names.add(l.name));
+  Object.keys(exSessions||{}).forEach(n=>{
+    if((exSessions[n]||[]).some(s=>s && s.e1rm!=null)) names.add(n);
+  });
+  return [...names];
+}
+function hasStrengthData(){ return strengthLifts().length>0; }
+
 function renderPStrength(){
   // a CrossFit-only user has no lift history — don't show a permanently empty card
   const card = document.getElementById("pe-chips") &&
                document.getElementById("pe-chips").closest(".pcard");
-  const showLift = trainingMode()!=="crossfit" || hasLiftData();
-  if(card) card.style.display = (showLift && hasLiftData()) ? "" : "none";
-  if(!(showLift && hasLiftData())) return;
+  const showLift = (trainingMode()!=="crossfit" || hasStrengthData()) && hasStrengthData();
+  if(card) card.style.display = showLift ? "" : "none";
+  if(!showLift) return;
 
   const chips = document.getElementById("pe-chips");
   const canvas = document.getElementById("pe-canvas");
@@ -4622,9 +4658,9 @@ function renderPStrength(){
   const sub = document.getElementById("pe-sub");
   if(!chips||!canvas) return;
 
-  // lifts that have any history
-  const withData = LIFTS.filter(n => liftLogs.some(l=>l.name===n));
-  const list = withData.length ? withData : LIFTS;
+  // anything with real history, whichever way it was logged
+  const logged = strengthLifts();
+  const list = logged.length ? logged : LIFTS;
   if(!peLift || !list.includes(peLift)) peLift = list[0];
 
   chips.innerHTML = "";
@@ -4636,11 +4672,7 @@ function renderPStrength(){
     chips.appendChild(c);
   });
 
-  const logs = liftLogs.filter(l=>l.name===peLift).sort((a,b)=>a.d.localeCompare(b.d));
-  // best e1RM per day
-  const byDay = {};
-  logs.forEach(l=>{ const e=e1rm(l.w,l.r); if(!byDay[l.d]||e>byDay[l.d]) byDay[l.d]=e; });
-  const pts = Object.keys(byDay).sort().map(d=>({d, e:byDay[d]}));
+  const pts = strengthSeries(peLift);
 
   if(pts.length<2){
     canvas.style.display="none"; empty.style.display="block";
@@ -4888,19 +4920,29 @@ function computeWodPRs(){
   });
   return out.sort((a,b)=>b.date.localeCompare(a.date));
 }
-function hasLiftData(){ return (liftLogs||[]).length>0; }
+function hasLiftData(){ return (liftLogs||[]).length>0 || Object.keys(exSessions||{}).length>0; }
 function hasWodData(){ return Object.keys(wodHistory||{}).length>0; }
 
 function computePRs(){
   const prs=[];
-  LIFTS.forEach(name=>{
-    const logs=liftLogs.filter(l=>l.name===name).sort((a,b)=>a.d.localeCompare(b.d));
-    let best=0;
-    logs.forEach(l=>{
+  strengthLifts().forEach(name=>{
+    // build a day-by-day best from both the manual log and logged sets
+    const detail={};
+    (liftLogs||[]).filter(l=>l.name===name).forEach(l=>{
       const e=e1rm(l.w,l.r);
-      if(e>best){
-        if(best>0) prs.push({name, d:l.d, e, gain:e-best, w:l.w, r:l.r});
-        best=e;
+      if(!detail[l.d] || e>detail[l.d].e) detail[l.d]={e, w:l.w, r:l.r};
+    });
+    (exSessions[name]||[]).forEach(s=>{
+      if(!s||s.e1rm==null||!s.date) return;
+      if(!detail[s.date] || s.e1rm>detail[s.date].e)
+        detail[s.date]={e:s.e1rm, w:s.topW, r:s.minReps};
+    });
+    let best=0;
+    Object.keys(detail).sort().forEach(d=>{
+      const x=detail[d];
+      if(x.e>best){
+        if(best>0) prs.push({name, d, e:x.e, gain:x.e-best, w:x.w, r:x.r});
+        best=x.e;
       }
     });
   });
