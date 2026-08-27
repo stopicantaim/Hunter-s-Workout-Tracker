@@ -1378,6 +1378,67 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
   padding:9px 11px;font-size:15px;font-weight:700;outline:none;width:100%;-webkit-appearance:none}
 .wod-input:focus{border-color:var(--ph)}
 .wod-prev{font-size:10px;font-weight:700;color:var(--sub);margin-top:6px}
+
+/* ── WOD clock + Rx toggle ── */
+.wod-clock{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--card);border:1px solid var(--border);border-radius:9px;
+  padding:9px 12px;margin-bottom:9px}
+.wod-clock.running{border-color:var(--ph);background:var(--ph-bg)}
+.wod-clock-time{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
+.wod-clock.running .wod-clock-time{color:var(--ph)}
+.wod-clock-sub{font-size:10px;font-weight:700;color:var(--sub);margin-top:2px}
+.wod-clock-btns{display:flex;gap:6px;flex-shrink:0}
+.wod-clock-btn{background:var(--bg2);border:1px solid var(--border2);border-radius:7px;
+  color:var(--sub);font-size:11px;font-weight:800;padding:6px 12px;cursor:pointer;transition:all .15s}
+.wod-clock-btn.start{border-color:var(--ph-border);color:var(--ph)}
+.wod-clock-btn:active{transform:scale(.96)}
+.wod-scale{display:flex;gap:6px;margin-bottom:8px}
+.wod-rx{flex:1;background:var(--card);border:1px solid var(--border2);border-radius:7px;
+  color:var(--sub);font-size:11px;font-weight:800;padding:6px;cursor:pointer;transition:all .15s}
+.wod-rx.on{background:var(--ph-bg);border-color:var(--ph);color:var(--ph)}
+.wod-box.wod-pr{animation:wodPR .9s ease}
+@keyframes wodPR{
+  0%{background:var(--bg2)}
+  25%{background:color-mix(in srgb, var(--ph) 16%, transparent)}
+  100%{background:var(--bg2)}
+}
+
+.pcard.acc-wod{--accent:#ec4899}
+.wod-hist-row{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.wod-hist-row:last-child{border-bottom:none}
+.wod-hist-date{color:var(--sub);font-weight:700}
+.wod-hist-res{font-weight:900;font-variant-numeric:tabular-nums}
+.wod-hist-tag{font-size:9px;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:6px;
+  background:var(--mute);color:var(--sub)}
+.wod-hist-tag.rx{background:var(--ph-bg);color:var(--ph)}
+.wod-hist-tag.pr{background:#fdf3e3;color:#b45309}
+body:not(.t-paper) .wod-hist-tag.pr{background:#2d1f00;color:#fbbf24}
+
+/* ── quick WOD log ── */
+.quick-wod-btn{width:100%;background:var(--card);border:1.5px solid var(--ph-border);
+  border-radius:var(--r);color:var(--ph);font-size:14px;font-weight:800;
+  padding:13px;cursor:pointer;margin:10px 0 4px;letter-spacing:.02em;
+  transition:transform .12s,background .16s}
+.quick-wod-btn:active{transform:scale(.985);background:var(--ph-bg)}
+.qwod-body{padding:14px 16px;overflow-y:auto}
+.qwod-bench{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}
+.qwod-bench::-webkit-scrollbar{display:none}
+.qwod-chip{flex-shrink:0;background:var(--card);border:1px solid var(--border2);
+  border-radius:99px;padding:6px 13px;font-size:12px;font-weight:700;color:var(--sub);
+  cursor:pointer;white-space:nowrap;transition:all .15s}
+.qwod-chip.on{background:var(--ph-bg);border-color:var(--ph);color:var(--ph)}
+.qwod-chip b{display:block;font-size:9px;font-weight:700;opacity:.75}
+
+.ob-mode{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;
+  text-align:left;background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;cursor:pointer;transition:border-color .18s}
+.ob-mode.on{border-color:var(--ph);background:var(--ph-bg)}
+.ob-mode b{font-size:15px;font-weight:800;color:var(--text)}
+.ob-mode span{font-size:12px;color:var(--sub)}
+/* mode-driven visibility */
+body.mode-lifting .crossfit-only{display:none !important}
+body.mode-crossfit .lifting-only{display:none !important}
 </style>
 </head>
 <body class="t-paper phase-cut">
@@ -1494,6 +1555,8 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
         <button class="recal-nudge-btn" id="recal-nudge-btn">Review</button>
       </div>
 
+      <button class="quick-wod-btn" id="quick-wod-btn">Log today&rsquo;s WOD</button>
+
       <!-- 5. COLLAPSIBLE: Exercises -->
       <div class="dash-accord open" id="dacc-workout">
         <button class="dacc-hdr" data-dacc="dacc-workout">
@@ -1569,6 +1632,54 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
             <button class="add-day-btn" id="add-day-btn">+ Add Day</button>
             <button class="btn" id="builder-save">Save Custom Workout</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK WOD LOG -->
+    <div class="modal-overlay hidden" id="qwod-modal">
+      <div class="modal-sheet" style="max-height:90dvh">
+        <div class="modal-hdr">
+          <div class="modal-title">Log today&rsquo;s WOD</div>
+          <button class="modal-close" id="qwod-close">×</button>
+        </div>
+
+        <div class="qwod-body">
+          <label class="ce-lbl">Pick a benchmark</label>
+          <div class="qwod-bench" id="qwod-bench"></div>
+
+          <label class="ce-lbl">Or name it yourself</label>
+          <input class="ce-input" id="qwod-name" placeholder="e.g. Saturday partner WOD"/>
+
+          <label class="ce-lbl">Format</label>
+          <div class="ce-formats" id="qwod-formats">
+            <button class="ce-fmt on" data-fmt="fortime">For time</button>
+            <button class="ce-fmt" data-fmt="amrap">AMRAP</button>
+            <button class="ce-fmt" data-fmt="emom">EMOM</button>
+            <button class="ce-fmt" data-fmt="rounds">Rounds</button>
+          </div>
+
+          <div class="ce-row">
+            <div>
+              <label class="ce-lbl" id="qwod-mins-lbl">Time cap (min)</label>
+              <input class="ce-input" type="number" id="qwod-mins" value="12"/>
+            </div>
+            <div>
+              <label class="ce-lbl">Result</label>
+              <input class="ce-input" id="qwod-result" placeholder="8:42"/>
+            </div>
+          </div>
+
+          <label class="ce-lbl">Movements / notes</label>
+          <textarea class="ce-input" id="qwod-notes" rows="3" placeholder="21-15-9 thrusters &amp; pull-ups"></textarea>
+
+          <div class="wod-scale" style="margin-top:12px">
+            <button class="wod-rx on" id="qwod-rx">Rx</button>
+            <button class="wod-rx" id="qwod-scaled">Scaled</button>
+          </div>
+
+          <div class="ce-err" id="qwod-err"></div>
+          <button class="btn" id="qwod-save">Save Result</button>
         </div>
       </div>
     </div>
@@ -1666,6 +1777,18 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
         <div class="lift-chips" id="pe-chips"></div>
         <canvas id="pe-canvas" height="140"></canvas>
         <div class="pchart-empty" id="pe-empty" style="display:none">Log this lift at least twice to see a trend.</div>
+      </div>
+
+      <!-- WOD RESULTS -->
+      <div class="pcard acc-wod" id="pwod-card" style="display:none">
+        <div class="pcard-hdr">
+          <span class="pcard-title">WOD Results</span>
+          <span class="pcard-sub" id="pwod-sub"></span>
+        </div>
+        <div class="lift-chips" id="pwod-chips"></div>
+        <canvas id="pwod-canvas" height="130"></canvas>
+        <div class="pchart-empty" id="pwod-empty" style="display:none">Log this WOD twice to see a trend.</div>
+        <div id="pwod-list"></div>
       </div>
 
       <!-- VOLUME TREND -->
@@ -1825,6 +1948,22 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
         Each profile keeps its own weight, lifts and program on this device.
       </div>
 
+      <div class="sh">Training Style</div>
+      <div class="fcard">
+        <div class="frow2">
+          <label>How you train</label>
+          <select id="mode-select">
+            <option value="lifting">Lifting</option>
+            <option value="crossfit">CrossFit</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--sub);line-height:1.6;margin-top:9px">
+          Changes which programs, cards and logging tools you see. Nothing is deleted &mdash;
+          switching back brings everything with it.
+        </div>
+      </div>
+
       <div class="sh">Theme</div>
       <div class="theme-grid" id="theme-grid"></div>
 
@@ -1912,18 +2051,33 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
     </div>
 
     <div class="ob-step hidden" data-step="2">
-      <div class="ob-title">What are you training for?</div>
-      <div class="ob-sub">This sets how the app reads your progress.</div>
+      <div class="ob-title">How do you train?</div>
+      <div class="ob-sub">This changes what the app tracks and shows you.</div>
       <div class="ob-phases">
-        <button class="ob-phase on" data-phase="cut"><b>Cut</b><span>Lose fat, hold muscle</span></button>
-        <button class="ob-phase" data-phase="bulk"><b>Bulk</b><span>Build size and strength</span></button>
-        <button class="ob-phase" data-phase="maintain"><b>Maintain</b><span>Hold weight, progress lifts</span></button>
+        <button class="ob-mode on" data-mode="lifting"><b>Lifting</b>
+          <span>Sets, reps and progressive overload</span></button>
+        <button class="ob-mode" data-mode="crossfit"><b>CrossFit</b>
+          <span>WODs, benchmarks and times</span></button>
+        <button class="ob-mode" data-mode="both"><b>Both</b>
+          <span>Strength work plus conditioning</span></button>
       </div>
       <button class="btn ob-next" data-next="3">Continue</button>
       <button class="ob-back" data-back="1">Back</button>
     </div>
 
     <div class="ob-step hidden" data-step="3">
+      <div class="ob-title">What are you training for?</div>
+      <div class="ob-sub">This sets how the app reads your progress.</div>
+      <div class="ob-phases">
+        <button class="ob-phase on" data-phase="cut"><b>Cut</b><span>Lose fat, hold muscle</span></button>
+        <button class="ob-phase" data-phase="bulk"><b>Bulk</b><span>Build size and strength</span></button>
+        <button class="ob-phase" data-phase="maintain"><b>Maintain</b><span>Hold weight, progress training</span></button>
+      </div>
+      <button class="btn ob-next" data-next="4">Continue</button>
+      <button class="ob-back" data-back="2">Back</button>
+    </div>
+
+    <div class="ob-step hidden" data-step="4">
       <div class="ob-title">Your starting numbers</div>
       <div class="ob-sub">You can change any of this later in Settings.</div>
       <label class="ob-lbl">Current weight (lb)</label>
@@ -1933,16 +2087,16 @@ body.t-paper .prof-btn.danger{border-color:#f3b7b7;color:#b91c1c}
       <label class="ob-lbl">Phase length (days)</label>
       <input class="ob-input" type="number" id="ob-len" placeholder="60" value="60"/>
       <div class="ob-err" id="ob-err"></div>
-      <button class="btn ob-next" data-next="4">Continue</button>
-      <button class="ob-back" data-back="2">Back</button>
+      <button class="btn ob-next" data-next="5">Continue</button>
+      <button class="ob-back" data-back="3">Back</button>
     </div>
 
-    <div class="ob-step hidden" data-step="4">
+    <div class="ob-step hidden" data-step="5">
       <div class="ob-title">Pick a starting program</div>
       <div class="ob-sub">Swap it or build your own any time.</div>
       <div class="ob-templates" id="ob-templates"></div>
       <button class="btn" id="ob-finish">Start Training</button>
-      <button class="ob-back" data-back="3">Back</button>
+      <button class="ob-back" data-back="4">Back</button>
     </div>
 
     <div class="ob-dots" id="ob-dots"></div>
@@ -1985,7 +2139,7 @@ const LIFTS=["Bench Press","Overhead Press","Lat Pulldown","Assisted Pull-up","S
 const BASELINES={"Bench Press":null,"Overhead Press":null,"Lat Pulldown":null,"Assisted Pull-up":null,"Seated Row":null,"T-Bar Row":null};
 const SESSIONS=[{key:"push",lbl:"Push"},{key:"pull",lbl:"Pull"},{key:"upper",lbl:"Upper"},{key:"arms",lbl:"Arms"},{key:"run",lbl:"Run"},{key:"walk",lbl:"Walk"}];
 // ─── EXERCISE LIBRARY ────────────────────────────────────────────────────────
-const MUSCLE_GROUPS=["Chest","Back","Shoulders","Biceps","Triceps","Legs","Core","Cardio","Olympic & CrossFit","My Exercises"];
+const MUSCLE_GROUPS=["Chest","Back","Shoulders","Biceps","Triceps","Legs","Core","Cardio","Olympic & CrossFit","Benchmark WODs","My Exercises"];
 
 // which muscle groups belong to which day type — keeps the picker relevant
 const DAY_MUSCLES={
@@ -2008,7 +2162,7 @@ const DAY_MUSCLES={
 };
 // fall back to the visual class if the key isn't mapped
 // CrossFit-style days should surface the functional library too
-const ALL_GROUPS_DAYS = ["wod","crossfit","metcon","full","conditioning"];
+const ALL_GROUPS_DAYS = ["wod","crossfit","metcon","full","conditioning","oly","chipper","amrap","emom"];
 const CLS_MUSCLES={
   push:["Chest","Shoulders","Triceps"],
   pull:["Back","Biceps"],
@@ -2160,6 +2314,7 @@ const EXERCISE_LIBRARY={
     {n:"Row Erg (Interval)",      eq:"cardio",    sets:"5×500m",load:""},
     {n:"Ski Erg",                 eq:"cardio",    sets:"5×500m",load:""},
   ],
+  "Benchmark WODs":[],
   "My Exercises":[],
   Cardio:[
     {n:"Treadmill Run",            eq:"cardio",  sets:"1×45min",load:""},
@@ -2351,6 +2506,36 @@ const TEMPLATES=[
         {n:"Abdominal Crunch (Machine)",s:"3×15",l:"",subs:[{n:"Cable Crunch",s:"3×15",l:"",w:"cable sub"}]},
         {n:"Hanging Knee Raise",      s:"3×15",l:"",subs:[{n:"Hanging Leg Raise",s:"3×12",l:"",w:"harder"}]},
         {n:"Plank",                   s:"3×45s",l:"",subs:[]},
+      ]},
+    ]
+  },
+  {
+    id:"crossfit", name:"CrossFit · Strength + Metcon",
+    desc:"5 days. A strength piece then a conditioning piece.",
+    days:[
+      {key:"wod1",cls:"push",label:"DAY 1 · SQUAT + METCON",exs:[
+        {n:"Back Squat",s:"5×5",l:"",subs:[{n:"Front Squat",s:"5×3",l:"",w:"more upright"},{n:"Goblet Squat",s:"4×10",l:"",w:"no rack"}]},
+        {n:"Push Press",s:"5×3",l:"",subs:[{n:"Push Jerk",s:"5×3",l:"",w:"heavier"},{n:"DB Shoulder Press",s:"4×8",l:"",w:"no bar"}]},
+        {n:"Fran",s:"cap 10 min",l:"",subs:[],format:"fortime",mins:10,rx:"95/65 lb",notes:"21-15-9\nThrusters\nPull-ups"},
+      ]},
+      {key:"wod2",cls:"pull",label:"DAY 2 · PULL + AMRAP",exs:[
+        {n:"Deadlift",s:"5×3",l:"",subs:[{n:"Deadlift (Touch & Go)",s:"5×5",l:"",w:"conditioning bias"},{n:"Romanian Deadlift",s:"4×8",l:"",w:"lighter"}]},
+        {n:"Chest-to-Bar Pull-Up",s:"5×5",l:"",subs:[{n:"Pull-Up",s:"5×8",l:"",w:"scale"},{n:"Assisted Pull-Up",s:"4×10",l:"",w:"machine"}]},
+        {n:"Cindy",s:"20 min",l:"",subs:[],format:"amrap",mins:20,rx:"bodyweight",notes:"AMRAP 20:\n5 Pull-ups\n10 Push-ups\n15 Air Squats"},
+      ]},
+      {key:"wod3",cls:"upper",label:"DAY 3 · OLY + EMOM",exs:[
+        {n:"Power Clean",s:"6×2",l:"",subs:[{n:"Hang Clean",s:"6×3",l:"",w:"from the hang"},{n:"Kettlebell Swing",s:"5×15",l:"",w:"no barbell"}]},
+        {n:"Push Jerk",s:"5×2",l:"",subs:[{n:"Split Jerk",s:"5×2",l:"",w:"heavier"}]},
+        {n:"Chelsea",s:"30 min",l:"",subs:[],format:"emom",mins:30,rx:"bodyweight",notes:"EMOM 30:\n5 Pull-ups\n10 Push-ups\n15 Air Squats"},
+      ]},
+      {key:"wod4",cls:"arms",label:"DAY 4 · PRESS + CHIPPER",exs:[
+        {n:"Overhead Press (Barbell)",s:"5×5",l:"",subs:[{n:"DB Shoulder Press",s:"4×8",l:"",w:"no rack"}]},
+        {n:"Handstand Push-Up",s:"5×5",l:"",subs:[{n:"Pike Push-Up",s:"4×10",l:"",w:"scale"},{n:"DB Shoulder Press",s:"4×10",l:"",w:"loaded"}]},
+        {n:"Filthy Fifty",s:"cap 35 min",l:"",subs:[],format:"fortime",mins:35,rx:"",notes:"50 each:\nBox Jumps · Jumping Pull-ups\nKB Swings · Walking Lunges\nKnees-to-Elbows · Push Press\nBack Extensions · Wall Balls\nBurpees · Double-unders"},
+      ]},
+      {key:"wod5",cls:"cardio",label:"DAY 5 · CONDITIONING",exs:[
+        {n:"Row Erg (Interval)",s:"5×500m",l:"",subs:[{n:"Assault Bike",s:"5×1min",l:"",w:"no rower"},{n:"Ski Erg",s:"5×500m",l:"",w:"upper body"}]},
+        {n:"Helen",s:"cap 15 min",l:"",subs:[],format:"fortime",mins:15,rx:"53/35 lb KB",notes:"3 rounds:\n400m Run\n21 KB Swings\n12 Pull-ups"},
       ]},
     ]
   },
@@ -2593,6 +2778,8 @@ function loadDataLocal(){
   friends = lsGet("friends") || [];
   dayExtras = lsGet("dayExtras") || {};
   customExercises = lsGet("customExercises") || [];
+  wodHistory = lsGet("wodHistory") || {};
+  mergeBenchmarks();
   mergeCustomExercises();
   const savedTheme = lsGet("theme");
   if(savedTheme) currentTheme = savedTheme;
@@ -2636,7 +2823,7 @@ document.querySelectorAll(".tab").forEach(b=>{
     document.getElementById("tab-"+b.dataset.tab).classList.add("on");
     if(b.dataset.tab==="lb") renderLB();
     if(b.dataset.tab==="progress"){renderWeighins();renderLifts();renderProgress();}
-    if(b.dataset.tab==="settings"){ updateDbStatus(); renderRecalCard(); renderThemePicker(); refreshSilentToggle(); renderProfileList(); }
+    if(b.dataset.tab==="settings"){ updateDbStatus(); renderRecalCard(); renderThemePicker(); refreshSilentToggle(); renderProfileList(); applyMode(trainingMode()); }
   });
 });
 
@@ -2718,7 +2905,14 @@ function renderDash(){
 
 // ── GOALS ─────────────────────────────────────────────
 function renderGoals(){
-  const board=document.getElementById("goal-board");board.innerHTML="";
+  const board=document.getElementById("goal-board");
+  if(!board) return;
+  board.innerHTML="";
+  if(!hasLiftData() && hasWodData()){
+    board.innerHTML='<div class="pchart-empty">1RM goals apply to barbell lifts. '+
+      'Your WOD results and PRs are on the Progress tab.</div>';
+    return;
+  }
   LIFTS.forEach(name=>{
     const myL=liftLogs.filter(l=>l.name===name).sort((a,c)=>a.d.localeCompare(c.d));
     const firstLog=myL[0],lat=myL.at(-1);
@@ -2767,6 +2961,13 @@ function myPoints(){
     const wl=weekLifts.filter(l=>l.name===name),prev=liftLogs.filter(l=>l.name===name&&l.d<wsStr);
     if(wl.length&&prev.length){const bp=Math.max(...prev.map(l=>e1rm(l.w,l.r)));if(Math.max(...wl.map(l=>e1rm(l.w,l.r)))>bp)prCount++;}
   });
+  // WOD PRs set inside this week count too
+  const wsD=new Date(plan.start_date||today()); wsD.setDate(wsD.getDate()+(week-1)*7);
+  const wsStr2=wsD.toISOString().split("T")[0];
+  const weD=new Date(wsD); weD.setDate(weD.getDate()+6);
+  const weStr2=weD.toISOString().split("T")[0];
+  prCount += computeWodPRs().filter(p=>p.date>=wsStr2 && p.date<=weStr2).length;
+
   let streak=0;
   for(let wk=week-1;wk>=1;wk--){if(SESSIONS.filter(s=>checks[`w${wk}-s-${s.key}`]).length>=6)streak++;else break;}
   if(doneSess>=6)streak++;
@@ -4078,7 +4279,10 @@ function renderAddList(){
     if(!already){
       item.querySelector(".modal-ex-item-add").addEventListener("click", ()=>{
         if(!dayExtras[addTargetDay.key]) dayExtras[addTargetDay.key] = [];
-        dayExtras[addTargetDay.key].push({ n:ex.n, s:ex.sets, l:"", subs:[], added:true });
+        dayExtras[addTargetDay.key].push({
+          n:ex.n, s:ex.sets, l:"", subs:[], added:true,
+          format:ex.format||"sets", notes:ex.notes||"", mins:ex.mins||null, rx:ex.rx||""
+        });
         lsSet("dayExtras", dayExtras);
         renderDashWorkout();
         updateDashSubtitles();
@@ -4268,7 +4472,7 @@ function renderPSummary(){
   Object.keys(checks).forEach(k=>{ if(/^w\d+-s-/.test(k) && checks[k]) sessions++; });
 
   // PRs
-  const prs = computePRs();
+  const prs = computePRs().map(p=>({...p, date:p.date||p.d})).concat(computeWodPRs());
 
   const cards = [
     {lbl: phase==="bulk"?"Total Gained":"Total Lost", val: change.toFixed(1), sub:"lb", cls:"c-loss"},
@@ -4405,6 +4609,13 @@ function renderPWeightChart(){
 
 // ── 3. e1RM PROGRESSION ─────────────────────────────────────────────────
 function renderPStrength(){
+  // a CrossFit-only user has no lift history — don't show a permanently empty card
+  const card = document.getElementById("pe-chips") &&
+               document.getElementById("pe-chips").closest(".pcard");
+  const showLift = trainingMode()!=="crossfit" || hasLiftData();
+  if(card) card.style.display = (showLift && hasLiftData()) ? "" : "none";
+  if(!(showLift && hasLiftData())) return;
+
   const chips = document.getElementById("pe-chips");
   const canvas = document.getElementById("pe-canvas");
   const empty = document.getElementById("pe-empty");
@@ -4535,6 +4746,13 @@ function computeWeeklyVolume(){
 }
 
 function renderPVolume(){
+  const vcard=document.getElementById("pv-canvas") &&
+              document.getElementById("pv-canvas").closest(".pcard");
+  const anyVolume = Object.keys(computeWeeklyVolume()).length>0;
+  const showVol = trainingMode()!=="crossfit" && (hasLiftData()||anyVolume);
+  if(vcard) vcard.style.display = showVol ? "" : "none";
+  if(!showVol) return;
+
   const canvas=document.getElementById("pv-canvas");
   const empty=document.getElementById("pv-empty");
   const sub=document.getElementById("pv-sub");
@@ -4646,6 +4864,33 @@ function renderPHeatmap(){
 }
 
 // ── 6. PR TIMELINE ──────────────────────────────────────────────────────
+
+// every WOD PR ever set, so it can be counted alongside lift PRs
+function computeWodPRs(){
+  const out=[];
+  Object.keys(wodHistory||{}).forEach(name=>{
+    ["rx","scaled"].forEach(variant=>{
+      const scaled = variant==="scaled";
+      const hist=(wodHistory[name]||[]).filter(h=>!!h.scaled===scaled)
+        .sort((a,b)=>a.date.localeCompare(b.date));
+      let best=null;
+      hist.forEach(h=>{
+        const timed = h.secs!=null;
+        const score = timed ? h.secs : ((h.rounds||0)*1000+(h.reps||0));
+        if(score==null) return;
+        const better = best===null || (timed ? score<best : score>best);
+        if(better){
+          if(best!==null) out.push({name, date:h.date, result:h.result, scaled, wod:true});
+          best=score;
+        }
+      });
+    });
+  });
+  return out.sort((a,b)=>b.date.localeCompare(a.date));
+}
+function hasLiftData(){ return (liftLogs||[]).length>0; }
+function hasWodData(){ return Object.keys(wodHistory||{}).length>0; }
+
 function computePRs(){
   const prs=[];
   LIFTS.forEach(name=>{
@@ -4666,18 +4911,27 @@ function renderPPRs(){
   const host=document.getElementById("pr-timeline");
   const sub=document.getElementById("ppr-sub");
   if(!host) return;
-  const prs=computePRs();
+  // lift PRs carry .d, WOD PRs carry .date — give everything a common key to sort on
+  const prs=computePRs().map(p=>({...p, date:p.date||p.d}))
+    .concat(computeWodPRs())
+    .sort((a,b)=>(b.date||"").localeCompare(a.date||""));
   if(sub) sub.textContent = prs.length ? prs.length+" total" : "";
   if(!prs.length){
-    host.innerHTML='<div class="pchart-empty">No PRs yet. Beat a logged lift to set one.</div>';
+    host.innerHTML='<div class="pchart-empty">No PRs yet. Beat a logged lift or WOD to set one.</div>';
     return;
   }
   host.innerHTML = prs.slice(0,12).map((p,i)=>
-    '<div class="pr-item" style="animation-delay:'+(i*0.05)+'s"><div class="pr-dot"></div>'+
-    '<div class="pr-body"><div class="pr-lift">'+p.name+'</div>'+
-    '<div class="pr-detail">'+p.d.slice(5).replace("-","/")+' · '+p.w+' × '+p.r+'</div></div>'+
-    '<div><div class="pr-val">'+p.e.toFixed(1)+'</div>'+
-    '<div class="pr-gain">+'+p.gain.toFixed(1)+'</div></div></div>'
+    (p.wod
+      ? '<div class="pr-item" style="animation-delay:'+(i*0.05)+'s"><div class="pr-dot"></div>'+
+        '<div class="pr-body"><div class="pr-lift">'+p.name+'</div>'+
+        '<div class="pr-detail">'+p.date.slice(5).replace("-","/")+' · '+(p.scaled?"Scaled":"Rx")+'</div></div>'+
+        '<div><div class="pr-val">'+p.result+'</div>'+
+        '<div class="pr-gain">WOD</div></div></div>'
+      : '<div class="pr-item" style="animation-delay:'+(i*0.05)+'s"><div class="pr-dot"></div>'+
+        '<div class="pr-body"><div class="pr-lift">'+p.name+'</div>'+
+        '<div class="pr-detail">'+p.d.slice(5).replace("-","/")+' · '+p.w+' × '+p.r+'</div></div>'+
+        '<div><div class="pr-val">'+p.e.toFixed(1)+'</div>'+
+        '<div class="pr-gain">+'+p.gain.toFixed(1)+'</div></div></div>')
   ).join("");
 }
 
@@ -4693,6 +4947,7 @@ function renderProgress(){
   renderPSummary();
   renderPWeightChart();
   renderPStrength();
+  renderPWod();
   renderPVolume();
   renderPHeatmap();
   renderPPRs();
@@ -5558,7 +5813,7 @@ document.getElementById("silent-toggle").addEventListener("click", ()=>{
 // ═══════════════════════════════════════════════════════════════════════
 //  FIRST-RUN SETUP + PROFILES
 // ═══════════════════════════════════════════════════════════════════════
-let obStep = 1, obPhase = "cut", obTemplate = "ppua";
+let obStep = 1, obPhase = "cut", obTemplate = "ppua", obMode = "lifting";
 
 function needsOnboarding(){
   // no plan anchor and nothing logged = a fresh profile
@@ -5582,13 +5837,17 @@ function goObStep(n){
     s.classList.toggle("hidden", +s.dataset.step !== n);
   });
   const dots=document.getElementById("ob-dots");
-  dots.innerHTML = [1,2,3,4].map(i=>'<i class="'+(i===n?"on":"")+'"></i>').join("");
+  dots.innerHTML = [1,2,3,4,5].map(i=>'<i class="'+(i===n?"on":"")+'"></i>').join("");
 }
 
 function renderObTemplates(){
   const host=document.getElementById("ob-templates");
   host.innerHTML="";
-  TEMPLATES.forEach(t=>{
+  const list = obMode==="crossfit" ? TEMPLATES.filter(t=>t.id==="crossfit")
+             : obMode==="both"     ? TEMPLATES
+             : TEMPLATES.filter(t=>t.id!=="crossfit");
+  if(!list.some(t=>t.id===obTemplate)) obTemplate = list[0].id;
+  list.forEach(t=>{
     const b=document.createElement("button");
     b.className="ob-tmpl"+(t.id===obTemplate?" on":"");
     b.innerHTML='<b>'+t.name+'</b><span>'+t.desc+'</span>';
@@ -5610,7 +5869,7 @@ document.querySelectorAll(".ob-next").forEach(b=>{
       const n=document.getElementById("ob-name").value.trim();
       if(!n){ toast("Enter a name"); return; }
     }
-    if(next===4){
+    if(next===5){
       const sw=parseFloat(document.getElementById("ob-sw").value);
       const gw=parseFloat(document.getElementById("ob-gw").value);
       if(isNaN(sw)||sw<60||sw>800){ err.textContent="Enter your current weight in pounds."; return; }
@@ -5620,11 +5879,20 @@ document.querySelectorAll(".ob-next").forEach(b=>{
       if(obPhase==="bulk" && gw<=sw){ err.textContent="On a bulk your goal should be above your current weight."; return; }
       if(pct>0.25){ err.textContent="That's a very large change for one phase — try a nearer target first."; return; }
     }
+    if(next===5) renderObTemplates();
     goObStep(next);
   });
 });
 document.querySelectorAll(".ob-back").forEach(b=>{
   b.addEventListener("click", ()=>goObStep(+b.dataset.back));
+});
+document.querySelectorAll(".ob-mode").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    obMode=b.dataset.mode;
+    document.querySelectorAll(".ob-mode").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    obTemplate = obMode==="crossfit" ? "crossfit" : "ppua";
+  });
 });
 document.querySelectorAll(".ob-phase").forEach(b=>{
   b.addEventListener("click", ()=>{
@@ -5651,6 +5919,7 @@ document.getElementById("ob-finish").addEventListener("click", ()=>{
   saveProfiles(list);
 
   plan = {
+    mode: obMode,
     phase: obPhase,
     start_date: new Date().toISOString().split("T")[0],
     start_weight: sw, goal_weight: gw, phase_length: len,
@@ -5676,6 +5945,7 @@ document.getElementById("ob-finish").addEventListener("click", ()=>{
   week = computeCurrentWeek();
 
   hideOnboarding();
+  applyMode(obMode);
   applyPhase(plan.phase);
   loadSettingsForm();
   renderDash(); renderDashWorkout(); updatePlanName(); updateDashSubtitles();
@@ -5964,35 +6234,514 @@ document.getElementById("ce-save").addEventListener("click", ()=>{
 function renderWodLogger(ex, ck){
   const wrap=document.createElement("div");
   wrap.className="wod-box";
-  const saved=(lsGet("wodResults")||{})[ck];
+  const store=lsGet("wodResults")||{};
+  const saved=store[ck]||{};
+  const scaled=!!saved.scaled;
 
   const target = ex.mins
     ? (ex.format==="rounds" ? ex.mins+" rounds" : ex.mins+" min")
     : (ex.s||"");
+  const best=bestWod(ex.n, scaled);
 
   wrap.innerHTML =
     '<div class="wod-head">'+
       '<span class="wod-badge">'+(FMT_LABEL[ex.format]||"WOD")+'</span>'+
       (target?'<span class="wod-target">'+target+'</span>':'')+
+      (ex.rx?'<span class="wod-target">· '+ex.rx+'</span>':'')+
     '</div>'+
     (ex.notes?'<div class="wod-notes">'+ex.notes+'</div>':'')+
-    '<div class="wod-result">'+
-      '<input class="wod-input" id="wod-'+ck+'" placeholder="'+
-        (FMT_RESULT_PLACEHOLDER[ex.format]||"Result")+'" value="'+(saved?saved.result:"")+'"/>'+
+
+    '<div class="wod-clock">'+
+      '<div><div class="wod-clock-time">'+
+        (ex.format==="fortime" ? "0:00" : fmtSecs((ex.mins||10)*60))+
+      '</div><div class="wod-clock-sub">'+
+        (ex.format==="emom" ? "EMOM "+(ex.mins||10)+" min"
+         : ex.format==="fortime" ? "counts up" : "counts down")+
+      '</div></div>'+
+      '<div class="wod-clock-btns">'+
+        '<button class="wod-clock-btn start">Start</button>'+
+        '<button class="wod-clock-btn stop">Stop</button>'+
+      '</div>'+
     '</div>'+
-    (saved&&saved.date?'<div class="wod-prev">Last logged '+saved.date.slice(5).replace("-","/")+'</div>':'');
+
+    '<div class="wod-scale">'+
+      '<button class="wod-rx'+(scaled?"":" on")+'" data-scaled="0">Rx</button>'+
+      '<button class="wod-rx'+(scaled?" on":"")+'" data-scaled="1">Scaled</button>'+
+    '</div>'+
+
+    '<div class="wod-result">'+
+      '<input class="wod-input" placeholder="'+
+        (FMT_RESULT_PLACEHOLDER[ex.format]||"Result")+'" value="'+(saved.result||"")+'"/>'+
+    '</div>'+
+    '<div class="wod-prev">'+
+      (best ? "Best "+(scaled?"scaled":"Rx")+": "+best.label+"  ·  "+best.date.slice(5).replace("-","/")
+            : "No history yet")+
+    '</div>';
 
   const inp=wrap.querySelector(".wod-input");
-  inp.addEventListener("change", ()=>{
-    const all=lsGet("wodResults")||{};
-    const v=inp.value.trim();
-    if(v) all[ck]={result:v, date:today()};
-    else delete all[ck];
-    lsSet("wodResults", all);
-    toast(v?"Result saved":"Cleared");
+  let isScaled=scaled;
+
+  wrap.querySelectorAll(".wod-rx").forEach(b=>{
+    b.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      isScaled = b.dataset.scaled==="1";
+      wrap.querySelectorAll(".wod-rx").forEach(x=>x.classList.remove("on"));
+      b.classList.add("on");
+      const all=lsGet("wodResults")||{};
+      all[ck]={...(all[ck]||{}), scaled:isScaled};
+      lsSet("wodResults", all);
+      const bb=bestWod(ex.n, isScaled);
+      wrap.querySelector(".wod-prev").textContent =
+        bb ? "Best "+(isScaled?"scaled":"Rx")+": "+bb.label+"  ·  "+bb.date.slice(5).replace("-","/")
+           : "No history yet";
+    });
   });
+
+  inp.addEventListener("change", ()=>{
+    const v=inp.value.trim();
+    const all=lsGet("wodResults")||{};
+    if(!v){ delete all[ck]; lsSet("wodResults", all); toast("Cleared"); return; }
+    all[ck]={result:v, date:today(), scaled:isScaled};
+    lsSet("wodResults", all);
+    const res=recordWodResult(ex.n, ex.format, v, isScaled);
+    if(!res.ok){
+      toast(ex.format==="fortime" ? "Use m:ss, e.g. 8:42" : "Use rounds+reps, e.g. 7+12");
+      return;
+    }
+    const bb=bestWod(ex.n, isScaled);
+    wrap.querySelector(".wod-prev").textContent =
+      bb ? "Best "+(isScaled?"scaled":"Rx")+": "+bb.label+"  ·  "+bb.date.slice(5).replace("-","/") : "";
+    if(res.pr){
+      wrap.classList.remove("wod-pr"); void wrap.offsetWidth; wrap.classList.add("wod-pr");
+      playSfx("exDone");
+      if(navigator.vibrate) navigator.vibrate([25,50,25]);
+      toast("New PR on "+ex.n);
+    } else {
+      toast("Result saved");
+    }
+    if(document.getElementById("tab-progress").classList.contains("on")) renderProgress();
+  });
+
+  wrap.querySelector(".start").addEventListener("click",(e)=>{ e.stopPropagation(); startWodClock(wrap.querySelector(".wod-clock"), ex); });
+  wrap.querySelector(".stop").addEventListener("click",(e)=>{ e.stopPropagation(); stopWodClock(); });
+
   return wrap;
 }
+
+
+// ═══════════════════════════════════════════════════════════════════════
+//  BENCHMARK WODS + RESULT HISTORY + WOD CLOCK
+// ═══════════════════════════════════════════════════════════════════════
+const BENCHMARKS = [
+  {n:"Fran",      format:"fortime", mins:10, rx:"95/65 lb",   notes:"21-15-9\nThrusters\nPull-ups"},
+  {n:"Grace",     format:"fortime", mins:10, rx:"135/95 lb",  notes:"30 Clean & Jerks for time"},
+  {n:"Isabel",    format:"fortime", mins:10, rx:"135/95 lb",  notes:"30 Snatches for time"},
+  {n:"Elizabeth", format:"fortime", mins:15, rx:"135/95 lb",  notes:"21-15-9\nCleans\nRing Dips"},
+  {n:"Diane",     format:"fortime", mins:12, rx:"225/155 lb", notes:"21-15-9\nDeadlifts\nHandstand Push-ups"},
+  {n:"Karen",     format:"fortime", mins:15, rx:"20/14 lb",   notes:"150 Wall Balls for time"},
+  {n:"Annie",     format:"fortime", mins:12, rx:"",           notes:"50-40-30-20-10\nDouble-unders\nSit-ups"},
+  {n:"Jackie",    format:"fortime", mins:15, rx:"45 lb bar",  notes:"1000m Row\n50 Thrusters\n30 Pull-ups"},
+  {n:"Helen",     format:"fortime", mins:15, rx:"53/35 lb KB",notes:"3 rounds:\n400m Run\n21 KB Swings\n12 Pull-ups"},
+  {n:"Nancy",     format:"fortime", mins:20, rx:"95/65 lb",   notes:"5 rounds:\n400m Run\n15 Overhead Squats"},
+  {n:"DT",        format:"fortime", mins:15, rx:"155/105 lb", notes:"5 rounds:\n12 Deadlifts\n9 Hang Power Cleans\n6 Push Jerks"},
+  {n:"Kelly",     format:"fortime", mins:35, rx:"20/14 lb",   notes:"5 rounds:\n400m Run\n30 Box Jumps\n30 Wall Balls"},
+  {n:"Angie",     format:"fortime", mins:25, rx:"bodyweight", notes:"100 Pull-ups\n100 Push-ups\n100 Sit-ups\n100 Air Squats"},
+  {n:"Barbara",   format:"fortime", mins:35, rx:"bodyweight", notes:"5 rounds, 3 min rest:\n20 Pull-ups\n30 Push-ups\n40 Sit-ups\n50 Air Squats"},
+  {n:"Murph",     format:"fortime", mins:60, rx:"20/14 lb vest", notes:"1 mile Run\n100 Pull-ups\n200 Push-ups\n300 Air Squats\n1 mile Run"},
+  {n:"Filthy Fifty", format:"fortime", mins:35, rx:"", notes:"50 each:\nBox Jumps · Jumping Pull-ups\nKB Swings · Walking Lunges\nKnees-to-Elbows · Push Press\nBack Extensions · Wall Balls\nBurpees · Double-unders"},
+  {n:"Cindy",     format:"amrap", mins:20, rx:"bodyweight", notes:"AMRAP 20:\n5 Pull-ups\n10 Push-ups\n15 Air Squats"},
+  {n:"Mary",      format:"amrap", mins:20, rx:"bodyweight", notes:"AMRAP 20:\n5 Handstand Push-ups\n10 Pistols\n15 Pull-ups"},
+  {n:"The Chief", format:"amrap", mins:25, rx:"135/95 lb",  notes:"5 × AMRAP 3, 1 min rest:\n3 Power Cleans\n6 Push-ups\n9 Air Squats"},
+  {n:"Chelsea",   format:"emom",  mins:30, rx:"bodyweight", notes:"EMOM 30:\n5 Pull-ups\n10 Push-ups\n15 Air Squats"},
+];
+
+function mergeBenchmarks(){
+  EXERCISE_LIBRARY["Benchmark WODs"] = BENCHMARKS.map(w=>({
+    n:w.n, eq:"cardio",
+    sets:(w.format==="amrap"||w.format==="emom") ? w.mins+" min" : "cap "+w.mins+" min",
+    load:"", format:w.format, mins:w.mins, notes:w.notes, rx:w.rx, benchmark:true
+  }));
+}
+
+let wodHistory = {};
+
+function parseWodResult(str, format){
+  const s=(str||"").trim();
+  if(!s) return null;
+  if(format==="fortime"){
+    const m=s.match(/^(\d+)\s*[:.]\s*(\d{1,2})$/);
+    if(m) return {secs:(+m[1])*60 + (+m[2])};
+    const only=s.match(/^(\d+(?:\.\d+)?)$/);
+    if(only) return {secs:Math.round(parseFloat(only[1])*60)};
+    return null;
+  }
+  const r=s.match(/^(\d+)\s*\+\s*(\d+)$/);
+  if(r) return {rounds:+r[1], reps:+r[2]};
+  const n=s.match(/^(\d+)$/);
+  if(n) return {rounds:+n[1], reps:0};
+  return null;
+}
+function fmtSecs(sec){ const m=Math.floor(sec/60), s=sec%60; return m+":"+String(s).padStart(2,"0"); }
+
+function isWodPR(name, parsed, format, scaled){
+  const hist=(wodHistory[name]||[]).filter(h=>!!h.scaled===!!scaled);
+  if(!hist.length || !parsed) return false;
+  if(format==="fortime"){
+    const times=hist.filter(h=>h.secs!=null).map(h=>h.secs);
+    return times.length ? parsed.secs < Math.min(...times) : false;
+  }
+  const score=p=>(p.rounds||0)*1000+(p.reps||0);
+  const scores=hist.filter(h=>h.rounds!=null).map(score);
+  return scores.length ? score(parsed) > Math.max(...scores) : false;
+}
+
+function recordWodResult(name, format, resultStr, scaled){
+  const parsed=parseWodResult(resultStr, format);
+  if(!parsed) return {ok:false};
+  const pr=isWodPR(name, parsed, format, scaled);
+  if(!wodHistory[name]) wodHistory[name]=[];
+  const d=today();
+  const i=wodHistory[name].findIndex(h=>h.date===d && !!h.scaled===!!scaled);
+  const entry={date:d, result:resultStr.trim(), scaled:!!scaled, ...parsed};
+  if(i>=0) wodHistory[name][i]=entry; else wodHistory[name].push(entry);
+  wodHistory[name]=wodHistory[name].sort((a,b)=>a.date.localeCompare(b.date)).slice(-40);
+  lsSet("wodHistory", wodHistory);
+  return {ok:true, pr};
+}
+
+function bestWod(name, scaled){
+  const hist=(wodHistory[name]||[]).filter(h=>!!h.scaled===!!scaled);
+  if(!hist.length) return null;
+  const timed=hist.filter(h=>h.secs!=null);
+  if(timed.length){ const b=timed.sort((a,b)=>a.secs-b.secs)[0]; return {label:fmtSecs(b.secs), date:b.date}; }
+  const rounds=hist.filter(h=>h.rounds!=null);
+  if(rounds.length){ const b=rounds.sort((a,b)=>(b.rounds*1000+b.reps)-(a.rounds*1000+a.reps))[0];
+    return {label:b.rounds+(b.reps?"+"+b.reps:""), date:b.date}; }
+  return null;
+}
+
+// ── WOD clock ───────────────────────────────────────────────────────────
+let wodClock={int:null,endsAt:null,startedAt:null,mode:null,mins:0,lastBeep:-1,host:null};
+
+function stopWodClock(){
+  if(wodClock.int){clearInterval(wodClock.int);wodClock.int=null;}
+  if(wodClock.host) wodClock.host.classList.remove("running");
+  wodClock.host=null; wodClock.endsAt=null; wodClock.startedAt=null;
+  lsSet("wodClock", null);
+}
+function paintWodClock(){
+  if(!wodClock.host) return;
+  const el=wodClock.host.querySelector(".wod-clock-time");
+  const sub=wodClock.host.querySelector(".wod-clock-sub");
+  if(!el) return;
+  let secs = wodClock.mode==="up"
+    ? Math.floor((Date.now()-wodClock.startedAt)/1000)
+    : Math.max(0, Math.round((wodClock.endsAt-Date.now())/1000));
+  el.textContent=fmtSecs(Math.max(0,secs));
+  if(wodClock.mode==="emom"){
+    const elapsed=Math.floor((Date.now()-wodClock.startedAt)/1000);
+    const minute=Math.floor(elapsed/60);
+    if(minute!==wodClock.lastBeep){
+      wodClock.lastBeep=minute;
+      if(minute>0) playSfx("set");
+      if(sub) sub.textContent="Minute "+Math.min(minute+1,wodClock.mins)+" of "+wodClock.mins;
+    }
+  }
+  if(wodClock.mode!=="up" && secs<=0){
+    playSfx("dayDone");
+    if(navigator.vibrate) navigator.vibrate([60,80,60]);
+    stopWodClock();
+  }
+}
+function startWodClock(host, ex){
+  stopWodClock();
+  wodClock.host=host; wodClock.mins=ex.mins||10; wodClock.lastBeep=-1;
+  if(ex.format==="fortime"){ wodClock.mode="up"; wodClock.startedAt=Date.now(); }
+  else if(ex.format==="emom"){ wodClock.mode="emom"; wodClock.startedAt=Date.now();
+    wodClock.endsAt=Date.now()+wodClock.mins*60000; }
+  else { wodClock.mode="down"; wodClock.endsAt=Date.now()+wodClock.mins*60000; }
+  host.classList.add("running");
+  paintWodClock();
+  wodClock.int=setInterval(paintWodClock,250);
+  if(navigator.vibrate) navigator.vibrate(30);
+}
+
+
+// ── WOD results chart (lower is better for time, higher for rounds) ─────
+let pwodName = null;
+function renderPWod(){
+  const card=document.getElementById("pwod-card");
+  if(!card) return;
+  const names=Object.keys(wodHistory||{}).filter(n=>(wodHistory[n]||[]).length);
+  if(!names.length || trainingMode()==="lifting"){ card.style.display="none"; return; }
+  card.style.display="";
+
+  if(!pwodName || !names.includes(pwodName)) pwodName=names[0];
+
+  const chips=document.getElementById("pwod-chips"); chips.innerHTML="";
+  names.forEach(n=>{
+    const c=document.createElement("div");
+    c.className="lift-chip"+(n===pwodName?" on":"");
+    c.textContent=n;
+    c.addEventListener("click",()=>{pwodName=n;renderPWod();});
+    chips.appendChild(c);
+  });
+
+  const hist=(wodHistory[pwodName]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const canvas=document.getElementById("pwod-canvas");
+  const empty=document.getElementById("pwod-empty");
+  const sub=document.getElementById("pwod-sub");
+  const timed = hist.some(h=>h.secs!=null);
+  const pts = hist.filter(h=> timed ? h.secs!=null : h.rounds!=null)
+                  .map(h=>({d:h.date, v: timed ? h.secs : (h.rounds*1000+h.reps), scaled:h.scaled}));
+
+  // history list underneath
+  const list=document.getElementById("pwod-list");
+  let best = timed ? Infinity : -Infinity;
+  const rows = hist.slice().reverse().map(h=>{
+    const val = timed ? (h.secs!=null?fmtSecs(h.secs):h.result)
+                      : (h.rounds!=null? h.rounds+(h.reps?"+"+h.reps:"") : h.result);
+    return {date:h.date, val, scaled:h.scaled, key: timed?h.secs:(h.rounds*1000+h.reps)};
+  });
+  const bestKey = timed ? Math.min(...rows.filter(r=>r.key!=null).map(r=>r.key))
+                        : Math.max(...rows.filter(r=>r.key!=null).map(r=>r.key));
+  list.innerHTML = rows.slice(0,8).map(r=>
+    '<div class="wod-hist-row"><span class="wod-hist-date">'+r.date.slice(5).replace("-","/")+
+    '<span class="wod-hist-tag '+(r.scaled?"":"rx")+'">'+(r.scaled?"Scaled":"Rx")+'</span>'+
+    (r.key===bestKey?'<span class="wod-hist-tag pr">best</span>':'')+
+    '</span><span class="wod-hist-res">'+r.val+'</span></div>').join("");
+
+  if(pts.length<2){
+    canvas.style.display="none"; empty.style.display="block";
+    if(sub) sub.textContent = pts.length ? (timed?fmtSecs(pts[0].v):rows[0].val) : "";
+    return;
+  }
+  canvas.style.display="block"; empty.style.display="none";
+
+  const t0=new Date(pts[0].d).getTime(), tE=new Date(pts[pts.length-1].d).getTime();
+  const span=Math.max(tE-t0,864e5);
+  const vals=pts.map(p=>p.v);
+  let mn=Math.min(...vals), mx=Math.max(...vals);
+  const padY=(mx-mn)*0.18||30; mn-=padY; mx+=padY;
+
+  animateDraw("pwod", 800, (prog)=>{
+    const {ctx,W,H}=hiDPI(canvas,130);
+    const INK=themeInk();
+    const pad={l:40,r:10,t:12,b:20};
+    const X=t=>pad.l+((t-t0)/span)*(W-pad.l-pad.r);
+    // for time, a lower value is better, so invert the axis
+    const Y=v=> timed
+      ? pad.t+((v-mn)/(mx-mn))*(H-pad.t-pad.b)
+      : pad.t+((mx-v)/(mx-mn))*(H-pad.t-pad.b);
+
+    ctx.strokeStyle=INK.grid; ctx.lineWidth=1;
+    ctx.fillStyle=INK.sub; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
+    for(let i=0;i<=3;i++){
+      const v=mn+(mx-mn)*(i/3), y=Y(v);
+      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+      ctx.fillText(timed?fmtSecs(Math.max(0,Math.round(v))):Math.round(v/1000)+"r", pad.l-6, y+3);
+    }
+
+    const shown=Math.max(2,Math.ceil(pts.length*prog));
+    const p2=pts.slice(0,shown);
+    const g=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
+    g.addColorStop(0,"rgba(236,72,153,.26)"); g.addColorStop(1,"rgba(236,72,153,0)");
+    ctx.beginPath();
+    p2.forEach((p,i)=>{ const x=X(new Date(p.d).getTime()), y=Y(p.v);
+      if(!i) ctx.moveTo(x,y); else { const px=X(new Date(p2[i-1].d).getTime()), py=Y(p2[i-1].v);
+        const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y); } });
+    ctx.lineTo(X(new Date(p2[p2.length-1].d).getTime()),H-pad.b);
+    ctx.lineTo(X(t0),H-pad.b); ctx.closePath(); ctx.fillStyle=g; ctx.fill();
+
+    ctx.beginPath();
+    p2.forEach((p,i)=>{ const x=X(new Date(p.d).getTime()), y=Y(p.v);
+      if(!i) ctx.moveTo(x,y); else { const px=X(new Date(p2[i-1].d).getTime()), py=Y(p2[i-1].v);
+        const cx=(px+x)/2; ctx.bezierCurveTo(cx,py,cx,y,x,y); } });
+    ctx.strokeStyle="#ec4899"; ctx.lineWidth=2.4; ctx.lineJoin="round"; ctx.lineCap="round"; ctx.stroke();
+
+    p2.forEach((p,i)=>{ const x=X(new Date(p.d).getTime()), y=Y(p.v);
+      const last=i===p2.length-1&&prog>=1;
+      ctx.beginPath(); ctx.arc(x,y,last?4:2.4,0,Math.PI*2);
+      ctx.fillStyle=last?INK.dot:"#ec4899"; ctx.fill();
+      if(last){ctx.strokeStyle="#ec4899";ctx.lineWidth=2.4;ctx.stroke();} });
+
+    ctx.fillStyle=INK.sub; ctx.font="9px -apple-system,sans-serif";
+    ctx.textAlign="left";  ctx.fillText(pts[0].d.slice(5).replace("-","/"), pad.l, H-6);
+    ctx.textAlign="right"; ctx.fillText(pts[pts.length-1].d.slice(5).replace("-","/"), W-pad.r, H-6);
+  });
+
+  const first=vals[0], last=vals[vals.length-1];
+  const improved = timed ? last<first : last>first;
+  if(sub){
+    sub.textContent = (timed?fmtSecs(last):rows[0].val) + (vals.length>1 ? (improved?"  ↓ improving":"  · holding") : "");
+    sub.style.color = improved ? "var(--ph)" : "var(--sub)";
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  QUICK-LOG A WOD  (without touching the programme)
+// ═══════════════════════════════════════════════════════════════════════
+let qwodFmt = "fortime";
+let qwodScaled = false;
+let qwodPick = null;
+
+function openQuickWod(){
+  qwodFmt="fortime"; qwodScaled=false; qwodPick=null;
+  document.getElementById("qwod-name").value="";
+  document.getElementById("qwod-result").value="";
+  document.getElementById("qwod-notes").value="";
+  document.getElementById("qwod-mins").value="12";
+  document.getElementById("qwod-err").textContent="";
+  document.querySelectorAll("#qwod-formats .ce-fmt").forEach((b,i)=>b.classList.toggle("on", i===0));
+  document.getElementById("qwod-rx").classList.add("on");
+  document.getElementById("qwod-scaled").classList.remove("on");
+  renderQwodBench();
+  syncQwodLabels();
+  document.getElementById("qwod-modal").classList.remove("hidden");
+}
+function closeQuickWod(){ document.getElementById("qwod-modal").classList.add("hidden"); }
+
+function renderQwodBench(){
+  const host=document.getElementById("qwod-bench");
+  host.innerHTML="";
+  BENCHMARKS.forEach(w=>{
+    const best=bestWod(w.n, false);
+    const c=document.createElement("div");
+    c.className="qwod-chip"+(qwodPick===w.n?" on":"");
+    c.innerHTML = w.n + (best?'<b>PB '+best.label+'</b>':'');
+    c.addEventListener("click",()=>{
+      qwodPick = qwodPick===w.n ? null : w.n;
+      if(qwodPick){
+        document.getElementById("qwod-name").value=w.n;
+        document.getElementById("qwod-mins").value=w.mins;
+        document.getElementById("qwod-notes").value=w.notes;
+        qwodFmt=w.format;
+        document.querySelectorAll("#qwod-formats .ce-fmt")
+          .forEach(b=>b.classList.toggle("on", b.dataset.fmt===w.format));
+        syncQwodLabels();
+      }
+      renderQwodBench();
+    });
+    host.appendChild(c);
+  });
+}
+
+function syncQwodLabels(){
+  const lbl=document.getElementById("qwod-mins-lbl");
+  lbl.textContent = qwodFmt==="fortime" ? "Time cap (min)"
+                  : qwodFmt==="emom"    ? "Minutes"
+                  : qwodFmt==="rounds"  ? "Rounds"
+                  : "Duration (min)";
+  document.getElementById("qwod-result").placeholder =
+    FMT_RESULT_PLACEHOLDER[qwodFmt] || "Result";
+}
+
+document.getElementById("quick-wod-btn").addEventListener("click", openQuickWod);
+document.getElementById("qwod-close").addEventListener("click", closeQuickWod);
+document.getElementById("qwod-modal").addEventListener("click", e=>{
+  if(e.target===document.getElementById("qwod-modal")) closeQuickWod();
+});
+document.querySelectorAll("#qwod-formats .ce-fmt").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    qwodFmt=b.dataset.fmt;
+    document.querySelectorAll("#qwod-formats .ce-fmt").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    syncQwodLabels();
+  });
+});
+document.getElementById("qwod-rx").addEventListener("click", ()=>{
+  qwodScaled=false;
+  document.getElementById("qwod-rx").classList.add("on");
+  document.getElementById("qwod-scaled").classList.remove("on");
+  renderQwodBench();
+});
+document.getElementById("qwod-scaled").addEventListener("click", ()=>{
+  qwodScaled=true;
+  document.getElementById("qwod-scaled").classList.add("on");
+  document.getElementById("qwod-rx").classList.remove("on");
+});
+
+document.getElementById("qwod-save").addEventListener("click", ()=>{
+  const err=document.getElementById("qwod-err"); err.textContent="";
+  const name=document.getElementById("qwod-name").value.trim();
+  const result=document.getElementById("qwod-result").value.trim();
+  if(!name){ err.textContent="Give the workout a name."; return; }
+  if(!result){ err.textContent="Enter your result."; return; }
+  const parsed=parseWodResult(result, qwodFmt);
+  if(!parsed){
+    err.textContent = qwodFmt==="fortime" ? "Time should look like 8:42."
+                                          : "Use rounds+reps, e.g. 7+12.";
+    return;
+  }
+
+  const res=recordWodResult(name, qwodFmt, result, qwodScaled);
+
+  // keep a dated log of one-off sessions, separate from the programme
+  const log=lsGet("wodLog")||[];
+  log.push({
+    id:"q"+Date.now(), date:today(), name, format:qwodFmt,
+    mins:parseInt(document.getElementById("qwod-mins").value)||null,
+    notes:document.getElementById("qwod-notes").value.trim(),
+    result, scaled:qwodScaled
+  });
+  lsSet("wodLog", log.slice(-200));
+
+  // count it as a session for streaks and the leaderboard
+  const ck="w"+week+"-s-wod";
+  if(!checks[ck]){ checks[ck]=true; lsSet("checks",checks); }
+
+  closeQuickWod();
+  renderDash(); updateDashSubtitles();
+  if(document.getElementById("tab-progress").classList.contains("on")) renderProgress();
+  toast(res.pr ? "New PR on "+name : "Logged "+name);
+  if(res.pr){ playSfx("exDone"); if(navigator.vibrate) navigator.vibrate([25,50,25]); }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+//  TRAINING MODE  —  lifting · crossfit · both
+// ═══════════════════════════════════════════════════════════════════════
+function trainingMode(){ return (plan && plan.mode) || "lifting"; }
+
+function applyMode(m){
+  m = ["lifting","crossfit","both"].includes(m) ? m : "lifting";
+  document.body.classList.remove("mode-lifting","mode-crossfit","mode-both");
+  document.body.classList.add("mode-"+m);
+
+  // the quick WOD button only belongs to people who do WODs
+  const q=document.getElementById("quick-wod-btn");
+  if(q) q.style.display = (m==="lifting") ? "none" : "";
+
+  // what the workout section is called
+  const exLbl=document.querySelector('[data-dacc="dacc-workout"] span');
+  if(exLbl) exLbl.textContent = m==="crossfit" ? "Today's training" : "Exercises";
+
+  const sel=document.getElementById("mode-select");
+  if(sel && sel.value!==m) sel.value=m;
+}
+
+function setTrainingMode(m){
+  plan.mode = m;
+  lsSet("plan", plan);
+  applyMode(m);
+  renderDash(); renderDashWorkout(); updateDashSubtitles();
+  if(document.getElementById("tab-progress").classList.contains("on")) renderProgress();
+  toast(m==="crossfit" ? "CrossFit mode" : m==="both" ? "Lifting + CrossFit" : "Lifting mode");
+}
+
+// templates worth showing for each mode
+function templatesForMode(){
+  const m=trainingMode();
+  if(m==="crossfit") return TEMPLATES.filter(t=>t.id==="crossfit");
+  if(m==="both")     return TEMPLATES;
+  return TEMPLATES.filter(t=>t.id!=="crossfit");
+}
+
+
+document.getElementById("mode-select").addEventListener("change", (e)=>{
+  setTrainingMode(e.target.value);
+  renderThemePicker();
+});
+
 // ── BOOT ──────────────────────────────────────────────
 (async()=>{
   try {
@@ -6011,6 +6760,7 @@ function renderWodLogger(ex, ck){
     renderDashWorkout();
     updatePlanName();
     applyTheme(currentTheme);
+    applyMode(trainingMode());
     const bt=document.getElementById("build-tag"); if(bt) bt.textContent=BUILD;
     renderProfileList();
     const who=document.getElementById("who-pill");
