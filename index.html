@@ -1443,6 +1443,90 @@ body:not(.t-paper) .wod-hist-tag.pr{background:#2d1f00;color:#fbbf24}
 /* mode-driven visibility */
 body.mode-lifting .crossfit-only{display:none !important}
 body.mode-crossfit .lifting-only{display:none !important}
+
+/* ═══════════════════════════════════════════════════════════════════
+   WEIGHT — motion that settles instead of snapping.
+   Everything here is inside a reduced-motion guard so anyone who has
+   asked their phone for less movement gets a still app.
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --spring:cubic-bezier(.34,1.4,.5,1);      /* slight overshoot, then settles */
+  --settle:cubic-bezier(.2,.8,.25,1);       /* heavy start, gentle landing */
+  --press:cubic-bezier(.3,.7,.4,1);
+}
+
+@media (prefers-reduced-motion: no-preference){
+
+  /* ── things you press push into the page ── */
+  .btn{transition:transform .16s var(--press),opacity .15s,box-shadow .2s var(--press);
+       box-shadow:0 2px 0 rgba(0,0,0,.28)}
+  .btn:active{transform:translateY(2px) scale(.994);box-shadow:0 0 0 rgba(0,0,0,.28);opacity:.92}
+
+  .set-done-btn{transition:transform .18s var(--spring),background .18s,border-color .18s,color .18s}
+  .set-done-btn:active{transform:scale(.86)}
+  .set-done-btn.done{animation:doneSettle .42s var(--spring)}
+  @keyframes doneSettle{
+    0%{transform:scale(.86)} 45%{transform:scale(1.14)} 100%{transform:scale(1)}
+  }
+
+  /* rows have mass: they compress, then come back */
+  .ex-main{transition:transform .18s var(--press),background .2s}
+  .ex-main.pressing{transform:scale(.985)}
+  .day-hdr{transition:transform .16s var(--press),filter .18s}
+  .day-hdr.pressing{transform:scale(.992)}
+
+  /* ── tab switching carries direction ── */
+  .page.on{animation:pageIn .34s var(--settle)}
+  @keyframes pageIn{
+    from{opacity:0;transform:translateY(10px) scale(.995)}
+    to{opacity:1;transform:none}
+  }
+
+  /* the bottom bar's active tab slides rather than jumps */
+  .tab{transition:color .2s var(--settle)}
+  .tab .ico,.tab svg{transition:transform .26s var(--spring)}
+  .tab.on .ico,.tab.on svg{transform:translateY(-2px) scale(1.06)}
+
+  /* numbers already settle via the app's own .num-settle — left alone */
+
+  /* ── cards arrive with a little inertia, staggered ── */
+  .fcard,.pcard,.dash-card,.hero-card{animation:cardIn .44s var(--settle) both}
+  @keyframes cardIn{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* sheets rise with weight */
+  .modal-sheet{animation:sheetUp .38s var(--settle)}
+  @keyframes sheetUp{
+    from{transform:translateY(28px);opacity:0}
+    to{transform:none;opacity:1}
+  }
+
+  /* ── the workout overlay has heft coming up and going down ── */
+  #workout-overlay{transition:transform .38s var(--settle),opacity .28s}
+  #workout-overlay.closing{transform:translateY(100%);opacity:.6}
+
+  /* ── rest bar drains with a steady weight ── */
+  .rest-bar-fill{transition:width .95s linear}
+  .rest-bar-wrap.active{animation:restIn .34s var(--spring)}
+  @keyframes restIn{
+    from{opacity:0;transform:scaleY(.4)} to{opacity:1;transform:none}
+  }
+
+  /* ── chips and pills bounce very slightly when they turn on ── */
+  .seg button,.lift-chip,.dogchip,.ce-fmt{transition:transform .18s var(--spring),background .18s,border-color .18s,color .18s}
+  .seg button:active,.lift-chip:active{transform:scale(.95)}
+  .seg button.on,.lift-chip.on{animation:chipSettle .34s var(--spring)}
+  @keyframes chipSettle{0%{transform:scale(.95)}55%{transform:scale(1.05)}100%{transform:scale(1)}}
+
+  /* ── inputs sink slightly when focused ── */
+  .in,.set-input{transition:border-color .18s,box-shadow .22s var(--settle),transform .18s var(--press)}
+  .set-input:focus{transform:scale(1.03)}
+}
+
+/* press feedback that's fine even with reduced motion */
+.btn,.set-done-btn,.seg button,.lift-chip{will-change:transform}
 </style>
 </head>
 <body class="t-paper phase-cut">
@@ -6839,6 +6923,45 @@ if ("serviceWorker" in navigator) {
       console.warn("Offline support unavailable:", e));
   });
 }
+</script>
+<script>
+
+// ═══════════════════════════════════════════════════════════════════════
+//  WEIGHT — a few behaviours CSS can't do on its own
+// ═══════════════════════════════════════════════════════════════════════
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// cards stagger in rather than all landing at once.
+// Only ever the visible page, or the count runs away across hidden tabs.
+function staggerCards(){
+  if(REDUCED) return;
+  const page=document.querySelector(".page.on");
+  if(!page) return;
+  const cards=[...page.querySelectorAll(".fcard,.pcard,.dash-card,.hero-card")]
+    .filter(c=>c.offsetParent !== null);          // skip anything hidden
+  cards.forEach((c,i)=>{
+    c.style.animation="none";
+    void c.offsetWidth;                            // restart the animation
+    c.style.animation="";
+    c.style.animationDelay = Math.min(i,6)*45 + "ms";
+  });
+}
+document.querySelectorAll(".tab").forEach(t=>
+  t.addEventListener("click",()=>setTimeout(staggerCards,30)));
+addEventListener("load",()=>setTimeout(staggerCards,60));
+
+// the overlay should feel like it has mass on the way out too
+(function weightyOverlay(){
+  const ov=document.getElementById("workout-overlay");
+  const close=document.getElementById("wo-close");
+  if(!ov || !close || REDUCED) return;
+  const orig=close.onclick;
+  close.addEventListener("click", ()=>{
+    ov.classList.add("closing");
+    setTimeout(()=>ov.classList.remove("closing"), 400);
+  }, true);
+})();
+
 </script>
 </body>
 </html>

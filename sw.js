@@ -1,7 +1,7 @@
 /* STOPICANTGROW — offline support
    Bump CACHE when you upload a new index.html, or phones may keep serving
    the old one from cache. */
-const CACHE = "sicg-v1";
+const CACHE = "sicg-v2";
 const SHELL = [
   "./",
   "./index.html",
