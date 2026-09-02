@@ -2,1236 +2,1072 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
-<meta name="theme-color" content="#f6f7f9"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<title>Pack — Dog Sitting</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Hunter &amp; Dillon Dog Sitting</title>
+<meta name="description" content="Dog boarding, house sitting, drop-in visits and walks in Smithfield and Johnston County, NC. Book directly."/>
+<meta name="theme-color" content="#2f5d3a"/>
+<link rel="icon" href="favicon.ico"/>
+<link rel="apple-touch-icon" href="photos/apple-touch-icon.png"/>
+
+<!-- How the link looks when shared in Facebook groups, Nextdoor or a text -->
+<meta property="og:title" content="Hunter &amp; Dillon Dog Sitting — Smithfield, NC"/>
+<meta property="og:description" content="Boarding, house sitting, drop-in visits and walks. Free meet &amp; greet before your first booking."/>
+<meta property="og:type" content="website"/>
+<meta property="og:image" content="photos/social-preview.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Hunter &amp; Dillon Dog Sitting — Smithfield, NC"/>
+<meta name="twitter:description" content="Boarding, house sitting, drop-in visits and walks."/>
+<meta name="twitter:image" content="photos/social-preview.jpg"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --border:#1f2436;--border2:#2a3048;
-  --text:#eef0f8;--sub:#5a6380;--mute:#2e344a;
-  --bg:#f7f8fa;--bg2:#eef0f4;--card:#fff;--card2:#f9fafb;
-  --border:#e4e7ec;--border2:#d0d5dd;
-  --text:#101828;--sub:#667085;--mute:#d0d5dd;
-  --ac:#1c3d5a;--ac2:#16324a;--ac-bg:#eef3f8;--ac-bd:#c3d4e4;
-  --ok:#067647;--ok-bg:#ecfdf3;--warn:#b54708;--warn-bg:#fffaeb;
-  --bad:#b42318;--bad-bg:#fef3f2;
-  --r:10px;--rs:8px;
-  --sh:0 1px 2px rgba(16,24,40,.05);
+  --bg:#f6f4ec;--bg2:#eee9dc;--card:#fffdf7;--card2:#f5f1e6;
+  --line:#ddd6c4;--line2:#c8bfa8;
+  --ink:#1d2a20;--sub:#5f6b60;
+  --ac:#2f5d3a;--ac2:#24492e;--ac-bg:#e6efe6;
+  --ok:#2f5d3a;--ok-bg:#e6efe6;
+  --r:12px;--max:900px;
 }
-html,body{background:var(--bg);color:var(--text);
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Inter,sans-serif;
-  font-size:15px;line-height:1.5;min-height:100dvh;overscroll-behavior:none;
-  -webkit-font-smoothing:antialiased}
-body{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
-input,select,textarea,button{font-family:inherit}
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+img{max-width:100%;display:block}
 
-/* header */
-.hdr{position:sticky;top:0;z-index:50;background:var(--bg);
-  border-bottom:1px solid var(--border);padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
-.hdr-in{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.logo{font-size:15px;font-weight:800;letter-spacing:.01em;color:var(--text)}
-.logo span{display:none}
-.hdr-sub{font-size:11px;color:var(--sub);font-weight:600;margin-top:1px}
+/* nav */
+.nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.94);
+  backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--max);margin:0 auto;padding:13px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;letter-spacing:-.01em}
+.brand svg{width:22px;height:22px;stroke:var(--ac);fill:none;stroke-width:1.7}
+.nav-cta{background:var(--ac);color:#fff;border:none;border-radius:8px;
+  font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer;text-decoration:none;
+  white-space:nowrap;transition:opacity .15s}
+.nav-cta:active{opacity:.88}
 
-/* tabs */
-.tabs{position:fixed;bottom:0;left:0;right:0;z-index:60;display:flex;
-  background:var(--card);border-top:1px solid var(--border);
-  padding-bottom:env(safe-area-inset-bottom)}
-.tab{flex:1;background:none;border:none;color:var(--sub);cursor:pointer;
-  font-size:10px;font-weight:700;padding:9px 2px 8px;display:flex;
-  flex-direction:column;align-items:center;gap:3px;transition:color .15s}
-.tab .ico{display:block;height:20px}
-.tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;
-  stroke-linecap:round;stroke-linejoin:round}
-.tab.on svg{stroke-width:2}
-.tab.on{color:var(--ac)}
-.page{display:none;padding:14px 14px 20px}
-.page.on{display:block;animation:fade .25s ease}
-@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-/* generic */
-.sh{font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--sub);
-  margin:20px 2px 9px}
-.sh:first-child{margin-top:2px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh)}
-.btn{width:100%;background:var(--ac);border:1px solid var(--ac);border-radius:var(--rs);color:#fff;
-  font-size:14px;font-weight:600;padding:12px;cursor:pointer;transition:opacity .15s;letter-spacing:.01em}
+/* hero */
+.hero{padding:32px 0 26px;text-align:center}
+.eyebrow{display:inline-block;background:var(--ac-bg);color:var(--ac2);
+  font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;margin-bottom:16px}
+h1{font-size:32px;line-height:1.12;font-weight:800;letter-spacing:-.03em;margin-bottom:12px}
+.hero-strip{display:grid;gap:10px;margin:26px auto 0;max-width:var(--max);
+  grid-template-columns:1.4fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));
+  height:min(62vw,320px)}
+.hero-strip .hs{border-radius:12px;overflow:hidden;background:var(--bg2);
+  border:1px solid var(--line);cursor:zoom-in;position:relative;min-height:0}
+.hero-strip .hs img{width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .5s cubic-bezier(.2,.7,.3,1)}
+.hero-strip .hs:active img{transform:scale(1.03)}
+@media (hover:hover){.hero-strip .hs:hover img{transform:scale(1.06)}}
+/* the first tile spans both rows so it reads as the main image */
+.hero-strip .hs:first-child{grid-row:span 2}
+/* on a phone three tiles is plenty — more just makes them tiny */
+.hero-strip .hs:nth-child(n+4){display:none}
+@media (min-width:700px){
+  .hero-strip{max-width:var(--max);height:380px;
+    grid-template-columns:1.6fr 1fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr))}
+  .hero-strip .hs:first-child{grid-row:span 2}
+  .hero-strip .hs:nth-child(n+4){display:block}
+}
+.hero p{font-size:16px;color:var(--sub);max-width:460px;margin:0 auto 20px}
+.btn{display:block;width:100%;background:var(--ac);color:#fff;border:1px solid var(--ac);
+  border-radius:10px;font-size:16px;font-weight:600;padding:14px;cursor:pointer;
+  text-decoration:none;text-align:center;transition:opacity .15s}
 .btn:active{opacity:.88}
-.btn.ghost{background:var(--card);border-color:var(--border2);color:var(--text)}
-.btn.danger{background:var(--card);border-color:var(--border2);color:var(--bad)}
-.btn.sm{padding:9px;font-size:13px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-label.lbl{display:block;font-size:11px;font-weight:600;letter-spacing:.01em;
-  color:var(--sub);margin:13px 0 5px}
-.in{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:var(--rs);
-  color:var(--text);padding:11px 12px;font-size:16px;outline:none;-webkit-appearance:none;
+.btn.alt{background:#fff;color:var(--ink);border-color:var(--line2)}
+.btn-row{display:grid;gap:10px;max-width:340px;margin:0 auto}
+.trust{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:20px;
+  font-size:13px;color:var(--sub)}
+.trust span{display:flex;align-items:center;gap:6px}
+.trust svg{width:15px;height:15px;stroke:var(--ok);fill:none;stroke-width:2.2}
+
+/* sections */
+section{padding:30px 0;border-top:1px solid var(--line)}
+h2{font-size:23px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.lede{color:var(--sub);margin-bottom:22px}
+
+/* services */
+.svc{border:1px solid var(--line);border-radius:var(--r);padding:15px 16px;margin-bottom:8px;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.svc-n{font-size:16px;font-weight:600;margin-bottom:4px}
+.svc-d{font-size:14px;color:var(--sub);line-height:1.6}
+.svc-p{text-align:right;flex-shrink:0}
+.svc-amt{font-size:19px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.svc-unit{font-size:12px;color:var(--sub)}
+.note{font-size:13px;color:var(--sub);margin-top:14px;padding:13px 15px;
+  background:var(--bg2);border-radius:10px;line-height:1.6}
+
+/* about */
+.about{display:flex;gap:16px;align-items:flex-start}
+.about-img{width:96px;height:96px;border-radius:var(--r);background:var(--ac-bg);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.about-img svg{width:40px;height:40px;stroke:var(--ac);fill:none;stroke-width:1.5}
+.about-img img{width:100%;height:100%;object-fit:cover}
+.about-img.has-photo{background:none}
+.about p{font-size:15px;color:var(--sub)}
+.about p+p{margin-top:10px}
+
+/* gallery */
+.gal{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gal-i{aspect-ratio:1;position:relative;border-radius:var(--r);background:var(--bg2);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+  color:var(--line2);font-size:12px;overflow:hidden}
+.gal-i img{width:100%;height:100%;object-fit:cover}
+
+/* reviews */
+.rev{border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:8px}
+.stars{color:#f59e0b;font-size:13px;letter-spacing:2px;margin-bottom:8px}
+.rev p{font-size:15px;line-height:1.6}
+.rev-w{font-size:13px;color:var(--sub);margin-top:10px;font-weight:600}
+
+/* faq */
+.faq{border-bottom:1px solid var(--line)}
+.faq:last-child{border-bottom:none}
+.faq-q{width:100%;background:none;border:none;text-align:left;cursor:pointer;
+  padding:15px 0;font-size:15px;font-weight:600;color:var(--ink);
+  display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faq-q::after{content:"+";font-size:20px;color:var(--sub);font-weight:400;flex-shrink:0}
+.faq.open .faq-q::after{content:"−"}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,opacity .2s;
+  opacity:0;font-size:15px;color:var(--sub)}
+.faq.open .faq-a{max-height:400px;opacity:1;padding-bottom:15px}
+
+/* contact */
+.field{margin-bottom:14px}
+label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:6px}
+.in{width:100%;background:#fff;border:1px solid var(--line2);border-radius:10px;
+  color:var(--ink);padding:12px 13px;font-size:16px;outline:none;font-family:inherit;
   transition:border-color .15s,box-shadow .18s}
 .in:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-bg)}
-textarea.in{resize:vertical;min-height:64px;font-size:15px}
-.err{font-size:12px;color:var(--bad);min-height:15px;margin-top:6px}
-.empty{text-align:center;padding:26px 14px;color:var(--sub);font-size:13px;line-height:1.6}
-.pill{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.02em;
-  padding:2px 8px;border-radius:5px;text-transform:capitalize;border:1px solid transparent}
-.pill.rover{background:var(--ac-bg);color:var(--ac2)}
-.pill.direct{background:var(--ok-bg);color:var(--ok)}
-.pill.paid{background:var(--ok-bg);color:var(--ok)}
-.pill.unpaid{background:var(--warn-bg);color:var(--warn)}
-.pill.done{background:var(--bg2);color:var(--sub)}
-.pill.active{background:var(--ok-bg);color:var(--ok)}
-.pill.upcoming{background:var(--ac-bg);color:var(--ac2)}
+textarea.in{resize:vertical;min-height:88px}
+.err{font-size:13px;color:#b42318;min-height:18px;margin-bottom:4px}
 
-/* stat cards */
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
-  padding:13px 14px;position:relative;overflow:hidden;box-shadow:var(--sh)}
-.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ac)}
-.stat.ok::before{background:var(--ok)} .stat.warn::before{background:var(--warn)}
-.stat.mute::before{background:var(--border2)}
-.stat-l{font-size:10px;font-weight:600;letter-spacing:.03em;color:var(--sub)}
-.stat-v{font-size:21px;font-weight:700;letter-spacing:-.025em;margin-top:4px;font-variant-numeric:tabular-nums}
-.stat-s{font-size:10px;color:var(--sub);margin-top:2px}
+/* sticky bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(10px);border-top:1px solid var(--line);
+  padding:10px 20px calc(10px + env(safe-area-inset-bottom))}
+.bar-in{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bar .btn{padding:13px;font-size:15px}
 
-/* list rows */
-.item{display:flex;align-items:center;gap:12px;background:var(--card);
-  border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;
-  margin-bottom:7px;cursor:pointer;transition:background .15s,border-color .15s;box-shadow:var(--sh)}
-.item:active{background:var(--card2);border-color:var(--border2)}
-.av{width:36px;height:36px;border-radius:var(--rs);background:var(--ac-bg);color:var(--ac2);
-  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
-  flex-shrink:0;letter-spacing:.02em}
-.av.dog{background:var(--ac-bg);color:var(--ac2)}
-.av svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
-.item-b{flex:1;min-width:0}
-.item-t{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item-s{font-size:11px;color:var(--sub);margin-top:1px;overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap}
-.item-r{text-align:right;flex-shrink:0}
-.item-amt{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.item-sub{font-size:10px;color:var(--sub);margin-top:1px}
+.avail{display:flex;align-items:center;gap:9px;background:var(--ok-bg);
+  border:1px solid #a6f4c5;border-radius:10px;padding:11px 14px;margin-top:6px;
+  font-size:14px;font-weight:500;color:#054f31}
+.avail svg{width:17px;height:17px;stroke:var(--ok);fill:none;stroke-width:1.9;flex-shrink:0}
 
-/* sheet / modal */
-.sheet-bg{position:fixed;inset:0;z-index:200;background:rgba(15,17,21,.45);
-  display:flex;align-items:flex-end;animation:fade .2s ease}
-.sheet-bg.hidden{display:none !important}
-.sheet{width:100%;max-height:92dvh;background:var(--bg);border-radius:18px 18px 0 0;
-  display:flex;flex-direction:column;animation:up .28s cubic-bezier(.25,.9,.3,1)}
-@keyframes up{from{transform:translateY(100%)}to{transform:none}}
-.sheet-h{display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
-.sheet-t{font-size:16px;font-weight:900}
-.x{background:none;border:none;color:var(--sub);font-size:26px;line-height:1;
-  cursor:pointer;padding:0 4px}
-.sheet-b{padding:14px 16px calc(20px + env(safe-area-inset-bottom));overflow-y:auto}
+.est{border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-top:18px;background:var(--bg2)}
+.est-h{font-size:15px;font-weight:600;margin-bottom:12px}
+.est-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.est .in{background:#fff}
+.est-go{padding:12px;font-size:15px;width:100%}
+.est-out{border-top:1px solid var(--line2);padding-top:12px;margin-top:2px}
+.est-line{display:flex;justify-content:space-between;font-size:14px;color:var(--sub);padding:4px 0}
+.est-line b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.est-total{display:flex;justify-content:space-between;align-items:baseline;
+  margin-top:8px;padding-top:10px;border-top:1px solid var(--line2);font-size:15px;font-weight:600}
+.est-total span:last-child{font-size:24px;font-weight:700;letter-spacing:-.02em;
+  color:var(--ac);font-variant-numeric:tabular-nums}
+.est-fine{font-size:12px;color:var(--sub);margin-top:9px}
 
-/* segmented control */
-.seg{display:flex;gap:5px;flex-wrap:wrap}
-.seg button{flex:1;min-width:72px;background:var(--card);border:1px solid var(--border2);
-  border-radius:9px;color:var(--sub);font-size:12px;font-weight:700;padding:9px 6px;
-  cursor:pointer;transition:all .15s}
-.seg button.on{background:var(--ac-bg);border-color:var(--ac);color:var(--ac2)}
+.gal-i{cursor:pointer;transition:opacity .15s}
+.gal-i:active{opacity:.85}
+.lb{position:fixed;inset:0;z-index:100;background:rgba(8,11,16,.95);display:none;
+  align-items:center;justify-content:center;padding:20px}
+.lb.on{display:flex}
+.lb img{max-width:100%;max-height:82vh;border-radius:8px;object-fit:contain}
+.lb-x{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;
+  background:rgba(255,255,255,.14);border:none;color:#fff;font-size:26px;line-height:1;
+  width:40px;height:40px;border-radius:50%;cursor:pointer}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.14);
+  border:none;color:#fff;font-size:30px;line-height:1;width:44px;height:44px;
+  border-radius:50%;cursor:pointer}
+.lb-nav.prev{left:12px}.lb-nav.next{right:12px}
 
-/* calendar */
-.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.cal-m{font-size:15px;font-weight:900}
-.cal-nav{display:flex;gap:6px}
-.cal-btn{width:32px;height:32px;border-radius:9px;background:var(--card);
-  border:1px solid var(--border2);color:var(--sub);font-size:16px;cursor:pointer}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal-dow{font-size:9px;font-weight:800;color:var(--sub);text-align:center;padding:4px 0}
-.cal-d{aspect-ratio:1;border-radius:9px;background:var(--card);border:1px solid var(--border);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  font-size:12px;font-weight:700;cursor:pointer;position:relative;transition:all .15s}
-.cal-d.other{opacity:.32}
-.cal-d.today{border-color:var(--ac);color:var(--ac2);font-weight:900}
-.cal-d.has{background:var(--ac-bg);border-color:var(--ac-bd)}
-.cal-d .dot{width:5px;height:5px;border-radius:50%;background:var(--ac);margin-top:2px}
-.cal-d.sel{background:var(--ac);color:#fff;border-color:var(--ac)}
-.cal-d.sel .dot{background:#fff}
+.est-toggle{width:100%;margin-top:16px;background:#fff;border:1px solid var(--line2);
+  border-radius:10px;padding:13px 15px;font-size:15px;font-weight:500;color:var(--ink);
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  font-family:inherit;transition:border-color .15s}
+.est-toggle:active{border-color:var(--ac)}
+.est-toggle svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:2;
+  transition:transform .25s}
+.est-toggle.open svg{transform:rotate(180deg)}
+.est{margin-top:10px}
 
-/* money bars */
-.bar-row{display:flex;align-items:center;gap:9px;margin-bottom:8px}
-.bar-lbl{font-size:11px;font-weight:700;color:var(--sub);width:34px;flex-shrink:0}
-.bar-tr{display:block;flex:1;height:8px;background:var(--bg2);border-radius:99px;overflow:hidden}
-.bar-fl{display:block;height:100%;min-width:0;background:var(--ac);border-radius:99px;transition:width .5s cubic-bezier(.3,.8,.4,1)}
-.bar-amt{font-size:11px;font-weight:800;width:62px;text-align:right;
-  flex-shrink:0;font-variant-numeric:tabular-nums}
+.contact-grid{display:block}
+.contact-side{margin-top:22px}
+.cs-card{border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:10px;
+  background:var(--bg2)}
+.cs-h{font-size:14px;font-weight:600;margin-bottom:9px}
+.cs-steps{margin:0;padding-left:18px;font-size:14px;color:var(--sub);line-height:1.65}
+.cs-steps li{margin-bottom:6px}
+.cs-steps li:last-child{margin-bottom:0}
+.cs-line{font-size:14px;color:var(--sub);padding:5px 0;border-bottom:1px solid var(--line)}
+.cs-line:last-child{border-bottom:none}
+.cs-line a{color:var(--ac);text-decoration:none;font-weight:500}
 
-/* money breakdown */
-.brk{display:flex;justify-content:space-between;padding:9px 0;
-  border-bottom:1px solid var(--border);font-size:13px}
-.brk:last-child{border-bottom:none}
-.brk-l{color:var(--sub)}
-.brk-v{font-weight:800;font-variant-numeric:tabular-nums}
-.brk.total{border-top:2px solid var(--border);margin-top:4px;padding-top:11px;border-bottom:none}
-.brk.total .brk-l{color:var(--text);font-weight:800}
-.brk.total .brk-v{font-size:17px;color:var(--ok)}
-.neg{color:var(--bad)}
+.steps{list-style:none;counter-reset:s;display:grid;gap:10px}
+.steps li{counter-increment:s;display:flex;gap:14px;align-items:flex-start;
+  border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;background:#fff}
+.steps li::before{content:counter(s);flex-shrink:0;width:26px;height:26px;border-radius:50%;
+  background:var(--ac);color:#fff;font-size:13px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:1px}
+.steps b{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+.steps span{font-size:14px;color:var(--sub);line-height:1.5}
+@media (min-width:700px){ .steps{grid-template-columns:repeat(3,1fr)} }
 
-/* fab */
-.fab{position:fixed;right:16px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:55;
-  height:44px;padding:0 18px;border-radius:22px;background:var(--ac);color:#fff;border:none;
-  font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(28,61,90,.28);
-  display:flex;align-items:center;gap:7px;transition:opacity .15s}
-.fab:active{opacity:.9}
-.fab svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2}
+.policy{display:grid;gap:9px}
+.policy .p{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);
+  border-radius:var(--r);padding:13px 15px}
+.policy svg{width:17px;height:17px;stroke:var(--ac);fill:none;stroke-width:1.9;
+  flex-shrink:0;margin-top:3px}
+.policy b{display:block;font-size:14px;font-weight:600;margin-bottom:2px}
+.policy span{font-size:13px;color:var(--sub);line-height:1.55}
+@media (min-width:700px){ .policy{grid-template-columns:1fr 1fr} }
 
-/* dog chips */
-.dogchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.dogchip{background:var(--card);border:1px solid var(--border2);border-radius:99px;
-  padding:6px 12px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;transition:all .15s}
-.dogchip.on{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+footer{padding:26px 0 34px;text-align:center;color:var(--sub);font-size:13px;
+  border-top:1px solid var(--line)}
+footer a{color:var(--ac);text-decoration:none}
 
-/* detail rows */
-.drow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;
-  border-bottom:1px solid var(--border);font-size:13px}
-.drow:last-child{border-bottom:none}
-.drow-l{color:var(--sub);flex-shrink:0}
-.drow-v{font-weight:700;text-align:right;word-break:break-word}
-.note{font-size:12px;color:var(--sub);line-height:1.6;white-space:pre-wrap}
-.toast{position:fixed;left:50%;bottom:calc(94px + env(safe-area-inset-bottom));
-  transform:translateX(-50%) scale(.9);z-index:300;background:var(--card);
-  border:1px solid var(--border2);border-radius:99px;padding:10px 18px;font-size:13px;
-  font-weight:700;opacity:0;pointer-events:none;transition:all .25s;
-  box-shadow:0 6px 22px rgba(0,0,0,.12);white-space:nowrap;max-width:88vw;
-  overflow:hidden;text-overflow:ellipsis}
-.toast.on{opacity:1;transform:translateX(-50%) scale(1)}
-.inv{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
-  padding:16px 14px;font-size:12px;line-height:1.65;white-space:pre;overflow-x:auto;
-  font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace;
-  color:var(--text);box-shadow:var(--sh)}
+/* ── larger screens: two columns instead of a lonely strip ── */
+@media (min-width:700px){
+  :root{--max:900px}
+  .hero{padding:52px 0 40px}
+  h1{font-size:44px;max-width:760px;margin-left:auto;margin-right:auto}
+  .hero p{font-size:18px;max-width:560px}
+  .btn-row{grid-template-columns:1fr 1fr;max-width:460px}
+  section{padding:44px 0}
+  h2{font-size:27px}
+
+  /* services and reviews side by side */
+  #svc-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  #svc-list .svc{margin-bottom:0}
+  #rev-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  #rev-list .rev{margin-bottom:0}
+  .gal{grid-template-columns:repeat(4,1fr)}
+
+  /* about reads better wider */
+  .about-img{width:130px;height:130px}
+  .about{gap:24px}
+
+  /* the form doesn't need to be full width */
+  #contact .field,#contact .btn,#contact .err,#contact .note{max-width:520px}
+  .est{max-width:560px}
+  .est-row{grid-template-columns:1fr 1fr 1fr}
+
+  /* the sticky bar is a phone thing */
+  .bar{display:none}
+  body{padding-bottom:0}
+}
+@media (min-width:1000px){
+  :root{--max:1080px}
+  #svc-list{grid-template-columns:repeat(3,1fr)}
+  #rev-list{grid-template-columns:repeat(3,1fr)}
+  .gal{grid-template-columns:repeat(4,1fr)}
+}
+
+/* ── big monitors: stop floating in the middle of nowhere ── */
+@media (min-width:1400px){
+  :root{--max:1280px}
+  h1{font-size:52px;max-width:900px}
+  .hero p{font-size:19px;max-width:620px}
+  .hero{padding:64px 0 46px}
+  section{padding:54px 0}
+  h2{font-size:30px}
+  .gal{grid-template-columns:repeat(4,1fr);gap:14px}
+  #svc-list{gap:14px}
+  #rev-list{gap:14px}
+
+  /* the About block reads better as a real two-column spread */
+  .about{gap:36px;align-items:center}
+  .about-img{width:200px;height:200px}
+  .about p{font-size:17px}
+
+  /* form beside the contact detail rather than a lonely column */
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+  #contact .field,#contact .btn,#contact .err,#contact .note{max-width:none}
+  .est{max-width:none}
+}
+@media (min-width:1750px){
+  :root{--max:1440px}
+  .gal{grid-template-columns:repeat(6,1fr)}
+}
+
+/* ═══ MOTION ═══ */
+@media (prefers-reduced-motion: no-preference){
+
+  /* things fade up as they come into view */
+  .reveal{opacity:0;transform:translateY(18px);
+    transition:opacity .6s cubic-bezier(.2,.7,.3,1),transform .6s cubic-bezier(.2,.7,.3,1)}
+  .reveal.shown{opacity:1;transform:none}
+
+  /* hero pieces arrive in sequence on load */
+  .hero .eyebrow{animation:fadeUp .55s .05s both cubic-bezier(.2,.7,.3,1)}
+  .hero h1{animation:fadeUp .6s .13s both cubic-bezier(.2,.7,.3,1)}
+  .hero > p{animation:fadeUp .6s .22s both cubic-bezier(.2,.7,.3,1)}
+  .hero .btn-row{animation:fadeUp .6s .3s both cubic-bezier(.2,.7,.3,1)}
+  .hero-strip .hs{animation:photoIn .7s both cubic-bezier(.2,.7,.3,1)}
+  .hero-strip .hs:nth-child(1){animation-delay:.34s}
+  .hero-strip .hs:nth-child(2){animation-delay:.42s}
+  .hero-strip .hs:nth-child(3){animation-delay:.50s}
+  .hero-strip .hs:nth-child(4){animation-delay:.58s}
+  .hero-strip .hs:nth-child(5){animation-delay:.66s}
+  .hero .trust span:nth-child(1){animation:fadeUp .5s .5s both}
+  .hero .trust span:nth-child(2){animation:fadeUp .5s .58s both}
+  .hero .trust span:nth-child(3){animation:fadeUp .5s .66s both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes photoIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+
+  /* the hero photo drifts very slowly — enough to feel alive, not enough to distract */
+  .hero-strip .hs:first-child img{animation:driftIn 20s 1.4s ease-in-out infinite alternate}
+  @keyframes driftIn{from{transform:scale(1)}to{transform:scale(1.05)}}
+
+  /* gallery tiles stagger in */
+  .gal-i{opacity:0;transform:translateY(16px) scale(.97);
+    transition:opacity .55s cubic-bezier(.2,.7,.3,1),transform .55s cubic-bezier(.2,.7,.3,1)}
+  .gal-i.shown{opacity:1;transform:none}
+
+  /* availability banner gives one quiet pulse when it appears */
+  .avail.shown svg{animation:tick 2.4s 1.2s ease-in-out 2}
+  @keyframes tick{0%,100%{transform:none}12%{transform:scale(1.18)}24%{transform:none}}
+}
+
+/* hover / press behaviour — these are fine even with reduced motion */
+.gal-i{cursor:zoom-in;overflow:hidden}
+.gal-i img{transition:transform .5s cubic-bezier(.2,.7,.3,1)}
+@media (hover:hover){
+  .gal-i:hover img{transform:scale(1.07)}
+  .svc:hover{border-color:var(--ac-bd);background:var(--bg2)}
+  .rev:hover{border-color:var(--line2)}
+  .btn:hover{opacity:.92}
+  .nav-cta:hover{opacity:.92}
+}
+.gal-i:active img{transform:scale(1.02)}
+.svc{transition:border-color .2s,background .2s,transform .15s}
+.svc:active{transform:scale(.995)}
+.rev{transition:border-color .2s}
+
+/* the sticky call bar slides away when you're reading, back when you scroll up */
+.bar{transition:transform .3s cubic-bezier(.2,.7,.3,1)}
+.bar.hide{transform:translateY(120%)}
+
+/* nav gains a hairline shadow once you leave the top */
+.nav{transition:box-shadow .25s,border-color .25s}
+.nav.stuck{box-shadow:0 1px 12px rgba(16,24,40,.07)}
+
+/* counts up in the trust row feel static; give the tick a subtle draw */
+.trust svg{stroke-dasharray:24;stroke-dashoffset:0}
+@media (prefers-reduced-motion: no-preference){
+  .trust span.shown svg{animation:draw .5s ease both}
+  @keyframes draw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+}
+
+/* lightbox arrives a touch more gracefully */
+.lb{opacity:0;transition:opacity .22s ease}
+.lb.on{opacity:1}
+.lb img{animation:lbIn .3s cubic-bezier(.2,.8,.3,1)}
+@keyframes lbIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+
+/* alternating bands so the page isn't a sheet of white */
+#how{background:var(--bg2)}
+#services{background:var(--card)}
+#about{background:var(--bg2)}
+#gallery{background:var(--ink);color:#f3f0e6}
+#gallery h2{color:#fff}
+#gallery .lede{color:#c3c9c0}
+#reviews{background:var(--card)}
+#faq{background:var(--bg2)}
+#policy{background:var(--card)}
+#contact{background:var(--bg2)}
+/* full-bleed colour bands, content still inset */
+section,.hero{border-top:none;margin:0 -20px;padding:32px 20px}
+section>*,.hero>*{max-width:var(--max);margin-left:auto;margin-right:auto}
+.hero{background:var(--card);padding-top:38px;padding-bottom:34px}
+@media (min-width:700px){
+  section{padding:44px 20px}
+  .hero{padding-top:60px;padding-bottom:52px}
+}
+.nav{background:rgba(246,244,236,.94)}
+/* mustard as the highlight, used sparingly */
+.eyebrow{background:#f0c14b;color:#3a2f0b}
+.avail{background:#fdf6e0;border-color:#eddb9c;color:#6b5410}
+.avail svg{stroke:#a8811a}
+.steps li::before{background:#f0c14b;color:#3a2f0b}
+.trust svg{stroke:var(--ac)}
+.stars{color:#c99a1f}
 </style>
 </head>
 <body>
 
-<div class="hdr"><div class="hdr-in">
-  <div><div class="logo" id="biz-name">Pack</div>
-    <div class="hdr-sub" id="hdr-sub">Dog sitting</div></div>
-  <div style="text-align:right"><div style="font-size:17px;font-weight:900" id="hdr-amt">$0</div>
-    <div class="hdr-sub">Net this month</div></div>
-</div></div>
+<nav class="nav"><div class="nav-in">
+  <div class="brand">
+    <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="4.2" ry="3.4"/><ellipse cx="6.5" cy="10" rx="1.9" ry="2.4"/><ellipse cx="17.5" cy="10" rx="1.9" ry="2.4"/><ellipse cx="9.8" cy="6.4" rx="1.8" ry="2.2"/><ellipse cx="14.2" cy="6.4" rx="1.8" ry="2.2"/></svg>
+    <span id="nav-name">Hunter &amp; Dillon Dog Sitting</span>
+  </div>
+  <a class="nav-cta" href="#contact">Book now</a>
+</div></nav>
 
-<!-- HOME -->
-<section class="page on" id="p-home">
-  <div class="stats" id="home-stats"></div>
-  <div class="sh">In progress</div>
-  <div id="home-active"></div>
-  <div class="sh">Scheduled</div>
-  <div id="home-upcoming"></div>
-  <div class="sh">Outstanding</div>
-  <div id="home-unpaid"></div>
-  <div class="sh" id="followup-h" style="display:none">Worth a check-in</div>
-  <div id="home-followup"></div>
-</section>
+<div class="wrap">
 
-<!-- CLIENTS -->
-<section class="page" id="p-clients">
-  <input class="in" id="cl-search" placeholder="Search clients or dogs" style="margin-bottom:12px"/>
-  <div id="clients-list"></div>
-</section>
+  <header class="hero">
+    <div class="eyebrow" id="hero-area"></div>
+    <h1 id="hero-h1">Your dog stays happy while you&rsquo;re away</h1>
+    <p id="hero-p">Boarding, house sitting, drop-in visits and walks from two brothers who treat your dog like their own.</p>
+    <div class="btn-row">
+      <a class="btn" id="cta-text" href="#contact">Request a booking</a>
+      <a class="btn alt" id="cta-call" href="tel:">Call or text</a>
+    </div>
+    <div class="hero-strip" id="hero-strip"></div>
+    <div class="trust">
+      <span><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="t1"></span></span>
+      <span><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="t2"></span></span>
+      <span><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="t3"></span></span>
+    </div>
+  </header>
 
-<!-- CALENDAR -->
-<section class="page" id="p-cal">
-  <div class="card" style="margin-bottom:12px">
-    <div class="cal-h">
-      <div class="cal-m" id="cal-month"></div>
-      <div class="cal-nav">
-        <button class="cal-btn" id="cal-prev">&lsaquo;</button>
-        <button class="cal-btn" id="cal-today">•</button>
-        <button class="cal-btn" id="cal-next">&rsaquo;</button>
+  <div class="avail" id="avail" style="display:none">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg>
+    <span id="avail-text"></span>
+  </div>
+
+  <section id="how">
+    <h2>How it works</h2>
+    <p class="lede">No commitment until you&rsquo;ve met us.</p>
+    <ol class="steps" id="steps"></ol>
+  </section>
+
+  <section id="services">
+    <h2 id="svc-h">Services</h2>
+    <p class="lede" id="svc-lede"></p>
+    <div id="svc-list"></div>
+    <div class="note" id="svc-note"></div>
+
+    <button class="est-toggle" id="est-toggle">
+      <span>See a price estimate</span>
+      <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <div class="est" id="est" hidden>
+      <div class="est-h">Rough estimate</div>
+      <div class="est-row">
+        <div><label for="e-svc">Service</label><select class="in" id="e-svc"></select></div>
+        <div><label for="e-qty" id="e-qty-l">Nights</label><input class="in" type="number" id="e-qty" value="3" min="1"/></div>
       </div>
+      <div class="est-row">
+        <div><label for="e-dogs">Dogs</label><input class="in" type="number" id="e-dogs" value="1" min="1" max="6"/></div>
+        <div style="display:flex;align-items:flex-end">
+          <a class="btn est-go" id="e-book" href="#contact">Book this</a>
+        </div>
+      </div>
+      <div class="est-out">
+        <div id="e-break"></div>
+        <div class="est-total"><span>Estimated total</span><span id="e-total">$0</span></div>
+      </div>
+      <div class="est-fine">A rough guide only. I&rsquo;ll confirm the exact price before anything is booked.</div>
     </div>
-    <div class="cal-grid" id="cal-dows"></div>
-    <div class="cal-grid" id="cal-grid" style="margin-top:4px"></div>
-  </div>
-  <div class="sh" id="cal-day-lbl">Bookings</div>
-  <div id="cal-day-list"></div>
-</section>
+  </section>
 
-<!-- MONEY -->
-<section class="page" id="p-money">
-  <div class="seg" id="money-range" style="margin-bottom:12px">
-    <button class="on" data-range="month">This month</button>
-    <button data-range="year">This year</button>
-    <button data-range="all">All time</button>
-  </div>
-  <div class="card" style="margin-bottom:12px">
-    <div class="brk"><span class="brk-l">Rover bookings</span><span class="brk-v" id="m-rover">$0</span></div>
-    <div class="brk"><span class="brk-l">Rover fee (<span id="m-cutpct">20</span>%)</span><span class="brk-v neg" id="m-fee">$0</span></div>
-    <div class="brk"><span class="brk-l">Direct bookings</span><span class="brk-v" id="m-direct">$0</span></div>
-    <div class="brk"><span class="brk-l">Tips</span><span class="brk-v" id="m-tips">$0</span></div>
-    <div class="brk"><span class="brk-l">Expenses</span><span class="brk-v neg" id="m-exp">$0</span></div>
-    <div class="brk"><span class="brk-l">Mileage <span id="m-miles-n" style="opacity:.7"></span></span><span class="brk-v neg" id="m-miles">$0</span></div>
-    <div class="brk total"><span class="brk-l">Take-home</span><span class="brk-v" id="m-net">$0</span></div>
-  </div>
-  <div class="sh">Monthly net</div>
-  <div class="card" id="m-bars"></div>
-  <div class="sh">Top clients</div>
-  <div id="m-top"></div>
-  <div class="sh">Expenses &amp; mileage</div>
-  <button class="btn ghost sm" id="add-exp-btn" style="margin-bottom:10px">Add expense</button>
-  <button class="btn ghost sm" id="add-trip-btn" style="margin-bottom:10px">Log mileage</button>
-  <div id="exp-list"></div>
-</section>
-
-<!-- SETTINGS -->
-<section class="page" id="p-set">
-  <div class="sh">Default rates</div>
-  <div class="card">
-    <div class="row2">
-      <div><label class="lbl">Boarding / night</label><input class="in" type="number" id="r-board"/></div>
-      <div><label class="lbl">House sit / night</label><input class="in" type="number" id="r-house"/></div>
+  <section id="about">
+    <h2>About</h2>
+    <div class="about">
+      <div class="about-img" id="about-img">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0" stroke-linecap="round"/></svg>
+      </div>
+      <div id="about-text"></div>
     </div>
-    <div class="row2" style="margin-top:10px">
-      <div><label class="lbl">Drop-in / visit</label><input class="in" type="number" id="r-drop"/></div>
-      <div><label class="lbl">Walk / walk</label><input class="in" type="number" id="r-walk"/></div>
+  </section>
+
+  <section id="gallery">
+    <h2>Recent guests</h2>
+    <p class="lede">Some of the dogs who&rsquo;ve stayed with us.</p>
+    <div class="gal" id="gal"></div>
+  </section>
+
+  <section id="reviews">
+    <h2>What clients say</h2>
+    <div id="rev-list"></div>
+  </section>
+
+  <section id="faq">
+    <h2>Common questions</h2>
+    <div id="faq-list" style="margin-top:14px"></div>
+  </section>
+
+  <section id="policy">
+    <h2>Health &amp; safety</h2>
+    <div class="policy" id="policy-list"></div>
+  </section>
+
+  <section id="contact">
+    <h2>Request a booking</h2>
+    <p class="lede">Tell us the dates and we&rsquo;ll get back to you the same day.</p>
+    <div class="contact-grid">
+    <div>
+    <div class="field"><label for="f-name">Your name</label>
+      <input class="in" id="f-name" autocomplete="name"/></div>
+    <div class="field"><label for="f-dog">Dog&rsquo;s name &amp; breed</label>
+      <input class="in" id="f-dog"/></div>
+    <div class="field"><label for="f-svc">Service</label>
+      <select class="in" id="f-svc"></select></div>
+    <div class="field"><label for="f-dates">Dates needed</label>
+      <input class="in" id="f-dates" placeholder="e.g. Sept 12–16"/></div>
+    <div class="field"><label for="f-msg">Anything I should know?</label>
+      <textarea class="in" id="f-msg" placeholder="Medications, anxiety, routine, other pets..."></textarea></div>
+    <div class="err" id="f-err"></div>
+    <a class="btn" id="f-send" href="#">Send request by text</a>
+    <a class="btn alt" id="f-email" href="#" style="margin-top:10px">Send by email instead</a>
     </div>
-    <div class="row2" style="margin-top:10px">
-      <div><label class="lbl">Daycare / day</label><input class="in" type="number" id="r-day"/></div>
-      <div><label class="lbl">Rover cut %</label><input class="in" type="number" id="r-cut"/></div>
+    <aside class="contact-side">
+      <div class="cs-card">
+        <div class="cs-h">What happens next</div>
+        <ol class="cs-steps">
+          <li>We reply the same day with availability and a price.</li>
+          <li>We arrange a free meet-and-greet before the first booking.</li>
+          <li>You get photos and updates through every stay.</li>
+        </ol>
+      </div>
+      <div class="cs-card">
+        <div class="cs-h">Reach us directly</div>
+        <div class="cs-line" id="cs-phone"></div>
+        <div class="cs-line" id="cs-email"></div>
+        <div class="cs-line" id="cs-area"></div>
+      </div>
+      <div class="note" id="contact-note"></div>
+    </aside>
     </div>
-    <label class="lbl">Mileage rate ($/mile)</label>
-    <input class="in" type="number" step="0.01" id="r-mile"/>
-    <button class="btn" id="save-set" style="margin-top:14px">Save</button>
-  </div>
-  <div class="sh">Your details (for invoices)</div>
-  <div class="card">
-    <label class="lbl">Your name / business</label><input class="in" id="s-biz"/>
-    <label class="lbl">Phone or email</label><input class="in" id="s-contact"/>
-    <label class="lbl">Payment note</label>
-    <input class="in" id="s-pay" placeholder="Venmo @handle · Cash · Zelle"/>
-    <button class="btn" id="save-biz" style="margin-top:14px">Save</button>
-  </div>
-  <div class="sh">Data</div>
-  <div class="card">
-    <div style="font-size:12px;color:var(--sub);line-height:1.6;margin-bottom:11px" id="db-info"></div>
-    <button class="btn" id="exp-btn">Download backup</button>
-    <button class="btn ghost" id="imp-btn" style="margin-top:8px">Restore backup</button>
-    <input type="file" id="imp-file" accept="application/json,.json" style="display:none"/>
-    <button class="btn danger" id="wipe-btn" style="margin-top:8px">Erase everything</button>
-  </div>
-  <div style="text-align:center;font-size:11px;color:var(--sub);margin-top:16px">Pack · build <b id="build-tag"></b></div>
-</section>
+  </section>
 
-<button class="fab" id="fab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg><span id="fab-l">New booking</span></button>
+</div>
 
-<nav class="tabs">
-  <button class="tab on" data-tab="home"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Home</button>
-  <button class="tab" data-tab="clients"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 20a5.4 5.4 0 0 0-2-4.2"/></svg></span>Clients</button>
-  <button class="tab" data-tab="cal"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3"/></svg></span>Schedule</button>
-  <button class="tab" data-tab="money"><span class="ico"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/></svg></span>Finances</button>
-  <button class="tab" data-tab="set"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7.1 19.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 15H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 8.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 4.6V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></span>Settings</button>
-</nav>
-
-<div class="sheet-bg hidden" id="sheet"><div class="sheet">
-  <div class="sheet-h"><div class="sheet-t" id="sheet-t"></div><button class="x" id="sheet-x">×</button></div>
-  <div class="sheet-b" id="sheet-b"></div>
+<div class="bar"><div class="bar-in">
+  <a class="btn alt" id="bar-call" href="tel:">Call</a>
+  <a class="btn" href="#contact">Request booking</a>
 </div></div>
 
-<div class="toast" id="toast"></div>
+<footer class="wrap">
+  <div id="foot-name">Hunter &amp; Dillon Dog Sitting</div>
+  <div style="margin-top:5px" id="foot-contact"></div>
+  <div style="margin-top:10px;font-size:12px">Serving <span id="foot-area"></span></div>
+</footer>
+<div class="lb" id="lb"><button class="lb-x" id="lb-x">&times;</button>
+  <img id="lb-img" alt="Dog in my care"/>
+  <button class="lb-nav prev" id="lb-prev">&lsaquo;</button>
+  <button class="lb-nav next" id="lb-next">&rsaquo;</button>
+</div>
+
 <script>
-const BUILD="2026.08.20";
-const DB_KEY="pack.db", DB_V=1;
-let DB=null, suppressFlush=false;
+/* ═══════════════════════════════════════════════════════════════
+   EDIT THIS BLOCK — everything on the page comes from here.
+   Change the text, save, re-upload. Nothing else needs touching.
+   ═══════════════════════════════════════════════════════════════ */
+const SITE = {
+  name:    "Hunter & Dillon Dog Sitting",   // <- change this once you pick a name
+  // Both of you. The first number is the one the booking form texts.
+  people: [
+    {name:"Hunter", phone:"919-703-8438"},
+    {name:"Dillon", phone:"814-500-8393"},
+  ],
+  email:   "",          // add a shared email if you want one, or leave blank
 
-function blank(){return{__v:DB_V,__u:Date.now(),data:{}}}
-function dbLoad(){
-  try{const r=localStorage.getItem(DB_KEY);
-    if(r){const p=JSON.parse(r); if(p&&p.data){DB=p;DB.__v=DB_V;return;}}
-  }catch(e){console.warn("db parse failed",e)}
-  DB=blank(); dbFlush();
-}
-function dbFlush(){
-  if(suppressFlush||!DB)return;
-  DB.__u=Date.now();
-  try{localStorage.setItem(DB_KEY,JSON.stringify(DB))}
-  catch(e){console.error("save failed",e);toast("Save failed — storage full?")}
-}
-const get=(k,d)=>{if(!DB)dbLoad();const v=DB.data[k];return v===undefined?d:v};
-const set=(k,v)=>{if(!DB)dbLoad();DB.data[k]=v;dbFlush()};
-addEventListener("pagehide",dbFlush);
-addEventListener("beforeunload",dbFlush);
-document.addEventListener("visibilitychange",()=>{if(document.hidden)dbFlush()});
+  area:    "Smithfield, Selma, Clayton & Johnston County",
 
-// ── state ──────────────────────────────────────────────────────────────
-let clients=[], dogs=[], bookings=[], expenses=[], trips=[], settings={}, biz={};
-const DEF_SET={board:60,house:75,drop:25,walk:22,day:45,cut:20,mile:0.70};
+  // Availability notice shown near the top. Set to "" to hide it.
+  availability: "Now booking for September — holiday dates filling up",
+  // Dates already full, so people don't ask. Format "YYYY-MM-DD".
+  bookedDates: [],
 
-function loadAll(){
-  dbLoad();
-  clients=get("clients",[]); dogs=get("dogs",[]); bookings=get("bookings",[]);
-  expenses=get("expenses",[]); trips=get("trips",[]);
-  settings={...DEF_SET,...get("settings",{})};
-  biz=get("biz",{name:"",contact:"",pay:""});
-}
+  // The first thing visitors see. First one is the large tile.
+  heroPhotos: [
+    "photos/group-play-yard.jpg",
+    "photos/hello-at-the-fence.jpg",
+    "photos/pool-day.jpg",
+    "photos/puppy-on-the-deck.jpg",
+    "photos/shepherd-in-the-yard.jpg",
+  ],
+  headline: "Your dog stays happy while you're away",
+  intro:    "Boarding, house sitting, drop-in visits and walks from two brothers who treat your dog like their own.",
 
-// ── helpers ────────────────────────────────────────────────────────────
-const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const today=()=>new Date().toISOString().split("T")[0];
-const money=n=>"$"+(Math.round((+n||0)*100)/100).toLocaleString("en-US",{minimumFractionDigits:(Math.abs(n)%1?2:0),maximumFractionDigits:2});
-const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function dnum(d){const x=new Date(d+"T00:00:00");return isNaN(x)?null:x}
-function fmtD(d){const x=dnum(d);if(!x)return d;
-  return x.toLocaleDateString("en-US",{month:"short",day:"numeric"})}
-function fmtDL(d){const x=dnum(d);if(!x)return d;
-  return x.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}
-function daysBetween(a,b){const x=dnum(a),y=dnum(b);if(!x||!y)return 0;
-  return Math.max(0,Math.round((y-x)/864e5))}
-function toast(m){const t=document.getElementById("toast");t.textContent=m;
-  t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),2100)}
+  // The three ticks under the buttons.
+  // Only put things here that are true — people rely on these.
+  trust: ["Two of us, so someone's always around", "Free meet & greet first", "A home, not a kennel"],
 
-const SERVICES={
-  board:{n:"Boarding",unit:"night",rate:"board"},
-  house:{n:"House sitting",unit:"night",rate:"house"},
-  drop:{n:"Drop-in visit",unit:"visit",rate:"drop"},
-  walk:{n:"Dog walk",unit:"walk",rate:"walk"},
-  day:{n:"Daycare",unit:"day",rate:"day"},
+  services: [
+    {name:"Overnight boarding", unit:"per night",  price:60,
+     desc:"Your dog stays in our home, not a crate or a kennel run. Fed on their own schedule, walked twice a day, and settled in the same rooms we are. Photo updates every day."},
+
+    {name:"House sitting", unit:"per night",  price:75,
+     desc:"One of us stays overnight at your place so your dog keeps their own bed, their own routine and their own yard. We bring in mail, alternate lights and leave the house as we found it."},
+
+    {name:"Drop-in visits", unit:"per visit", price:25,
+     desc:"A 30-minute visit — feeding, fresh water, a potty break, medication if needed, and proper play or a short walk. You get a photo and a note after every visit."},
+
+    {name:"Dog walking", unit:"per walk",  price:22,
+     desc:"A full 30 minutes on the lead, rain or shine. Paced to suit your dog, whether that's a brisk loop for a young shepherd or a gentle amble for an older one. Paws wiped before we leave."},
+
+    {name:"Daycare", unit:"per day",   price:45,
+     desc:"Daytime care while you're at work, roughly 7am to 6pm. Your dog gets company, garden access and a midday walk instead of a long day alone at home."},
+  ],  // Show rates next to each service? false keeps the list clean and lets
+  // people ask first. The estimator below still works either way.
+  showPrices: false,
+  servicesNote: "Rates vary with the dates, the number of dogs and any extra care needed. Puppies, senior dogs and medication are all fine — tell us what's involved and we'll quote you the same day.",
+  // extra charge per additional dog, and the discount for longer stays
+  extraDogRate: 15,
+  weekDiscount: 10,   // % off stays of 7 nights or more
+
+  // Drop a photo of yourself into photos/ and put the filename here.
+  // A face matters more than anything else on this page — people are
+  // deciding whether to trust you with their dog and their house key.
+  aboutPhoto: "",          // e.g. "photos/dillon.jpg"
+
+  howItWorks: [
+    {t:"Send a message", d:"Tell us your dates and a bit about your dog. We reply the same day."},
+    {t:"Free meet & greet", d:"We meet before anything is booked so you and your dog can size us up."},
+    {t:"Booked and updated", d:"Dates confirmed, then photos and updates through every stay."},
+  ],
+
+  policy: [
+    {t:"Vaccinations required", d:"All dogs need to be up to date on rabies, DHPP and bordetella. Just send a photo of the records."},
+    {t:"Emergency plan", d:"If something goes wrong we'll contact you first, then your vet. We keep both numbers on hand for every stay."},
+    {t:"Meet before booking", d:"Every new dog comes for a free meet & greet, so nobody's first day is also their first time meeting us."},
+    {t:"Honest about fit", d:"If your dog wouldn't be happy in a home with other dogs, we'll tell you rather than take the booking."},
+  ],
+
+  about: [
+    "We're Hunter and Dillon, two brothers looking after dogs in Smithfield — everything from anxious rescues to nine-week-old puppies.",
+    "Because there are two of us, someone is almost always around. Your dog gets a real routine — proper walks, feeding on their schedule, and photos through the day so you're never wondering how things are going."
+  ],
+
+  // Photos live in the photos/ folder next to this page.
+  photos: [
+    "photos/group-play-yard.jpg",
+    "photos/hello-at-the-fence.jpg",
+    "photos/pool-day.jpg",
+    "photos/puppy-on-the-deck.jpg",
+    "photos/fenced-yard-play.jpg",
+    "photos/walk-time.jpg",
+    "photos/settled-indoors.jpg",
+    "photos/soccer-in-the-sun.jpg",
+    "photos/fetch-at-the-park.jpg",
+    "photos/toy-collection.jpg",
+    "photos/shepherd-in-the-yard.jpg",
+    "photos/poodle-in-the-sun.jpg",
+  ],
+
+  // REPLACE THESE with your real reviews before going live.
+  reviews: [
+    {stars:5, text:"They took our anxious rescue for a week and sent photos every day. She came home relaxed instead of stressed.", who:"Sarah M."},
+    {stars:5, text:"Reliable, communicative, and genuinely good with dogs. We won't use anyone else now.", who:"Priya K."},
+    {stars:5, text:"One of them stayed at our place over the holidays and left it spotless. Our two were completely at ease.", who:"Marcus T."},
+  ],
+
+  faq: [
+    {q:"What's your service area?", a:"Smithfield, Selma, Clayton, Four Oaks and the surrounding Johnston County area. Message us if you're just outside — we can often still help."},
+    {q:"Do you take dogs of any size?", a:"Yes. We've cared for everything from small breeds to large working dogs. Just let us know what to expect."},
+    {q:"What about medications?", a:"Happy to give oral medication at no extra charge. For injections, let us know in advance so we can talk it through."},
+    {q:"How do I pay?", a:"Venmo, Zelle or cash, due at the end of the stay. We'll send a simple invoice."},
+    {q:"Can I meet you first?", a:"Please do — we recommend a free meet-and-greet before the first booking so you and your dog can size us up."},
+  ],
+
+  contactNote: "Prefer to talk first? Call or text either of us any time between 8am and 8pm.",
 };
+/* ═══════════════ nothing below here needs editing ═══════════════ */
 
-// money maths for one booking
-function calc(b){
-  const gross=(+b.units||0)*(+b.rate||0);
-  const fee=b.platform==="rover" ? gross*((+settings.cut||0)/100) : 0;
-  const tip=+b.tip||0;
-  return {gross, fee, tip, net:gross-fee+tip};
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const digits = s => String(s||"").replace(/[^0-9+]/g,"");
+// the first person listed is the default contact
+const people = () => (SITE.people||[]).filter(p=>p && p.phone);
+const primaryPhone = () => { const p=people(); return p.length ? p[0].phone : (SITE.phone||""); };
+function prettyPhone(s){
+  const d=digits(s).replace(/^\+?1/,"");
+  return d.length===10 ? "("+d.slice(0,3)+") "+d.slice(3,6)+"-"+d.slice(6) : s;
 }
-function clientOf(id){return clients.find(c=>c.id===id)}
-function dogsOf(id){return dogs.filter(d=>d.clientId===id)}
-function dogNames(ids){
-  if(!ids||!ids.length)return "";
-  return ids.map(i=>{const d=dogs.find(x=>x.id===i);return d?d.name:""}).filter(Boolean).join(", ");
-}
-function statusOf(b){
-  if(b.cancelled)return "cancelled";
-  const t=today();
-  if(b.end<t)return "done";
-  if(b.start<=t&&b.end>=t)return "active";
-  return "upcoming";
-}
+const money = n => "$"+(+n||0);
 
-// ── sheet ──────────────────────────────────────────────────────────────
-function openSheet(title,html){
-  document.getElementById("sheet-t").textContent=title;
-  document.getElementById("sheet-b").innerHTML=html;
-  document.getElementById("sheet").classList.remove("hidden");
-}
-function closeSheet(){document.getElementById("sheet").classList.add("hidden")}
-document.getElementById("sheet-x").addEventListener("click",closeSheet);
-document.getElementById("sheet").addEventListener("click",e=>{
-  if(e.target===document.getElementById("sheet"))closeSheet()});
+function render(){
+  // identity
+  document.title = SITE.name + " — Smithfield, NC";
+  $("nav-name").textContent = SITE.name;
+  $("foot-name").textContent = SITE.name;
+  $("hero-h1").textContent = SITE.headline;
+  $("hero-p").textContent = SITE.intro;
+  $("hero-area").textContent = "Serving " + SITE.area;
+  $("foot-area").textContent = SITE.area;
 
-// ── tabs ───────────────────────────────────────────────────────────────
-document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
-  document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
-  b.classList.add("on");
-  document.getElementById("p-"+b.dataset.tab).classList.add("on");
-  scrollTo(0,0);
-  const t=b.dataset.tab;
-  if(t==="home")renderHome();
-  if(t==="clients")renderClients();
-  if(t==="cal")renderCal();
-  if(t==="money")renderMoney();
-  if(t==="set")renderSet();
-  const fab=document.getElementById("fab");
-  fab.style.display = (t==="money"||t==="set") ? "none":"";
-  const fl=document.getElementById("fab-l");
-  if(fl) fl.textContent = t==="clients" ? "New client" : "New booking";
-}));
+  (SITE.trust||[]).slice(0,3).forEach((t,i)=>{
+    const el=$("t"+(i+1)); if(el) el.textContent=t;
+  });
 
-// ── HOME ───────────────────────────────────────────────────────────────
-function monthRange(){
-  const n=new Date(), s=new Date(n.getFullYear(),n.getMonth(),1),
-        e=new Date(n.getFullYear(),n.getMonth()+1,0);
-  return [s.toISOString().split("T")[0], e.toISOString().split("T")[0]];
-}
-function bookingsIn(a,b){
-  return bookings.filter(x=>!x.cancelled && x.end>=a && x.start<=b);
-}
-function renderHome(){
-  const [ms,me]=monthRange();
-  const mb=bookingsIn(ms,me);
-  const net=mb.reduce((s,b)=>s+calc(b).net,0);
-  document.getElementById("hdr-amt").textContent=money(net);
-
-  const t=today();
-  const active=bookings.filter(b=>!b.cancelled&&b.start<=t&&b.end>=t);
-  const upcoming=bookings.filter(b=>!b.cancelled&&b.start>t).sort((a,b)=>a.start.localeCompare(b.start));
-  const unpaid=bookings.filter(b=>!b.cancelled&&b.platform==="direct"&&!b.paid&&b.end<=t);
-  const dogsToday=active.reduce((s,b)=>s+(b.dogIds?b.dogIds.length:0),0);
-
-  document.getElementById("home-stats").innerHTML=
-    stat("Net this month",money(net),mb.length+" booking"+(mb.length===1?"":"s"),"")+
-    stat("Dogs in care",String(dogsToday),active.length+" stay"+(active.length===1?"":"s"),"ok")+
-    stat("Upcoming",String(upcoming.length),upcoming[0]?"next "+fmtD(upcoming[0].start):"nothing booked","mute")+
-    stat("Outstanding",money(unpaid.reduce((s,b)=>s+calc(b).net,0)),unpaid.length+" to invoice",unpaid.length?"warn":"mute");
-
-  document.getElementById("home-active").innerHTML =
-    active.length ? active.map(bookingRow).join("")
-    : '<div class="empty">No dogs staying today.</div>';
-  document.getElementById("home-upcoming").innerHTML =
-    upcoming.length ? upcoming.slice(0,5).map(bookingRow).join("")
-    : '<div class="empty">Nothing booked yet. Tap + to add one.</div>';
-  document.getElementById("home-unpaid").innerHTML =
-    unpaid.length ? unpaid.map(bookingRow).join("")
-    : '<div class="empty">Everything invoiced.</div>';
-  renderFollowUp();
-  wireRows();
-}
-function stat(l,v,s,cls){
-  return '<div class="stat '+cls+'"><div class="stat-l">'+l+'</div>'+
-    '<div class="stat-v">'+v+'</div><div class="stat-s">'+s+'</div></div>';
-}
-function bookingRow(b){
-  const c=clientOf(b.clientId), st=statusOf(b), sv=SERVICES[b.service]||{n:b.service,unit:""};
-  const dn=dogNames(b.dogIds);
-  const rng=b.start===b.end?fmtD(b.start):fmtD(b.start)+" – "+fmtD(b.end);
-  return '<div class="item" data-book="'+b.id+'">'+
-    '<div class="av dog"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="4.2" ry="3.4"/><ellipse cx="6.5" cy="10" rx="1.9" ry="2.4"/><ellipse cx="17.5" cy="10" rx="1.9" ry="2.4"/><ellipse cx="9.8" cy="6.4" rx="1.8" ry="2.2"/><ellipse cx="14.2" cy="6.4" rx="1.8" ry="2.2"/></svg></div><div class="item-b">'+
-    '<div class="item-t">'+esc(c?c.name:"Unknown")+(dn?' · '+esc(dn):'')+'</div>'+
-    '<div class="item-s">'+sv.n+' · '+rng+' · '+b.units+' '+sv.unit+(b.units===1?"":"s")+'</div>'+
-    '</div><div class="item-r"><div class="item-amt">'+money(calc(b).net)+'</div>'+
-    '<div class="item-sub"><span class="pill '+st+'">'+st+'</span></div></div></div>';
-}
-function wireRows(){
-  document.querySelectorAll("[data-book]").forEach(el=>{
-    el.addEventListener("click",()=>showBooking(el.dataset.book))});
-  document.querySelectorAll("[data-client]").forEach(el=>{
-    el.addEventListener("click",()=>showClient(el.dataset.client))});
-}
-
-// ── CLIENTS ────────────────────────────────────────────────────────────
-function renderClients(){
-  const q=(document.getElementById("cl-search").value||"").toLowerCase().trim();
-  let list=clients.slice().sort((a,b)=>a.name.localeCompare(b.name));
-  if(q) list=list.filter(c=>
-    c.name.toLowerCase().includes(q) ||
-    dogsOf(c.id).some(d=>d.name.toLowerCase().includes(q)));
-  const host=document.getElementById("clients-list");
-  if(!list.length){
-    host.innerHTML='<div class="empty">'+(q?"No matches.":"No clients yet. Tap + to add one.")+'</div>';
-    return;
+  // contact links — the buttons ring the first person listed
+  const tel = digits(primaryPhone());
+  ["cta-call","bar-call"].forEach(id=>{
+    const el=$(id); if(!el) return;
+    if(tel){ el.href="tel:"+tel; } else { el.style.display="none"; }
+  });
+  $("foot-contact").innerHTML =
+    people().map(p=>'<a href="tel:'+esc(digits(p.phone))+'">'+esc(p.name)+
+      ' '+esc(prettyPhone(p.phone))+'</a>').join(' &nbsp;·&nbsp; ')+
+    (SITE.email?' &nbsp;·&nbsp; <a href="mailto:'+esc(SITE.email)+'">'+esc(SITE.email)+'</a>':'');
+  $("contact-note").textContent = SITE.contactNote||"";
+  const csP=$("cs-phone"), csE=$("cs-email"), csA=$("cs-area");
+  if(csP) csP.innerHTML = people().map(p=>
+    esc(p.name)+' &nbsp;<a href="tel:'+esc(digits(p.phone))+'">'+esc(prettyPhone(p.phone))+'</a>'
+  ).join('<br>');
+  if(csE){
+    csE.innerHTML = SITE.email ? 'Email <a href="mailto:'+esc(SITE.email)+'">'+esc(SITE.email)+'</a>' : "";
+    if(!SITE.email) csE.style.display="none";
   }
-  host.innerHTML=list.map(c=>{
-    const ds=dogsOf(c.id), bs=bookings.filter(b=>b.clientId===c.id&&!b.cancelled);
-    const earned=bs.reduce((s,b)=>s+calc(b).net,0);
-    return '<div class="item" data-client="'+c.id+'">'+
-      '<div class="av">'+esc((c.name||"?").charAt(0).toUpperCase())+'</div>'+
-      '<div class="item-b"><div class="item-t">'+esc(c.name)+'</div>'+
-      '<div class="item-s">'+(ds.length?esc(ds.map(d=>d.name).join(", ")):"no dogs added")+
-      ' · '+bs.length+' booking'+(bs.length===1?"":"s")+'</div></div>'+
-      '<div class="item-r"><div class="item-amt">'+money(earned)+'</div>'+
-      '<div class="item-sub">lifetime</div></div></div>';
-  }).join("");
-  wireRows();
-}
-document.getElementById("cl-search").addEventListener("input",renderClients);
+  if(csA) csA.textContent = SITE.area ? "Serving "+SITE.area : "";
 
-function clientForm(c){
-  c=c||{};
-  return '<label class="lbl">Name</label><input class="in" id="f-name" value="'+esc(c.name||"")+'"/>'+
-    '<label class="lbl">Phone</label><input class="in" id="f-phone" type="tel" value="'+esc(c.phone||"")+'"/>'+
-    '<label class="lbl">Email</label><input class="in" id="f-email" type="email" value="'+esc(c.email||"")+'"/>'+
-    '<label class="lbl">Address</label><input class="in" id="f-addr" value="'+esc(c.address||"")+'"/>'+
-    '<label class="lbl">Notes</label><textarea class="in" id="f-notes">'+esc(c.notes||"")+'</textarea>'+
-    '<div class="err" id="f-err"></div>'+
-    '<button class="btn" id="f-save">'+(c.id?"Save changes":"Add client")+'</button>'+
-    (c.id?'<button class="btn danger" id="f-del" style="margin-top:8px">Delete client</button>':'');
-}
-function addClient(existing){
-  openSheet(existing?"Edit client":"New client", clientForm(existing));
-  document.getElementById("f-save").addEventListener("click",()=>{
-    const name=document.getElementById("f-name").value.trim();
-    if(!name){document.getElementById("f-err").textContent="Name is required.";return}
-    const rec={
-      id:existing?existing.id:uid("c"), name,
-      phone:document.getElementById("f-phone").value.trim(),
-      email:document.getElementById("f-email").value.trim(),
-      address:document.getElementById("f-addr").value.trim(),
-      notes:document.getElementById("f-notes").value.trim(),
-      created:existing?existing.created:today()
-    };
-    if(existing) clients=clients.map(c=>c.id===rec.id?rec:c);
-    else clients.push(rec);
-    set("clients",clients); closeSheet(); renderClients(); renderHome();
-    toast(existing?"Client updated":name+" added");
-  });
-  const del=document.getElementById("f-del");
-  if(del) del.addEventListener("click",()=>{
-    const n=bookings.filter(b=>b.clientId===existing.id).length;
-    if(!confirm("Delete "+existing.name+"?"+(n?" This also removes "+n+" booking"+(n===1?"":"s")+" and their dogs.":" This also removes their dogs.")))return;
-    clients=clients.filter(c=>c.id!==existing.id);
-    dogs=dogs.filter(d=>d.clientId!==existing.id);
-    bookings=bookings.filter(b=>b.clientId!==existing.id);
-    set("clients",clients);set("dogs",dogs);set("bookings",bookings);
-    closeSheet(); renderClients(); renderHome(); toast("Deleted");
-  });
-}
+  // services
+  const showP = SITE.showPrices !== false;
+  $("svc-h").textContent = showP ? "Services & rates" : "Services";
+  $("svc-lede").textContent = showP
+    ? "Straightforward pricing. No app fees, no surprises."
+    : "Care built around your dog's routine, not ours.";
+  $("svc-list").innerHTML = (SITE.services||[]).map(s=>
+    '<div class="svc"><div><div class="svc-n">'+esc(s.name)+'</div>'+
+    '<div class="svc-d">'+esc(s.desc)+'</div></div>'+
+    (showP
+      ? '<div class="svc-p"><div class="svc-amt">'+money(s.price)+'</div>'+
+        '<div class="svc-unit">'+esc(s.unit)+'</div></div>'
+      : '<div class="svc-p"><div class="svc-unit">'+esc(s.unit)+'</div></div>')+
+    '</div>').join("");
+  $("svc-note").textContent = SITE.servicesNote||"";
+  $("f-svc").innerHTML = (SITE.services||[]).map(s=>
+    '<option>'+esc(s.name)+'</option>').join("") + '<option>Not sure yet</option>';
 
-function showClient(id){
-  const c=clientOf(id); if(!c)return;
-  const ds=dogsOf(id);
-  const bs=bookings.filter(b=>b.clientId===id&&!b.cancelled).sort((a,b)=>b.start.localeCompare(a.start));
-  const earned=bs.reduce((s,b)=>s+calc(b).net,0);
-  let h='<div class="card" style="margin-bottom:12px">';
-  if(c.phone) h+='<div class="drow"><span class="drow-l">Phone</span><span class="drow-v"><a href="tel:'+esc(c.phone)+'" style="color:var(--ac)">'+esc(c.phone)+'</a></span></div>';
-  if(c.email) h+='<div class="drow"><span class="drow-l">Email</span><span class="drow-v">'+esc(c.email)+'</span></div>';
-  if(c.address) h+='<div class="drow"><span class="drow-l">Address</span><span class="drow-v">'+esc(c.address)+'</span></div>';
-  h+='<div class="drow"><span class="drow-l">Bookings</span><span class="drow-v">'+bs.length+'</span></div>';
-  h+='<div class="drow"><span class="drow-l">Lifetime</span><span class="drow-v">'+money(earned)+'</span></div>';
-  h+='</div>';
-  if(c.notes) h+='<div class="sh">Notes</div><div class="card"><div class="note">'+esc(c.notes)+'</div></div>';
-
-  h+='<div class="sh">Dogs</div>';
-  h+= ds.length ? ds.map(d=>
-      '<div class="item" data-dog="'+d.id+'"><div class="av dog"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="4.2" ry="3.4"/><ellipse cx="6.5" cy="10" rx="1.9" ry="2.4"/><ellipse cx="17.5" cy="10" rx="1.9" ry="2.4"/><ellipse cx="9.8" cy="6.4" rx="1.8" ry="2.2"/><ellipse cx="14.2" cy="6.4" rx="1.8" ry="2.2"/></svg></div><div class="item-b">'+
-      '<div class="item-t">'+esc(d.name)+'</div><div class="item-s">'+
-      esc([d.breed,d.size,d.age].filter(Boolean).join(" · ")||"tap to add details")+'</div></div></div>').join("")
-    : '<div class="empty">No dogs yet.</div>';
-  h+='<button class="btn ghost sm" id="add-dog">Add a dog</button>';
-
-  h+='<div class="sh">Booking history</div>';
-  h+= bs.length ? bs.slice(0,10).map(bookingRow).join("") : '<div class="empty">No bookings yet.</div>';
-  h+='<button class="btn" id="new-booking" style="margin-top:10px">New booking</button>';
-  h+='<button class="btn ghost" id="edit-client" style="margin-top:8px">Edit client</button>';
-
-  openSheet(c.name,h);
-  document.getElementById("add-dog").addEventListener("click",()=>addDog(null,id));
-  document.getElementById("new-booking").addEventListener("click",()=>addBooking(null,id));
-  document.getElementById("edit-client").addEventListener("click",()=>addClient(c));
-  document.querySelectorAll("[data-dog]").forEach(el=>
-    el.addEventListener("click",()=>addDog(dogs.find(d=>d.id===el.dataset.dog))));
-  wireRows();
-}
-
-// ── DOGS ───────────────────────────────────────────────────────────────
-function addDog(d,clientId){
-  d=d||{}; const cid=d.clientId||clientId;
-  const h='<label class="lbl">Dog name</label><input class="in" id="d-name" value="'+esc(d.name||"")+'"/>'+
-    '<div class="row2"><div><label class="lbl">Breed</label><input class="in" id="d-breed" value="'+esc(d.breed||"")+'"/></div>'+
-    '<div><label class="lbl">Age</label><input class="in" id="d-age" value="'+esc(d.age||"")+'"/></div></div>'+
-    '<label class="lbl">Size</label><div class="seg" id="d-size">'+
-      ["Small","Medium","Large","XL"].map(s=>'<button data-size="'+s+'"'+(d.size===s?' class="on"':'')+'>'+s+'</button>').join("")+
-    '</div>'+
-    '<label class="lbl">Feeding</label><textarea class="in" id="d-feed">'+esc(d.feeding||"")+'</textarea>'+
-    '<label class="lbl">Medications</label><textarea class="in" id="d-meds">'+esc(d.meds||"")+'</textarea>'+
-    '<label class="lbl">Vet</label><input class="in" id="d-vet" value="'+esc(d.vet||"")+'"/>'+
-    '<label class="lbl">Quirks &amp; notes</label><textarea class="in" id="d-notes">'+esc(d.notes||"")+'</textarea>'+
-    '<div class="err" id="d-err"></div>'+
-    '<button class="btn" id="d-save">'+(d.id?"Save":"Add dog")+'</button>'+
-    (d.id?'<button class="btn danger" id="d-del" style="margin-top:8px">Delete dog</button>':'');
-  openSheet(d.id?d.name:"New dog",h);
-  let size=d.size||"Medium";
-  document.querySelectorAll("#d-size button").forEach(b=>b.addEventListener("click",()=>{
-    size=b.dataset.size;
-    document.querySelectorAll("#d-size button").forEach(x=>x.classList.remove("on"));
-    b.classList.add("on")}));
-  if(!d.size){const m=document.querySelector('#d-size [data-size="Medium"]');if(m)m.classList.add("on")}
-  document.getElementById("d-save").addEventListener("click",()=>{
-    const name=document.getElementById("d-name").value.trim();
-    if(!name){document.getElementById("d-err").textContent="Give the dog a name.";return}
-    const rec={id:d.id||uid("d"),clientId:cid,name,size,
-      breed:document.getElementById("d-breed").value.trim(),
-      age:document.getElementById("d-age").value.trim(),
-      feeding:document.getElementById("d-feed").value.trim(),
-      meds:document.getElementById("d-meds").value.trim(),
-      vet:document.getElementById("d-vet").value.trim(),
-      notes:document.getElementById("d-notes").value.trim()};
-    if(d.id) dogs=dogs.map(x=>x.id===rec.id?rec:x); else dogs.push(rec);
-    set("dogs",dogs); showClient(cid); toast(d.id?"Saved":name+" added");
-  });
-  const del=document.getElementById("d-del");
-  if(del) del.addEventListener("click",()=>{
-    if(!confirm("Delete "+d.name+"?"))return;
-    dogs=dogs.filter(x=>x.id!==d.id);
-    bookings=bookings.map(b=>({...b,dogIds:(b.dogIds||[]).filter(i=>i!==d.id)}));
-    set("dogs",dogs);set("bookings",bookings);showClient(cid);toast("Deleted");
-  });
-}
-
-// ── BOOKINGS ───────────────────────────────────────────────────────────
-function addBooking(b,clientId){
-  b=b||{};
-  const cid=b.clientId||clientId||"";
-  if(!clients.length){
-    openSheet("New booking",'<div class="empty">Add a client first — bookings belong to someone.</div>'+
-      '<button class="btn" id="b-goclient">Add a client</button>');
-    document.getElementById("b-goclient").addEventListener("click",()=>addClient());
-    return;
+  // how it works
+  const stepsEl=$("steps");
+  if(stepsEl){
+    const steps=SITE.howItWorks||[];
+    if(!steps.length){ document.getElementById("how").style.display="none"; }
+    else stepsEl.innerHTML = steps.map(s=>
+      '<li><div><b>'+esc(s.t)+'</b><span>'+esc(s.d)+'</span></div></li>').join("");
   }
-  const svc=b.service||"board";
-  const h=
-    '<label class="lbl">Client</label><select class="in" id="b-client">'+
-      clients.slice().sort((a,c)=>a.name.localeCompare(c.name))
-        .map(c=>'<option value="'+c.id+'"'+(c.id===cid?" selected":"")+'>'+esc(c.name)+'</option>').join("")+
-    '</select>'+
-    '<label class="lbl">Dogs</label><div class="dogchips" id="b-dogs"></div>'+
-    '<label class="lbl">Service</label><div class="seg" id="b-svc">'+
-      Object.keys(SERVICES).map(k=>'<button data-svc="'+k+'"'+(svc===k?' class="on"':'')+'>'+SERVICES[k].n+'</button>').join("")+
-    '</div>'+
-    '<div class="row2"><div><label class="lbl">Start</label><input class="in" type="date" id="b-start" value="'+(b.start||today())+'"/></div>'+
-    '<div><label class="lbl">End</label><input class="in" type="date" id="b-end" value="'+(b.end||today())+'"/></div></div>'+
-    '<div class="row2"><div><label class="lbl" id="b-units-l">Nights</label><input class="in" type="number" id="b-units" value="'+(b.units!=null?b.units:1)+'"/></div>'+
-    '<div><label class="lbl">Rate each</label><input class="in" type="number" step="0.01" id="b-rate" value="'+(b.rate!=null?b.rate:settings.board)+'"/></div></div>'+
-    '<label class="lbl">Booked through</label><div class="seg" id="b-plat">'+
-      '<button data-plat="rover"'+((b.platform||"rover")==="rover"?' class="on"':'')+'>Rover</button>'+
-      '<button data-plat="direct"'+(b.platform==="direct"?' class="on"':'')+'>Direct / cash</button></div>'+
-    '<div class="row2"><div><label class="lbl">Tip</label><input class="in" type="number" step="0.01" id="b-tip" value="'+(b.tip||0)+'"/></div>'+
-    '<div><label class="lbl">Paid?</label><div class="seg" id="b-paid">'+
-      '<button data-paid="1"'+(b.paid?' class="on"':'')+'>Paid</button>'+
-      '<button data-paid="0"'+(b.paid?'':' class="on"')+'>Not yet</button></div></div></div>'+
-    '<label class="lbl">Notes</label><textarea class="in" id="b-notes">'+esc(b.notes||"")+'</textarea>'+
-    '<div class="card" style="margin-top:14px"><div id="b-preview"></div></div>'+
-    '<div class="err" id="b-err"></div>'+
-    '<button class="btn" id="b-save">'+(b.id?"Save booking":"Add booking")+'</button>'+
-    (b.id?'<button class="btn danger" id="b-del" style="margin-top:8px">Delete booking</button>':'');
-  openSheet(b.id?"Edit booking":"New booking",h);
 
-  let service=svc, platform=b.platform||"rover", paid=!!b.paid;
-  let picked=(b.dogIds||[]).slice();
-
-  function renderDogPicks(){
-    const c=document.getElementById("b-client").value;
-    const ds=dogsOf(c);
-    picked=picked.filter(i=>ds.some(d=>d.id===i));
-    if(!ds.length && !picked.length) picked=[];
-    document.getElementById("b-dogs").innerHTML = ds.length
-      ? ds.map(d=>'<div class="dogchip'+(picked.includes(d.id)?" on":"")+'" data-pick="'+d.id+'">'+esc(d.name)+'</div>').join("")
-      : '<div style="font-size:12px;color:var(--sub)">No dogs saved for this client yet.</div>';
-    document.querySelectorAll("[data-pick]").forEach(el=>el.addEventListener("click",()=>{
-      const id=el.dataset.pick;
-      picked=picked.includes(id)?picked.filter(x=>x!==id):picked.concat(id);
-      renderDogPicks();
-    }));
+  // health & safety
+  const polEl=$("policy-list");
+  if(polEl){
+    const pol=SITE.policy||[];
+    if(!pol.length){ document.getElementById("policy").style.display="none"; }
+    else polEl.innerHTML = pol.map(p=>
+      '<div class="p"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6.2v5.1c0 4.4 3.1 8.5 7.5 9.7 4.4-1.2 7.5-5.3 7.5-9.7V6.2z" '+
+      'stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+      '<div><b>'+esc(p.t)+'</b><span>'+esc(p.d)+'</span></div></div>').join("");
   }
-  function autoUnits(){
-    const s=document.getElementById("b-start").value, e=document.getElementById("b-end").value;
-    const u=SERVICES[service].unit;
-    document.getElementById("b-units-l").textContent=u.charAt(0).toUpperCase()+u.slice(1)+"s";
-    if(u==="night"){
-      const n=daysBetween(s,e);
-      document.getElementById("b-units").value=Math.max(1,n);
+
+  // about
+  $("about-text").innerHTML = (SITE.about||[]).map(p=>'<p>'+esc(p)+'</p>').join("");
+  const ai=$("about-img");
+  if(ai && SITE.aboutPhoto){
+    ai.innerHTML='<img src="'+esc(SITE.aboutPhoto)+'" alt="'+esc(SITE.name)+'"/>';
+    ai.classList.add("has-photo");
+  }
+
+  // gallery — placeholders until real photos are added
+  const photos = SITE.photos||[];
+  const hs=$("hero-strip");
+  const heroes=(SITE.heroPhotos||[]).slice(0,5);
+  if(hs){
+    if(!heroes.length){ hs.style.display="none"; }
+    else{
+      hs.innerHTML=heroes.map((src,i)=>
+        '<div class="hs" data-hero="'+i+'"><img src="'+esc(src)+'" '+
+        'alt="A dog in my care" '+(i?'loading="lazy"':'')+'/></div>').join("");
+      hs.querySelectorAll("[data-hero]").forEach(el=>el.addEventListener("click",()=>{
+        const src=heroes[+el.dataset.hero];
+        const gi=(SITE.photos||[]).indexOf(src);
+        openLightbox(gi>=0?gi:0);
+      }));
     }
-    preview();
   }
-  function preview(){
-    const tmp={units:+document.getElementById("b-units").value||0,
-               rate:+document.getElementById("b-rate").value||0,
-               tip:+document.getElementById("b-tip").value||0, platform};
-    const c=calc(tmp);
-    document.getElementById("b-preview").innerHTML=
-      '<div class="brk"><span class="brk-l">Gross</span><span class="brk-v">'+money(c.gross)+'</span></div>'+
-      (platform==="rover"?'<div class="brk"><span class="brk-l">Rover fee '+settings.cut+'%</span><span class="brk-v neg">−'+money(c.fee)+'</span></div>':'')+
-      (c.tip?'<div class="brk"><span class="brk-l">Tip</span><span class="brk-v">'+money(c.tip)+'</span></div>':'')+
-      '<div class="brk total"><span class="brk-l">You keep</span><span class="brk-v">'+money(c.net)+'</span></div>';
+  const gal=$("gal");
+  // the hero already shows some of these — don't repeat them further down
+  const heroSet = new Set(heroes);
+  const galleryPhotos = photos.filter(p=>!heroSet.has(p)).concat(photos.filter(p=>heroSet.has(p)));
+  if(photos.length){
+    gal.innerHTML = galleryPhotos.slice(0,12).map((src,i)=>
+      '<div class="gal-i" data-i="'+i+'"><img src="'+esc(src)+'" alt="Dog in my care" loading="lazy"/></div>').join("");
+    gal.querySelectorAll("[data-i]").forEach(el=>
+      el.addEventListener("click",()=>{
+        const src = galleryPhotos[+el.dataset.i];
+        const idx = photos.indexOf(src);
+        openLightbox(idx>=0?idx:0);
+      }));
+  }else{
+    gal.innerHTML = Array.from({length:4},()=>'<div class="gal-i">photo</div>').join("");
+    document.querySelector("#gallery .lede").textContent =
+      "Add photos of dogs you've looked after — with the owner's blessing.";
   }
-  document.getElementById("b-client").addEventListener("change",renderDogPicks);
-  document.querySelectorAll("#b-svc button").forEach(x=>x.addEventListener("click",()=>{
-    service=x.dataset.svc;
-    document.querySelectorAll("#b-svc button").forEach(y=>y.classList.remove("on"));
-    x.classList.add("on");
-    if(!b.id) document.getElementById("b-rate").value=settings[SERVICES[service].rate];
-    autoUnits();
-  }));
-  document.querySelectorAll("#b-plat button").forEach(x=>x.addEventListener("click",()=>{
-    platform=x.dataset.plat;
-    document.querySelectorAll("#b-plat button").forEach(y=>y.classList.remove("on"));
-    x.classList.add("on"); preview();
-  }));
-  document.querySelectorAll("#b-paid button").forEach(x=>x.addEventListener("click",()=>{
-    paid=x.dataset.paid==="1";
-    document.querySelectorAll("#b-paid button").forEach(y=>y.classList.remove("on"));
-    x.classList.add("on");
-  }));
-  ["b-start","b-end"].forEach(i=>document.getElementById(i).addEventListener("change",autoUnits));
-  ["b-units","b-rate","b-tip"].forEach(i=>document.getElementById(i).addEventListener("input",preview));
-  renderDogPicks(); autoUnits();
 
-  document.getElementById("b-save").addEventListener("click",()=>{
-    const err=document.getElementById("b-err"); err.textContent="";
-    const start=document.getElementById("b-start").value, end=document.getElementById("b-end").value;
-    const units=+document.getElementById("b-units").value, rate=+document.getElementById("b-rate").value;
-    if(!start||!end){err.textContent="Pick both dates.";return}
-    if(end<start){err.textContent="End date is before the start date.";return}
-    if(!(units>0)){err.textContent="Units must be at least 1.";return}
-    if(!(rate>=0)){err.textContent="Rate can't be negative.";return}
-    const rec={id:b.id||uid("b"),clientId:document.getElementById("b-client").value,
-      dogIds:picked,service,start,end,units,rate,platform,paid,
-      tip:+document.getElementById("b-tip").value||0,
-      notes:document.getElementById("b-notes").value.trim(),
-      created:b.created||today(),cancelled:!!b.cancelled};
-    if(b.id) bookings=bookings.map(x=>x.id===rec.id?rec:x); else bookings.push(rec);
-    set("bookings",bookings); closeSheet();
-    renderHome(); renderClients(); renderCal(); renderMoney();
-    toast(b.id?"Booking saved":"Booking added");
+  // reviews
+  $("rev-list").innerHTML = (SITE.reviews||[]).map(r=>
+    '<div class="rev"><div class="stars">'+"★".repeat(Math.max(1,Math.min(5,r.stars||5)))+'</div>'+
+    '<p>'+esc(r.text)+'</p><div class="rev-w">— '+esc(r.who)+'</div></div>').join("");
+
+  // faq
+  $("faq-list").innerHTML = (SITE.faq||[]).map(f=>
+    '<div class="faq"><button class="faq-q">'+esc(f.q)+'</button>'+
+    '<div class="faq-a">'+esc(f.a)+'</div></div>').join("");
+  document.querySelectorAll(".faq-q").forEach(b=>b.addEventListener("click",()=>{
+    const box=b.parentElement, open=box.classList.contains("open");
+    document.querySelectorAll(".faq").forEach(f=>f.classList.remove("open"));
+    if(!open) box.classList.add("open");
+  }));
+}
+
+// ── booking request → prefilled text or email ─────────────────────────
+function buildMessage(){
+  const name=$("f-name").value.trim();
+  const dog=$("f-dog").value.trim();
+  const svc=$("f-svc").value;
+  const dates=$("f-dates").value.trim();
+  const msg=$("f-msg").value.trim();
+  if(!name) return {err:"Please add your name."};
+  if(!dates) return {err:"Which dates do you need?"};
+  const body=
+    "Hi "+SITE.name+" — I'd like to book.\n\n"+
+    "Name: "+name+"\n"+
+    (dog?"Dog: "+dog+"\n":"")+
+    "Service: "+svc+"\n"+
+    "Dates: "+dates+"\n"+
+    (msg?"\nNotes: "+msg+"\n":"");
+  return {body};
+}
+function wireForm(){
+  $("f-send").addEventListener("click",e=>{
+    e.preventDefault();
+    const r=buildMessage();
+    $("f-err").textContent=r.err||"";
+    if(r.err) return;
+    const tel=digits(primaryPhone());
+    if(!tel){ $("f-err").textContent="No phone number set — use email below."; return; }
+    // iOS wants ?& , Android wants ?body=
+    const sep = /iPhone|iPad|Macintosh/i.test(navigator.userAgent) ? "&" : "?";
+    location.href = "sms:"+tel+sep+"body="+encodeURIComponent(r.body);
   });
-  const del=document.getElementById("b-del");
-  if(del) del.addEventListener("click",()=>{
-    if(!confirm("Delete this booking?"))return;
-    bookings=bookings.filter(x=>x.id!==b.id); set("bookings",bookings);
-    closeSheet(); renderHome(); renderCal(); renderMoney(); toast("Deleted");
+  if(!SITE.email){ const fe=$("f-email"); if(fe) fe.style.display="none"; }
+  $("f-email").addEventListener("click",e=>{
+    e.preventDefault();
+    const r=buildMessage();
+    $("f-err").textContent=r.err||"";
+    if(r.err) return;
+    if(!SITE.email){ $("f-err").textContent="No email set — use the text option."; return; }
+    location.href="mailto:"+SITE.email+
+      "?subject="+encodeURIComponent("Booking request — "+$("f-name").value.trim())+
+      "&body="+encodeURIComponent(r.body);
   });
 }
 
-function showBooking(id){
-  const b=bookings.find(x=>x.id===id); if(!b)return;
-  const c=clientOf(b.clientId), sv=SERVICES[b.service]||{n:b.service,unit:""}, m=calc(b);
-  const st=statusOf(b);
-  let h='<div class="card" style="margin-bottom:12px">'+
-    '<div class="drow"><span class="drow-l">Client</span><span class="drow-v">'+esc(c?c.name:"—")+'</span></div>'+
-    (b.dogIds&&b.dogIds.length?'<div class="drow"><span class="drow-l">Dogs</span><span class="drow-v">'+esc(dogNames(b.dogIds))+'</span></div>':'')+
-    '<div class="drow"><span class="drow-l">Service</span><span class="drow-v">'+sv.n+'</span></div>'+
-    '<div class="drow"><span class="drow-l">Dates</span><span class="drow-v">'+fmtDL(b.start)+(b.start!==b.end?' → '+fmtDL(b.end):'')+'</span></div>'+
-    '<div class="drow"><span class="drow-l">Status</span><span class="drow-v"><span class="pill '+st+'">'+st+'</span> '+
-      '<span class="pill '+(b.paid?"paid":"unpaid")+'">'+(b.paid?"paid":"unpaid")+'</span></span></div>'+
-    '</div>';
-  h+='<div class="card" style="margin-bottom:12px">'+
-    '<div class="brk"><span class="brk-l">'+b.units+' '+sv.unit+(b.units===1?"":"s")+' × '+money(b.rate)+'</span><span class="brk-v">'+money(m.gross)+'</span></div>'+
-    (b.platform==="rover"?'<div class="brk"><span class="brk-l">Rover fee '+settings.cut+'%</span><span class="brk-v neg">−'+money(m.fee)+'</span></div>':
-      '<div class="brk"><span class="brk-l">Direct booking</span><span class="brk-v">no fee</span></div>')+
-    (m.tip?'<div class="brk"><span class="brk-l">Tip</span><span class="brk-v">'+money(m.tip)+'</span></div>':'')+
-    '<div class="brk total"><span class="brk-l">You keep</span><span class="brk-v">'+money(m.net)+'</span></div></div>';
-  if(b.notes) h+='<div class="sh">Notes</div><div class="card"><div class="note">'+esc(b.notes)+'</div></div>';
-  h+='<button class="btn" id="bk-edit" style="margin-top:12px">Edit booking</button>';
-  if(b.platform==="direct") h+='<button class="btn ghost" id="bk-inv" style="margin-top:8px">Make invoice</button>';
-  h+='<button class="btn ghost" id="bk-paid" style="margin-top:8px">'+(b.paid?"Mark unpaid":"Mark as paid")+'</button>';
-  openSheet(sv.n,h);
-  document.getElementById("bk-edit").addEventListener("click",()=>addBooking(b));
-  document.getElementById("bk-paid").addEventListener("click",()=>{
-    b.paid=!b.paid; bookings=bookings.map(x=>x.id===b.id?b:x); set("bookings",bookings);
-    closeSheet(); renderHome(); renderMoney(); toast(b.paid?"Marked paid":"Marked unpaid");
-  });
-  const inv=document.getElementById("bk-inv");
-  if(inv) inv.addEventListener("click",()=>makeInvoice(b));
+
+// ── availability notice ────────────────────────────────────────────────
+function renderAvailability(){
+  const box=$("avail");
+  const msg=(SITE.availability||"").trim();
+  const full=(SITE.bookedDates||[]).length;
+  if(!msg && !full){ box.style.display="none"; return; }
+  box.style.display="flex";
+  $("avail-text").textContent = msg + (full ? "  ·  "+full+" date"+(full===1?"":"s")+" already full" : "");
 }
 
-// ── INVOICE ────────────────────────────────────────────────────────────
-function makeInvoice(b){
-  const c=clientOf(b.clientId), sv=SERVICES[b.service], m=calc(b);
-  const total=m.gross+m.tip;
-  let refs=get("invRefs",{});
-  if(!refs[b.id]){
-    const n=(get("invSeq",0)||0)+1; set("invSeq",n);
-    refs[b.id]="INV-"+String(new Date().getFullYear()).slice(2)+"-"+String(n).padStart(4,"0");
-    set("invRefs",refs);
-  }
-  const ref=refs[b.id];
-  const dueD=new Date(); dueD.setDate(dueD.getDate()+7);
-  const due=dueD.toISOString().split("T")[0];
-  const rule="\u2500".repeat(34);
+// ── price estimator ────────────────────────────────────────────────────
+function unitWord(unit){
+  return (unit||"").replace(/^per\s+/,"");
+}
+function renderEstimator(){
+  const sel=$("e-svc");
+  sel.innerHTML=(SITE.services||[]).map((s,i)=>
+    '<option value="'+i+'">'+esc(s.name)+'</option>').join("");
+  ["e-svc","e-qty","e-dogs"].forEach(id=>{
+    const el=$(id);
+    el.addEventListener("input",estimate);
+    el.addEventListener("change",estimate);
+  });
+  estimate();
+}
+function estimate(){
+  const svcs=SITE.services||[];
+  const s=svcs[+$("e-svc").value]||svcs[0];
+  if(!s) return;
+  const word=unitWord(s.unit);
+  $("e-qty-l").textContent = word.charAt(0).toUpperCase()+word.slice(1)+"s";
+
+  let qty=Math.max(1, Math.min(365, parseInt($("e-qty").value)||1));
+  let dogs=Math.max(1, Math.min(6, parseInt($("e-dogs").value)||1));
+
+  const base=s.price*qty;
+  const extraPer=+SITE.extraDogRate||0;
+  const extra=extraPer*(dogs-1)*qty;
+  const sub=base+extra;
+
+  // longer stays get a discount, but only for per-night services
+  const pct=+SITE.weekDiscount||0;
+  const nightly=/night/i.test(s.unit);
+  const disc=(nightly && pct>0 && qty>=7) ? sub*(pct/100) : 0;
+  const total=sub-disc;
+
   const L=[];
-  L.push((biz.name||"Dog Sitting Services").toUpperCase());
-  if(biz.contact) L.push(biz.contact);
-  L.push("");
-  L.push("INVOICE  "+ref);
-  L.push("Issued   "+fmtDL(today()));
-  L.push("Due      "+fmtDL(due));
-  L.push(rule);
-  L.push("BILL TO");
-  L.push(c?c.name:"\u2014");
-  if(c&&c.address) L.push(c.address);
-  if(c&&c.email) L.push(c.email);
-  if(c&&c.phone) L.push(c.phone);
-  L.push(rule);
-  L.push("SERVICES");
-  L.push(sv.n+(b.dogIds&&b.dogIds.length?" \u2014 "+dogNames(b.dogIds):""));
-  L.push(fmtDL(b.start)+(b.start!==b.end?"  to  "+fmtDL(b.end):""));
-  L.push("");
-  L.push(pad(b.units+" "+sv.unit+(b.units===1?"":"s")+" @ "+money(b.rate), money(m.gross)));
-  if(m.tip) L.push(pad("Gratuity", money(m.tip)));
-  L.push(rule);
-  L.push(pad("TOTAL DUE", money(total)));
-  L.push(rule);
-  if(biz.pay){ L.push(""); L.push("PAYMENT"); L.push(biz.pay); }
-  L.push("");
-  L.push("Thank you for trusting me with your dog"+(b.dogIds&&b.dogIds.length>1?"s":"")+".");
-  const txt=L.join("\n");
-  openSheet("Invoice "+ref,
-    '<div class="inv" id="inv-txt">'+esc(txt)+'</div>'+
-    '<button class="btn" id="inv-copy" style="margin-top:12px">Copy invoice</button>'+
-    '<button class="btn ghost" id="inv-share" style="margin-top:8px">Send</button>'+
-    '<button class="btn ghost" id="inv-paid" style="margin-top:8px">Mark as paid</button>');
-  document.getElementById("inv-copy").addEventListener("click",async()=>{
-    try{
-      if(navigator.clipboard&&navigator.clipboard.writeText) await navigator.clipboard.writeText(txt);
-      else{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);
-        t.select();document.execCommand("copy");t.remove()}
-      toast("Invoice copied");
-    }catch(e){toast("Couldn't copy \u2014 select the text instead")}
-  });
-  document.getElementById("inv-share").addEventListener("click",async()=>{
-    if(navigator.share){try{await navigator.share({title:"Invoice "+ref,text:txt})}catch(e){}}
-    else toast("Sharing isn't supported here \u2014 use Copy");
-  });
-  document.getElementById("inv-paid").addEventListener("click",()=>{
-    b.paid=true; bookings=bookings.map(x=>x.id===b.id?b:x); set("bookings",bookings);
-    closeSheet(); renderHome(); renderMoney(); toast("Marked paid");
-  });
-}
-function pad(left,right){
-  const w=34, gap=Math.max(1, w-left.length-right.length);
-  return left+" ".repeat(gap)+right;
-}
+  L.push(line(qty+" "+word+(qty===1?"":"s")+" @ "+money(s.price), money(base)));
+  if(extra>0) L.push(line((dogs-1)+" extra dog"+(dogs-1===1?"":"s")+" @ "+money(extraPer), money(extra)));
+  if(disc>0) L.push(line(pct+"% long-stay discount", "−"+money(Math.round(disc))));
+  $("e-break").innerHTML=L.join("");
+  $("e-total").textContent=money(Math.round(total));
 
-// ── CALENDAR ───────────────────────────────────────────────────────────
-let calY=new Date().getFullYear(), calM=new Date().getMonth(), calSel=today();
-function renderCal(){
-  document.getElementById("cal-dows").innerHTML=
-    ["S","M","T","W","T","F","S"].map(d=>'<div class="cal-dow">'+d+'</div>').join("");
-  const first=new Date(calY,calM,1), start=new Date(first);
-  start.setDate(1-first.getDay());
-  document.getElementById("cal-month").textContent=
-    first.toLocaleDateString("en-US",{month:"long",year:"numeric"});
-  let html="";
-  for(let i=0;i<42;i++){
-    const d=new Date(start); d.setDate(start.getDate()+i);
-    const iso=d.toISOString().split("T")[0];
-    const other=d.getMonth()!==calM;
-    const has=bookings.some(b=>!b.cancelled&&b.start<=iso&&b.end>=iso);
-    const cls=["cal-d",other?"other":"",iso===today()?"today":"",has?"has":"",iso===calSel?"sel":""]
-      .filter(Boolean).join(" ");
-    html+='<div class="'+cls+'" data-day="'+iso+'">'+d.getDate()+(has?'<span class="dot"></span>':'')+'</div>';
-  }
-  document.getElementById("cal-grid").innerHTML=html;
-  document.querySelectorAll("[data-day]").forEach(el=>el.addEventListener("click",()=>{
-    calSel=el.dataset.day; renderCal();
-  }));
-  const list=bookings.filter(b=>!b.cancelled&&b.start<=calSel&&b.end>=calSel);
-  document.getElementById("cal-day-lbl").textContent=fmtDL(calSel);
-  document.getElementById("cal-day-list").innerHTML=
-    list.length?list.map(bookingRow).join("")
-    :'<div class="empty">Nothing booked. Tap + to add.</div>';
-  wireRows();
+  // carry the choice into the booking form
+  const bookSvc=$("f-svc");
+  if(bookSvc) bookSvc.value=s.name;
+  const dates=$("f-dates");
+  if(dates && !dates.value) dates.placeholder="e.g. "+qty+" "+word+(qty===1?"":"s");
 }
-document.getElementById("cal-prev").addEventListener("click",()=>{
-  calM--; if(calM<0){calM=11;calY--} renderCal()});
-document.getElementById("cal-next").addEventListener("click",()=>{
-  calM++; if(calM>11){calM=0;calY++} renderCal()});
-document.getElementById("cal-today").addEventListener("click",()=>{
-  const n=new Date(); calY=n.getFullYear(); calM=n.getMonth(); calSel=today(); renderCal()});
-
-// ── MONEY ──────────────────────────────────────────────────────────────
-let moneyRange="month";
-document.querySelectorAll("#money-range button").forEach(b=>b.addEventListener("click",()=>{
-  moneyRange=b.dataset.range;
-  document.querySelectorAll("#money-range button").forEach(x=>x.classList.remove("on"));
-  b.classList.add("on"); renderMoney();
-}));
-function rangeBounds(){
-  const n=new Date();
-  if(moneyRange==="month"){
-    return [new Date(n.getFullYear(),n.getMonth(),1).toISOString().split("T")[0],
-            new Date(n.getFullYear(),n.getMonth()+1,0).toISOString().split("T")[0]];
-  }
-  if(moneyRange==="year") return [n.getFullYear()+"-01-01", n.getFullYear()+"-12-31"];
-  return ["0000-01-01","9999-12-31"];
+function line(l,r){
+  return '<div class="est-line"><span>'+esc(l)+'</span><b>'+esc(r)+'</b></div>';
 }
-function renderMoney(){
-  const [a,z]=rangeBounds();
-  const bs=bookings.filter(b=>!b.cancelled&&b.end>=a&&b.start<=z);
-  const ex=expenses.filter(e=>e.date>=a&&e.date<=z);
-  const tr=trips.filter(t=>t.date>=a&&t.date<=z);
-
-  let rover=0,fee=0,direct=0,tips=0;
-  bs.forEach(b=>{const m=calc(b); tips+=m.tip;
-    if(b.platform==="rover"){rover+=m.gross;fee+=m.fee} else direct+=m.gross});
-  const expTotal=ex.reduce((s,e)=>s+(+e.amount||0),0);
-  const miles=tr.reduce((s,t)=>s+(+t.miles||0),0);
-  const mileAmt=miles*(+settings.mile||0);
-  const net=rover-fee+direct+tips-expTotal-mileAmt;
-
-  document.getElementById("m-cutpct").textContent=settings.cut;
-  document.getElementById("m-rover").textContent=money(rover);
-  document.getElementById("m-fee").textContent="−"+money(fee);
-  document.getElementById("m-direct").textContent=money(direct);
-  document.getElementById("m-tips").textContent=money(tips);
-  document.getElementById("m-exp").textContent="−"+money(expTotal);
-  document.getElementById("m-miles").textContent="−"+money(mileAmt);
-  document.getElementById("m-miles-n").textContent=miles?"("+miles.toFixed(0)+" mi)":"";
-  document.getElementById("m-net").textContent=money(net);
-
-  // 6-month bars
-  const now=new Date(), months=[];
-  for(let i=5;i>=0;i--){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    const s=d.toISOString().split("T")[0];
-    const e=new Date(d.getFullYear(),d.getMonth()+1,0).toISOString().split("T")[0];
-    const v=bookings.filter(b=>!b.cancelled&&b.end>=s&&b.start<=e)
-      .reduce((t,b)=>t+calc(b).net,0);
-    months.push({l:d.toLocaleDateString("en-US",{month:"short"}),v});
-  }
-  const mx=Math.max(...months.map(m=>m.v),1);
-  document.getElementById("m-bars").innerHTML= months.every(m=>!m.v)
-    ? '<div class="empty">No income logged yet.</div>'
-    : months.map(m=>'<div class="bar-row"><span class="bar-lbl">'+m.l+'</span>'+
-        '<span class="bar-tr"><span class="bar-fl" style="width:'+(m.v/mx*100)+'%"></span></span>'+
-        '<span class="bar-amt">'+money(m.v)+'</span></div>').join("");
-
-  // top clients
-  const byC={};
-  bs.forEach(b=>{byC[b.clientId]=(byC[b.clientId]||0)+calc(b).net});
-  const top=Object.keys(byC).map(id=>({c:clientOf(id),v:byC[id]}))
-    .filter(x=>x.c).sort((p,q)=>q.v-p.v).slice(0,5);
-  document.getElementById("m-top").innerHTML= top.length
-    ? top.map(x=>'<div class="item" data-client="'+x.c.id+'">'+
-        '<div class="av">'+esc(x.c.name.charAt(0).toUpperCase())+'</div>'+
-        '<div class="item-b"><div class="item-t">'+esc(x.c.name)+'</div>'+
-        '<div class="item-s">'+bs.filter(b=>b.clientId===x.c.id).length+' booking(s)</div></div>'+
-        '<div class="item-r"><div class="item-amt">'+money(x.v)+'</div></div></div>').join("")
-    : '<div class="empty">No bookings in this range.</div>';
-
-  const items=ex.map(e=>({...e,kind:"exp"})).concat(tr.map(t=>({...t,kind:"trip"})))
-    .sort((p,q)=>q.date.localeCompare(p.date)).slice(0,20);
-  document.getElementById("exp-list").innerHTML= items.length
-    ? items.map(i=>'<div class="item" data-'+(i.kind==="exp"?"exp":"trip")+'="'+i.id+'">'+
-        '<div class="av" style="background:var(--bg2);color:var(--sub)">'+(i.kind==="exp"?"EXP":"MI")+'</div>'+
-        '<div class="item-b"><div class="item-t">'+esc(i.kind==="exp"?(i.category||"Expense"):(i.purpose||"Drive"))+'</div>'+
-        '<div class="item-s">'+fmtD(i.date)+(i.note?' · '+esc(i.note):'')+'</div></div>'+
-        '<div class="item-r"><div class="item-amt neg">−'+
-          money(i.kind==="exp"?i.amount:(i.miles*settings.mile))+'</div>'+
-        '<div class="item-sub">'+(i.kind==="exp"?"expense":i.miles+" mi")+'</div></div></div>').join("")
-    : '<div class="empty">No expenses logged.</div>';
-  document.querySelectorAll("[data-exp]").forEach(el=>el.addEventListener("click",()=>
-    addExpense(expenses.find(x=>x.id===el.dataset.exp))));
-  document.querySelectorAll("[data-trip]").forEach(el=>el.addEventListener("click",()=>
-    addTrip(trips.find(x=>x.id===el.dataset.trip))));
-  wireRows();
-}
-const EXP_CATS=["Supplies","Treats & food","Gas","Grooming","Insurance","Marketing","Other"];
-function addExpense(e){
-  e=e||{};
-  openSheet(e.id?"Edit expense":"Add expense",
-    '<label class="lbl">Amount</label><input class="in" type="number" step="0.01" id="e-amt" value="'+(e.amount||"")+'"/>'+
-    '<label class="lbl">Category</label><select class="in" id="e-cat">'+
-      EXP_CATS.map(c=>'<option'+(e.category===c?" selected":"")+'>'+c+'</option>').join("")+'</select>'+
-    '<label class="lbl">Date</label><input class="in" type="date" id="e-date" value="'+(e.date||today())+'"/>'+
-    '<label class="lbl">Note</label><input class="in" id="e-note" value="'+esc(e.note||"")+'"/>'+
-    '<div class="err" id="e-err"></div><button class="btn" id="e-save">Save</button>'+
-    (e.id?'<button class="btn danger" id="e-del" style="margin-top:8px">Delete</button>':''));
-  document.getElementById("e-save").addEventListener("click",()=>{
-    const amt=+document.getElementById("e-amt").value;
-    if(!(amt>0)){document.getElementById("e-err").textContent="Enter an amount.";return}
-    const rec={id:e.id||uid("e"),amount:amt,category:document.getElementById("e-cat").value,
-      date:document.getElementById("e-date").value||today(),
-      note:document.getElementById("e-note").value.trim()};
-    if(e.id) expenses=expenses.map(x=>x.id===rec.id?rec:x); else expenses.push(rec);
-    set("expenses",expenses); closeSheet(); renderMoney(); toast("Saved");
-  });
-  const d=document.getElementById("e-del");
-  if(d) d.addEventListener("click",()=>{
-    expenses=expenses.filter(x=>x.id!==e.id); set("expenses",expenses);
-    closeSheet(); renderMoney(); toast("Deleted")});
-}
-function addTrip(t){
-  t=t||{};
-  openSheet(t.id?"Edit mileage":"Log mileage",
-    '<label class="lbl">Miles</label><input class="in" type="number" step="0.1" id="t-mi" value="'+(t.miles||"")+'"/>'+
-    '<label class="lbl">Date</label><input class="in" type="date" id="t-date" value="'+(t.date||today())+'"/>'+
-    '<label class="lbl">Purpose</label><input class="in" id="t-purp" value="'+esc(t.purpose||"")+'" placeholder="Drop-in at the Millers"/>'+
-    '<div class="err" id="t-err"></div><button class="btn" id="t-save">Save</button>'+
-    (t.id?'<button class="btn danger" id="t-del" style="margin-top:8px">Delete</button>':''));
-  document.getElementById("t-save").addEventListener("click",()=>{
-    const mi=+document.getElementById("t-mi").value;
-    if(!(mi>0)){document.getElementById("t-err").textContent="Enter the miles driven.";return}
-    const rec={id:t.id||uid("t"),miles:mi,date:document.getElementById("t-date").value||today(),
-      purpose:document.getElementById("t-purp").value.trim()};
-    if(t.id) trips=trips.map(x=>x.id===rec.id?rec:x); else trips.push(rec);
-    set("trips",trips); closeSheet(); renderMoney(); toast("Saved");
-  });
-  const d=document.getElementById("t-del");
-  if(d) d.addEventListener("click",()=>{
-    trips=trips.filter(x=>x.id!==t.id); set("trips",trips);
-    closeSheet(); renderMoney(); toast("Deleted")});
-}
-document.getElementById("add-exp-btn").addEventListener("click",()=>addExpense());
-document.getElementById("add-trip-btn").addEventListener("click",()=>addTrip());
-
-
-// ── clients who haven't booked in a while ──────────────────────────────
-const FOLLOWUP_DAYS = 45;
-function daysSince(d){
-  const x=dnum(d); if(!x) return null;
-  return Math.floor((new Date().setHours(0,0,0,0)-x)/864e5);
-}
-function followUpClients(){
-  const t=today();
-  return clients.map(c=>{
-    const bs=bookings.filter(b=>b.clientId===c.id&&!b.cancelled);
-    if(!bs.length) return null;
-    // ignore anyone with a booking in progress or on the books
-    if(bs.some(b=>b.end>=t)) return null;
-    const last=bs.map(b=>b.end).sort().pop();
-    const gap=daysSince(last);
-    if(gap==null||gap<FOLLOWUP_DAYS) return null;
-    const sn=get("snoozed",{})[c.id];
-    if(sn && sn>today()) return null;
-    const spend=bs.reduce((s,b)=>s+calc(b).net,0);
-    return {c, last, gap, visits:bs.length, spend};
-  }).filter(Boolean).sort((a,b)=>b.spend-a.spend);
-}
-function renderFollowUp(){
-  const host=document.getElementById("home-followup");
-  const head=document.getElementById("followup-h");
-  if(!host) return;
-  const list=followUpClients();
-  head.style.display = list.length ? "" : "none";
-  if(!list.length){ host.innerHTML=""; return; }
-  host.innerHTML=list.slice(0,5).map(x=>
-    '<div class="item" data-follow="'+x.c.id+'">'+
-    '<div class="av">'+esc(x.c.name.charAt(0).toUpperCase())+'</div>'+
-    '<div class="item-b"><div class="item-t">'+esc(x.c.name)+'</div>'+
-    '<div class="item-s">Last stay '+fmtD(x.last)+' · '+x.visits+' booking'+(x.visits===1?"":"s")+
-      ' · '+money(x.spend)+' lifetime</div></div>'+
-    '<div class="item-r"><div class="item-amt">'+x.gap+'d</div>'+
-    '<div class="item-sub">since</div></div></div>').join("");
-  host.querySelectorAll("[data-follow]").forEach(el=>
-    el.addEventListener("click",()=>followUpSheet(el.dataset.follow)));
-}
-function followUpSheet(id){
-  const c=clientOf(id); if(!c) return;
-  const info=followUpClients().find(x=>x.c.id===id);
-  const ds=dogsOf(id);
-  const dog=ds.length?ds[0].name:null;
-  const msg="Hi "+c.name.split(" ")[0]+" — it's "+(biz.name||"your dog sitter")+". "+
-    (dog?"How's "+dog+"? ":"")+
-    "I've got some availability coming up if you need anything booked.";
-  let html='<div class="card" style="margin-bottom:12px">'+
-    '<div class="drow"><span class="drow-l">Last stay</span><span class="drow-v">'+
-      (info?fmtDL(info.last)+" ("+info.gap+" days ago)":"—")+'</span></div>'+
-    '<div class="drow"><span class="drow-l">Bookings</span><span class="drow-v">'+(info?info.visits:0)+'</span></div>'+
-    '<div class="drow"><span class="drow-l">Lifetime</span><span class="drow-v">'+(info?money(info.spend):"—")+'</span></div>'+
-    (ds.length?'<div class="drow"><span class="drow-l">Dogs</span><span class="drow-v">'+esc(ds.map(d=>d.name).join(", "))+'</span></div>':'')+
-    '</div>';
-  html+='<div class="sh">Suggested message</div>'+
-    '<div class="card"><div class="note" id="fu-msg">'+esc(msg)+'</div></div>';
-  if(c.phone) html+='<a class="btn" id="fu-text" style="margin-top:12px;display:block;text-align:center;text-decoration:none" href="#">Send text</a>';
-  html+='<button class="btn ghost" id="fu-copy" style="margin-top:8px">Copy message</button>';
-  html+='<button class="btn ghost" id="fu-open" style="margin-top:8px">Open client</button>';
-  html+='<button class="btn ghost" id="fu-snooze" style="margin-top:8px">Not now</button>';
-  openSheet(c.name, html);
-
-  const t=document.getElementById("fu-text");
-  if(t){
-    const tel=String(c.phone||"").replace(/[^0-9+]/g,"");
-    const sep=/iPhone|iPad|Macintosh/i.test(navigator.userAgent)?"&":"?";
-    t.href="sms:"+tel+sep+"body="+encodeURIComponent(msg);
-    t.addEventListener("click",()=>{ snooze(id); });
-  }
-  document.getElementById("fu-copy").addEventListener("click",async()=>{
-    try{
-      if(navigator.clipboard&&navigator.clipboard.writeText) await navigator.clipboard.writeText(msg);
-      else{const x=document.createElement("textarea");x.value=msg;document.body.appendChild(x);
-        x.select();document.execCommand("copy");x.remove()}
-      toast("Message copied");
-    }catch(e){toast("Couldn't copy")}
-  });
-  document.getElementById("fu-open").addEventListener("click",()=>showClient(id));
-  document.getElementById("fu-snooze").addEventListener("click",()=>{
-    snooze(id); closeSheet(); renderHome(); toast("Hidden for 30 days");
-  });
-}
-function snooze(id){
-  const s=get("snoozed",{});
-  const until=new Date(); until.setDate(until.getDate()+30);
-  s[id]=until.toISOString().split("T")[0];
-  set("snoozed",s);
-}
-
-// ── SETTINGS ───────────────────────────────────────────────────────────
-function renderSet(){
-  document.getElementById("r-board").value=settings.board;
-  document.getElementById("r-house").value=settings.house;
-  document.getElementById("r-drop").value=settings.drop;
-  document.getElementById("r-walk").value=settings.walk;
-  document.getElementById("r-day").value=settings.day;
-  document.getElementById("r-cut").value=settings.cut;
-  document.getElementById("r-mile").value=settings.mile;
-  document.getElementById("s-biz").value=biz.name||"";
-  document.getElementById("s-contact").value=biz.contact||"";
-  document.getElementById("s-pay").value=biz.pay||"";
-  document.getElementById("build-tag").textContent=BUILD;
-  document.getElementById("db-info").innerHTML=
-    clients.length+" clients · "+dogs.length+" dogs · "+bookings.length+" bookings<br>"+
-    "Saved on this device. Last change "+(DB.__u?new Date(DB.__u).toLocaleString():"—");
-}
-document.getElementById("save-set").addEventListener("click",()=>{
-  const cut=+document.getElementById("r-cut").value;
-  if(cut<0||cut>100){toast("Rover cut must be 0–100%");return}
-  settings={board:+document.getElementById("r-board").value||0,
-    house:+document.getElementById("r-house").value||0,
-    drop:+document.getElementById("r-drop").value||0,
-    walk:+document.getElementById("r-walk").value||0,
-    day:+document.getElementById("r-day").value||0,
-    cut:cut, mile:+document.getElementById("r-mile").value||0};
-  set("settings",settings); renderMoney(); toast("Rates saved");
-});
-document.getElementById("save-biz").addEventListener("click",()=>{
-  biz={name:document.getElementById("s-biz").value.trim(),
-       contact:document.getElementById("s-contact").value.trim(),
-       pay:document.getElementById("s-pay").value.trim()};
-  set("biz",biz);
-  const nEl=document.getElementById("biz-name");
-  if(nEl) nEl.textContent=biz.name||"Pack";
-  toast("Saved");
-});
-document.getElementById("exp-btn").addEventListener("click",()=>{
-  try{
-    const blob=new Blob([JSON.stringify({...DB,__exported:new Date().toISOString()},null,2)],
-      {type:"application/json"});
-    const url=URL.createObjectURL(blob), a=document.createElement("a");
-    a.href=url; a.download="pack-backup-"+today()+".json";
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    toast("Backup downloaded");
-  }catch(e){toast("Export failed")}
-});
-document.getElementById("imp-btn").addEventListener("click",()=>
-  document.getElementById("imp-file").click());
-document.getElementById("imp-file").addEventListener("change",ev=>{
-  const f=ev.target.files&&ev.target.files[0]; if(!f)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    try{
-      const p=JSON.parse(e.target.result);
-      const d=p&&p.data?p.data:p;
-      if(!d||typeof d!=="object")throw new Error("bad file");
-      DB.data={...DB.data,...d}; dbFlush();
-      toast("Backup restored"); setTimeout(()=>location.reload(),700);
-    }catch(err){toast("That file isn't a valid backup")}
-  };
-  r.onerror=()=>toast("Couldn't read that file");
-  r.readAsText(f);
-});
-document.getElementById("wipe-btn").addEventListener("click",()=>{
-  if(!confirm("Erase all clients, bookings and money records? Download a backup first — this can't be undone."))return;
-  suppressFlush=true; DB=null; localStorage.removeItem(DB_KEY); location.reload();
+$("est-toggle").addEventListener("click",()=>{
+  const box=$("est"), btn=$("est-toggle");
+  const open=!box.hasAttribute("hidden");
+  if(open){ box.setAttribute("hidden",""); btn.classList.remove("open");
+            btn.querySelector("span").textContent="See a price estimate"; }
+  else { box.removeAttribute("hidden"); btn.classList.add("open");
+         btn.querySelector("span").textContent="Hide estimate"; estimate(); }
 });
 
-// ── FAB ────────────────────────────────────────────────────────────────
-document.getElementById("fab").addEventListener("click",()=>{
-  const tab=document.querySelector(".tab.on").dataset.tab;
-  if(tab==="clients") addClient();
-  else addBooking(null,null);
+$("e-book").addEventListener("click",()=>{
+  const s=(SITE.services||[])[+$("e-svc").value];
+  if(s && $("f-svc")) $("f-svc").value=s.name;
 });
 
-// ── BOOT ───────────────────────────────────────────────────────────────
+// ── photo lightbox ─────────────────────────────────────────────────────
+let lbIdx=0;
+function openLightbox(i){
+  const photos=SITE.photos||[];
+  if(!photos.length) return;
+  lbIdx=(i+photos.length)%photos.length;
+  $("lb-img").src=photos[lbIdx];
+  $("lb").classList.add("on");
+  document.body.style.overflow="hidden";
+  const multi=photos.length>1;
+  $("lb-prev").style.display=multi?"":"none";
+  $("lb-next").style.display=multi?"":"none";
+}
+function closeLightbox(){
+  $("lb").classList.remove("on");
+  document.body.style.overflow="";
+}
+$("lb-x").addEventListener("click",closeLightbox);
+$("lb").addEventListener("click",e=>{ if(e.target===$("lb")) closeLightbox(); });
+$("lb-prev").addEventListener("click",e=>{e.stopPropagation();openLightbox(lbIdx-1)});
+$("lb-next").addEventListener("click",e=>{e.stopPropagation();openLightbox(lbIdx+1)});
+addEventListener("keydown",e=>{
+  if(!$("lb").classList.contains("on")) return;
+  if(e.key==="Escape") closeLightbox();
+  if(e.key==="ArrowLeft") openLightbox(lbIdx-1);
+  if(e.key==="ArrowRight") openLightbox(lbIdx+1);
+});
+// swipe between photos
 (function(){
-  try{
-    loadAll();
-    renderHome(); renderCal(); renderSet();
-    const n=clients.length+bookings.length;
-    const nameEl=document.getElementById("biz-name");
-    if(nameEl) nameEl.textContent = biz.name || "Pack";
-    document.getElementById("hdr-sub").textContent =
-      clients.length ? clients.length+" client"+(clients.length===1?"":"s") : "Dog sitting";
-  }catch(e){
-    console.error("Boot error:",e);
-    document.getElementById("home-stats").innerHTML=
-      '<div class="empty">Something went wrong starting up. '+
-      'Try Settings → Restore backup.</div>';
-  }
+  let x0=null;
+  const lb=$("lb");
+  lb.addEventListener("touchstart",e=>{x0=e.touches[0].clientX},{passive:true});
+  lb.addEventListener("touchend",e=>{
+    if(x0===null) return;
+    const dx=e.changedTouches[0].clientX-x0;
+    if(Math.abs(dx)>50) openLightbox(lbIdx+(dx<0?1:-1));
+    x0=null;
+  },{passive:true});
 })();
+
+
+// ── reveal on scroll ───────────────────────────────────────────────────
+function initMotion(){
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // mark the blocks that should fade in
+  const targets = document.querySelectorAll(
+    "section h2, .lede, .svc, .rev, .faq, .about, .note, .est-toggle, " +
+    "#contact .field, #contact .btn, .contact-side, .avail, .trust span");
+  targets.forEach(el=>el.classList.add("reveal"));
+
+  if(reduce || !("IntersectionObserver" in window)){
+    // no animation wanted or supported — just show everything
+    document.querySelectorAll(".reveal,.gal-i").forEach(el=>el.classList.add("shown"));
+    return;
+  }
+
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      e.target.classList.add("shown");
+      io.unobserve(e.target);
+    });
+  }, {rootMargin:"0px 0px -8% 0px", threshold:0.08});
+
+  targets.forEach((el,i)=>{
+    el.style.transitionDelay = Math.min(i%6,5)*40 + "ms";
+    io.observe(el);
+  });
+
+  // gallery tiles stagger by position
+  const gio = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      const tiles=[...document.querySelectorAll(".gal-i")];
+      tiles.forEach((t,i)=>setTimeout(()=>t.classList.add("shown"), i*70));
+      gio.disconnect();
+    });
+  }, {threshold:0.05});
+  const gal=document.getElementById("gal");
+  if(gal) gio.observe(gal);
+
+  // Safety net. An element sitting behind the sticky bar, or inside a
+  // container that scrolled past in one jump, can miss its trigger — and a
+  // permanently invisible section is far worse than an un-animated one.
+  function showStragglers(){
+    const vh = innerHeight;
+    document.querySelectorAll(".reveal:not(.shown)").forEach(el=>{
+      const r = el.getBoundingClientRect();
+      if(r.top < vh + 80) el.classList.add("shown");
+    });
+  }
+  addEventListener("scroll", showStragglers, {passive:true});
+  addEventListener("resize", showStragglers);
+  setTimeout(showStragglers, 1200);
+  // and once the page has settled, never leave anything hidden
+  setTimeout(()=>document.querySelectorAll(".reveal:not(.shown)").forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.top < document.documentElement.scrollHeight) el.classList.add("shown");
+  }), 4000);
+}
+
+// ── nav shadow + sticky bar hides while scrolling down ─────────────────
+function initScrollChrome(){
+  const nav=document.querySelector(".nav");
+  const bar=document.querySelector(".bar");
+  let last=window.scrollY, ticking=false;
+  function onScroll(){
+    const y=window.scrollY;
+    if(nav) nav.classList.toggle("stuck", y>8);
+    if(bar){
+      const down = y > last + 4;
+      const up   = y < last - 4;
+      if(down && y>240) bar.classList.add("hide");
+      else if(up) bar.classList.remove("hide");
+    }
+    last=y; ticking=false;
+  }
+  addEventListener("scroll", ()=>{
+    if(!ticking){ requestAnimationFrame(onScroll); ticking=true; }
+  }, {passive:true});
+  onScroll();
+}
+
+try{ render(); wireForm(); renderAvailability(); renderEstimator();
+     initMotion(); initScrollChrome(); }
+catch(e){ console.error("Site error:",e); }
 </script>
 </body>
 </html>
