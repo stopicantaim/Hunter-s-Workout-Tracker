@@ -4160,21 +4160,65 @@ function closeWorkoutOverlay() {
   updateDashSubtitles();
 }
 
-document.getElementById("wo-close").addEventListener("click", closeWorkoutOverlay);
+document.getElementById("wo-close").addEventListener("click", attemptCloseWorkout);
 
-// swipe down to close
+// Swipe down to close — but only from the header.
+//
+// This used to listen on the whole overlay, which meant any downward drag
+// closed the workout. Scrolling UP through your exercises is a downward
+// drag, so the session kept exiting mid-set. Now the gesture has to start
+// on the header, has to be a deliberate distance, and has to be mostly
+// vertical rather than an accidental diagonal.
 (function () {
-  const el = document.getElementById("workout-overlay");
-  let startY = 0;
-  el.addEventListener("touchstart", e => { startY = e.touches[0].clientY; }, { passive: true });
-  el.addEventListener("touchend", e => {
-    if (e.changedTouches[0].clientY - startY > 90) closeWorkoutOverlay();
+  const overlay = document.getElementById("workout-overlay");
+  const header  = overlay ? overlay.querySelector(".wo-header") : null;
+  if (!header) return;
+
+  let startY = 0, startX = 0, startT = 0, tracking = false;
+
+  header.addEventListener("touchstart", e => {
+    if (e.touches.length !== 1) return;
+    startY = e.touches[0].clientY;
+    startX = e.touches[0].clientX;
+    startT = Date.now();
+    tracking = true;
   }, { passive: true });
+
+  header.addEventListener("touchend", e => {
+    if (!tracking) return;
+    tracking = false;
+    const dy = e.changedTouches[0].clientY - startY;
+    const dx = Math.abs(e.changedTouches[0].clientX - startX);
+    const dt = Date.now() - startT;
+    // far enough down, more vertical than horizontal, and not a slow drag
+    if (dy > 120 && dy > dx * 2 && dt < 800) attemptCloseWorkout();
+  }, { passive: true });
+
+  header.addEventListener("touchcancel", () => { tracking = false; }, { passive: true });
 })();
+
+// Closing mid-session asks first, so a mis-tap doesn't lose your place.
+function attemptCloseWorkout() {
+  const day = getDays().find(d => d.key === activeDayKey);
+  let logged = 0, total = 0;
+  if (day) {
+    (day.exs || []).forEach((ex, xi) => {
+      const ck = "w" + week + "-" + day.key + "-" + xi;
+      const sets = setLogs[ck] || [];
+      sets.forEach(s => { total++; if (s && s.done) logged++; });
+    });
+  }
+  // nothing logged, or everything finished — just close
+  if (logged === 0 || (total > 0 && logged === total)) { closeWorkoutOverlay(); return; }
+  if (confirm("Leave this workout? " + logged + " set" + (logged === 1 ? "" : "s") +
+              " already logged — they're saved either way.")) {
+    closeWorkoutOverlay();
+  }
+}
 
 function renderActiveWorkout(day) {
   document.getElementById("wo-title").textContent = day.label;
-  document.getElementById("wo-subtitle").textContent = "Week " + week + "  ·  Swipe down to exit";
+  document.getElementById("wo-subtitle").textContent = "Week " + week;
 
   const host = document.getElementById("wo-body");
   host.innerHTML = "";
