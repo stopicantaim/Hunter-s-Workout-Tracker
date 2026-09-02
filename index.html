@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="SICG"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-180.png"/>
 <meta name="theme-color" content="#080a10"/>
 <title>STOPICANTGROW</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.__sbFailed=true"></script>
@@ -6826,6 +6830,15 @@ document.getElementById("mode-select").addEventListener("change", (e)=>{
     console.error("Boot error:", err);
   }
 })();
+</script>
+<script>
+/* offline support — registers quietly, and the app is unaffected if it fails */
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(e =>
+      console.warn("Offline support unavailable:", e));
+  });
+}
 </script>
 </body>
 </html>
