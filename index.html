@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="SICG"/>
+<meta name="apple-mobile-web-app-title" content="GROWTH"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="icons/icon-180.png"/>
 <meta name="theme-color" content="#080a10"/>
-<title>STOPICANTGROW</title>
+<title>GROWTH</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.__sbFailed=true"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -61,7 +61,26 @@ body.t-plum{
   --border:#291f3a;--border2:#372a4c;
   --text:#f0ecf8;--sub:#7a6d94;--mute:#3b3050;
 }
-/* Paper — light */
+/* Rose — dark pink */
+body.t-rose{
+  --bg:#120910;--bg2:#1a0d17;--card:#231121;--card2:#2d172b;
+  --border:#3a1f36;--border2:#4d2a48;
+  --text:#f9ecf5;--sub:#96768c;--mute:#4a3145;
+}
+/* Rose keeps a pink accent whatever the phase, otherwise it reads as a
+   pink background with green buttons. */
+body.t-rose.phase-cut     {--ph:#ec4899;--ph2:#db2777;--ph-bg:#2a1020;--ph-border:#5a2440}
+body.t-rose.phase-bulk    {--ph:#f472b6;--ph2:#ec4899;--ph-bg:#2a1020;--ph-border:#5a2440}
+body.t-rose.phase-maintain{--ph:#f9a8d4;--ph2:#f472b6;--ph-bg:#2a1020;--ph-border:#5a2440}
+/* Blossom — light pink */
+body.t-blossom{
+  --bg:#fdf4f8;--bg2:#f8e9f0;--card:#ffffff;--card2:#fdf2f7;
+  --border:#f0d8e4;--border2:#e0bcd0;
+  --text:#2a1620;--sub:#8a6b7a;--mute:#e8ccd9;
+}
+/* Paper — light.
+   Blossom used to be listed here too, which silently wiped its own pink
+   palette a few lines above. */
 body.t-paper{
   --bg:#f4f5f7;--bg2:#eceef1;--card:#ffffff;--card2:#f5f6f8;
   --border:#dcdfe5;--border2:#c6cad3;
@@ -74,12 +93,16 @@ body.phase-bulk    {--ph:#f59f00;--ph2:#d97706;--ph-bg:#1c1200;--ph-border:#3d29
 body.phase-maintain{--ph:#60a5fa;--ph2:#3b82f6;--ph-bg:#071428;--ph-border:#1a3060}
 
 /* light theme needs lighter accent tints so text stays readable */
-body.t-paper.phase-cut     {--ph:#059669;--ph2:#047857;--ph-bg:#e6f7f0;--ph-border:#a7e3cd}
+body.t-paper.phase-cut,
+body.t-blossom.phase-bulk    {--ph:#db2777;--ph2:#be185d;--ph-bg:#fce7f3;--ph-border:#f5c2dd}
+body.t-blossom.phase-maintain{--ph:#e05297;--ph2:#c93b80;--ph-bg:#fce7f3;--ph-border:#f5c2dd}
+body.t-blossom.phase-cut{--ph:#db2777;--ph2:#be185d;--ph-bg:#fce7f3;--ph-border:#f5c2dd}
 body.t-paper.phase-bulk    {--ph:#b45309;--ph2:#92400e;--ph-bg:#fdf3e3;--ph-border:#f0d3a0}
 body.t-paper.phase-maintain{--ph:#2563eb;--ph2:#1d4ed8;--ph-bg:#e8f0fe;--ph-border:#b6cdf8}
 
 /* light theme: soften things that assume a dark surface */
-body.t-paper .hero-card{background:var(--ph-bg)}
+body.t-paper .hero-card,
+body.t-blossom .hero-card{background:var(--ph-bg)}
 body.t-paper .hero-weight{color:#151821}
 body.t-paper .hero-prog-track{background:rgba(0,0,0,.10)}
 body.t-paper .hero-spark{border-top-color:rgba(0,0,0,.08)}
@@ -1180,15 +1203,19 @@ body.t-paper .warn-box{background:#fdecec;border-color:#f3b7b7;color:#b91c1c}
 .theme-tick{font-size:13px;font-weight:900;color:var(--ph);width:14px;text-align:right;flex-shrink:0}
 
 /* ── Paper refinements ── */
-body.t-paper .hero-wi-input{background:#fff;border-color:var(--ph-border);color:var(--text)}
+body.t-paper .hero-wi-input,
+body.t-blossom .hero-wi-input{background:#fff;border-color:var(--ph-border);color:var(--text)}
 body.t-paper .hero-wi-input::placeholder{color:#9aa2ae}
 body.t-paper .pchart-legend i.lg-band{background:rgba(0,0,0,.14)}
 body.t-paper .hero-streaks .streak-num{color:var(--sub)}
 body.t-paper .set-input{background:#fff}
 body.t-paper .frow2 input, body.t-paper .frow2 select,
-body.t-paper .frow input{background:#fff}
-body.t-paper .set-done-btn, body.t-paper .ex-chk{background:#fff;border-color:var(--border2)}
-body.t-paper .set-done-btn.done, body.t-paper .ex-chk.done{background:var(--ph-bg);border-color:var(--ph)}
+body.t-paper .frow input,
+body.t-blossom .frow2 input,body.t-blossom .frow2 select,body.t-blossom .frow input{background:#fff}
+body.t-paper .set-done-btn, body.t-paper .ex-chk,
+body.t-blossom .set-done-btn,body.t-blossom .ex-chk{background:#fff;border-color:var(--border2)}
+body.t-paper .set-done-btn.done, body.t-paper .ex-chk.done,
+body.t-blossom .set-done-btn.done,body.t-blossom .ex-chk.done{background:var(--ph-bg);border-color:var(--ph)}
 body.t-paper .set-tag-btn{background:#fff}
 body.t-paper .rpe-btn{background:#fff}
 body.t-paper .wk-btn{background:#fff;border-color:var(--border2)}
@@ -1196,7 +1223,8 @@ body.t-paper .wo-close{background:#fff;border-color:var(--border2)}
 body.t-paper .prog-track,
 body.t-paper .goal-track,
 body.t-paper .lb-bar-track,
-body.t-paper .rest-bar-track{background:#dfe3e9}
+body.t-paper .rest-bar-track,
+body.t-blossom .prog-track,body.t-blossom .goal-track,body.t-blossom .lb-bar-track,body.t-blossom .rest-bar-track{background:#dfe3e9}
 body.t-paper .heat-daylabels{color:#98a0ad}
 body.t-paper .day-add-btn{background:#fff;border-color:var(--border2)}
 body.t-paper .plan-bar{background:#fff}
@@ -1527,13 +1555,23 @@ body.mode-crossfit .lifting-only{display:none !important}
 
 /* press feedback that's fine even with reduced motion */
 .btn,.set-done-btn,.seg button,.lift-chip{will-change:transform}
+
+/* ── daily steps ── */
+.steps-row{margin-top:10px}
+.steps-bar{height:6px;border-radius:99px;background:var(--mute);overflow:hidden}
+.steps-fill{height:100%;width:0;border-radius:99px;background:var(--ph);
+  transition:width .6s cubic-bezier(.2,.8,.25,1)}
+.steps-meta{display:flex;justify-content:space-between;align-items:baseline;
+  margin-top:6px;font-size:11px;color:var(--sub)}
+.steps-meta b{color:var(--text);font-weight:800;font-variant-numeric:tabular-nums}
+.steps-meta .hit{color:var(--ph)}
 </style>
 </head>
 <body class="t-paper phase-cut">
 
 <!-- AUTH SCREEN -->
 <div id="auth-screen" style="display:none">
-  <div class="auth-logo">STOPICANTGROW</div>
+  <div class="auth-logo">GROWTH</div>
   <div class="auth-tagline">Train. Track. Compete.</div>
   <div class="auth-card">
     <div class="auth-tabs">
@@ -1561,7 +1599,7 @@ body.mode-crossfit .lifting-only{display:none !important}
   <header class="hdr">
     <div class="hdr-inner">
       <div class="hdr-left">
-        <div class="app-logo">STOPICANTGROW</div>
+        <div class="app-logo">GROWTH</div>
         <div class="phase-pill" id="who-pill" style="display:none"></div>
         <div class="phase-pill" id="phase-pill">CUT</div>
       </div>
@@ -1608,6 +1646,17 @@ body.mode-crossfit .lifting-only{display:none !important}
         <div class="hero-wi">
           <input type="number" step="0.1" id="dash-wi-w" class="hero-wi-input" placeholder="Log today's weight"/>
           <button class="hero-wi-btn" id="dash-wi-save">Log</button>
+        </div>
+        <div class="hero-wi">
+          <input type="number" step="100" id="dash-st-w" class="hero-wi-input" placeholder="Log today's steps"/>
+          <button class="hero-wi-btn" id="dash-st-save">Log</button>
+        </div>
+        <div class="steps-row" id="steps-row">
+          <div class="steps-bar"><div class="steps-fill" id="steps-fill"></div></div>
+          <div class="steps-meta">
+            <span id="steps-today">No steps logged today</span>
+            <span id="steps-avg"></span>
+          </div>
         </div>
         <div class="hero-prog-track">
           <div class="prog-fill" id="d-fill" style="width:0%"></div>
@@ -2012,6 +2061,7 @@ body.mode-crossfit .lifting-only{display:none !important}
         <div class="frow2"><label>Protein (g)</label><input type="number" id="t-pro" placeholder="199"/></div>
         <div class="frow2"><label>Fat (g)</label><input type="number" id="t-fat" placeholder="75"/></div>
         <div class="frow2"><label>Net Carbs (g)</label><input type="number" id="t-carb" placeholder="199"/></div>
+        <div class="frow2"><label>Daily step goal</label><input type="number" id="t-steps" placeholder="10000"/></div>
         <button class="btn" id="t-save">Save Targets</button>
       </div>
       <div class="sh">Weekly Log</div>
@@ -2129,7 +2179,7 @@ body.mode-crossfit .lifting-only{display:none !important}
 <!-- FIRST-RUN SETUP -->
 <div id="onboard" class="ob-overlay hidden">
   <div class="ob-card">
-    <div class="ob-brand">STOPICANTGROW</div>
+    <div class="ob-brand">GROWTH</div>
 
     <div class="ob-step" data-step="1">
       <div class="ob-title">What should we call you?</div>
@@ -2264,8 +2314,10 @@ function musclesForDay(day){
   if(ALL_GROUPS_DAYS.some(k=>key.includes(k)||label.includes(k))) return MUSCLE_GROUPS;
   const base = DAY_MUSCLES[day.key] || CLS_MUSCLES[day.cls];
   if(!base) return MUSCLE_GROUPS;
-  // always allow the functional list and anything they made themselves
-  return base.concat(["Olympic & CrossFit","My Exercises"]);
+  // Cardio, the functional list and anything they made themselves are
+  // available on every day — people finish a lifting session with a run,
+  // and hiding it behind the day type just looks like it isn't there.
+  return base.concat(["Cardio","Olympic & CrossFit","Benchmark WODs","My Exercises"]);
 }
 const EXERCISE_LIBRARY={
   Chest:[
@@ -2372,9 +2424,17 @@ const EXERCISE_LIBRARY={
   "Olympic & CrossFit":[
     {n:"Snatch",                  eq:"barbell",   sets:"5×2",  load:""},
     {n:"Power Snatch",            eq:"barbell",   sets:"5×3",  load:""},
+    {n:"Hang Power Snatch",       eq:"barbell",   sets:"5×3",  load:""},
+    {n:"Hang Snatch",             eq:"barbell",   sets:"5×2",  load:""},
+    {n:"Squat Snatch",            eq:"barbell",   sets:"5×2",  load:""},
+    {n:"Snatch Balance",          eq:"barbell",   sets:"4×3",  load:""},
+    {n:"Snatch Pull",             eq:"barbell",   sets:"4×3",  load:""},
+    {n:"Dumbbell Snatch",         eq:"dumbbell",  sets:"4×8",  load:""},
     {n:"Clean & Jerk",            eq:"barbell",   sets:"5×2",  load:""},
     {n:"Power Clean",             eq:"barbell",   sets:"5×3",  load:""},
     {n:"Hang Clean",              eq:"barbell",   sets:"5×3",  load:""},
+    {n:"Hang Power Clean",        eq:"barbell",   sets:"5×3",  load:""},
+    {n:"Squat Clean",             eq:"barbell",   sets:"5×2",  load:""},
     {n:"Front Squat",             eq:"barbell",   sets:"5×5",  load:""},
     {n:"Overhead Squat",          eq:"barbell",   sets:"4×5",  load:""},
     {n:"Push Jerk",               eq:"barbell",   sets:"5×3",  load:""},
@@ -2387,8 +2447,16 @@ const EXERCISE_LIBRARY={
     {n:"Burpee",                  eq:"bodyweight",sets:"3×15", load:""},
     {n:"Burpee Box Jump Over",    eq:"bodyweight",sets:"3×12", load:""},
     {n:"Toes-to-Bar",             eq:"bodyweight",sets:"3×12", load:""},
+    {n:"Knees-to-Elbows",         eq:"bodyweight",sets:"3×12", load:""},
+    {n:"GHD Sit-Up",              eq:"machine",   sets:"3×15", load:""},
     {n:"Chest-to-Bar Pull-Up",    eq:"bodyweight",sets:"4×8",  load:""},
     {n:"Muscle-Up",               eq:"bodyweight",sets:"4×4",  load:""},
+    {n:"Bar Muscle-Up",           eq:"bodyweight",sets:"4×4",  load:""},
+    {n:"Ring Dip",                eq:"bodyweight",sets:"4×8",  load:""},
+    {n:"Ring Row",                eq:"bodyweight",sets:"4×10", load:""},
+    {n:"Pistol Squat",            eq:"bodyweight",sets:"4×8",  load:""},
+    {n:"Air Squat",               eq:"bodyweight",sets:"3×25", load:""},
+    {n:"Walking Lunge",           eq:"bodyweight",sets:"3×20", load:""},
     {n:"Handstand Push-Up",       eq:"bodyweight",sets:"4×6",  load:""},
     {n:"Handstand Walk",          eq:"bodyweight",sets:"4×50ft",load:""},
     {n:"Wall Walk",               eq:"bodyweight",sets:"3×5",  load:""},
@@ -2405,6 +2473,20 @@ const EXERCISE_LIBRARY={
   "Benchmark WODs":[],
   "My Exercises":[],
   Cardio:[
+    {n:"Run",                      eq:"cardio",  sets:"1×30min",load:""},
+    {n:"Run (Outdoor)",            eq:"cardio",  sets:"1×30min",load:""},
+    {n:"Easy Run",                 eq:"cardio",  sets:"1×40min",load:""},
+    {n:"Long Run",                 eq:"cardio",  sets:"1×60min",load:""},
+    {n:"Tempo Run",                eq:"cardio",  sets:"1×25min",load:""},
+    {n:"Trail Run",                eq:"cardio",  sets:"1×45min",load:""},
+    {n:"Run — 400m",               eq:"cardio",  sets:"4×400m", load:""},
+    {n:"Run — 800m",               eq:"cardio",  sets:"3×800m", load:""},
+    {n:"Run — 1 Mile",             eq:"cardio",  sets:"1×1mi",  load:""},
+    {n:"Run — 5K",                 eq:"cardio",  sets:"1×5K",   load:""},
+    {n:"Sprint Intervals",         eq:"cardio",  sets:"8×100m", load:""},
+    {n:"Hill Sprints",             eq:"cardio",  sets:"8×30sec",load:""},
+    {n:"Walk (Outdoor)",           eq:"cardio",  sets:"1×45min",load:""},
+    {n:"Ruck / Weighted Walk",     eq:"cardio",  sets:"1×45min",load:""},
     {n:"Treadmill Run",            eq:"cardio",  sets:"1×45min",load:""},
     {n:"Treadmill Walk (Incline)", eq:"cardio",  sets:"1×60min",load:""},
     {n:"Elliptical",               eq:"cardio",  sets:"1×45min",load:""},
@@ -2858,6 +2940,7 @@ function loadDataLocal(){
   };
   targets  = lsGet("targets")  || {cal:2264, pro:199, fat:75, carb:199};
   weighins = lsGet("weighins") || [];
+  steps    = lsGet("steps")    || [];
   liftLogs = lsGet("liftLogs") || [];
   goalMap  = lsGet("goals")    || {};
   checks  = lsGet("checks")  || {};
@@ -2917,6 +3000,7 @@ document.querySelectorAll(".tab").forEach(b=>{
 
 // ── DASHBOARD ─────────────────────────────────────────
 function renderDash(){
+  try{ renderSteps(); }catch(e){}
   const phase=plan.phase||"cut";
   applyPhase(phase);
 
@@ -3411,6 +3495,7 @@ function loadSettingsForm(){
   document.getElementById("t-pro").value=targets.pro||"";
   document.getElementById("t-fat").value=targets.fat||"";
   document.getElementById("t-carb").value=targets.carb||"";
+  document.getElementById("t-steps").value = targets.steps || 10000;
   applyPhase(plan.phase||"cut");
 }
 document.querySelectorAll(".ph-btn").forEach(btn=>{
@@ -3433,8 +3518,13 @@ document.getElementById("p-save").addEventListener("click",async()=>{
   renderDash();
 });
 document.getElementById("t-save").addEventListener("click",async()=>{
-  targets={cal:+document.getElementById("t-cal").value||2264,pro:+document.getElementById("t-pro").value||199,fat:+document.getElementById("t-fat").value||75,carb:+document.getElementById("t-carb").value||199};
+  targets={cal:+document.getElementById("t-cal").value||2264,
+           pro:+document.getElementById("t-pro").value||199,
+           fat:+document.getElementById("t-fat").value||75,
+           carb:+document.getElementById("t-carb").value||199,
+           steps:+document.getElementById("t-steps").value||10000};
   lsSet("targets",targets);
+  renderSteps();
   toast("Targets saved");
 });
 document.getElementById("nl-save").addEventListener("click",async()=>{
@@ -3671,6 +3761,69 @@ document.getElementById("dash-wi-save").addEventListener("click", async () => {
   renderDash();
   toast("Weight logged");
 });
+
+
+// ── DAILY STEPS ──────────────────────────────────────────────────────────────
+let steps = [];        // [{d:"2026-09-02", n:8421}]
+
+function stepGoal(){ return Math.max(1, +(targets.steps || 10000)); }
+function stepsOn(d){ const e=(steps||[]).find(x=>x.d===d); return e ? e.n : 0; }
+
+function logSteps(n){
+  const d = today();
+  const existing = steps.find(e => e.d === d);
+  if (existing) existing.n = n;
+  else steps.push({id:"s"+Date.now(), d, n});
+  steps = steps.sort((a,b)=>a.d.localeCompare(b.d)).slice(-400);
+  lsSet("steps", steps);
+}
+
+function renderSteps(){
+  const row = document.getElementById("steps-row");
+  if(!row) return;
+  const goal = stepGoal();
+  const n = stepsOn(today());
+
+  const fill = document.getElementById("steps-fill");
+  if(fill) fill.style.width = Math.min(100, n/goal*100) + "%";
+
+  const todayEl = document.getElementById("steps-today");
+  if(todayEl){
+    todayEl.innerHTML = n
+      ? '<b>'+n.toLocaleString()+'</b> of '+goal.toLocaleString()+
+        (n>=goal ? ' <span class="hit">· goal hit</span>' : '')
+      : "No steps logged today";
+  }
+
+  // a seven-day average is more useful than any single day
+  const avgEl = document.getElementById("steps-avg");
+  if(avgEl){
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-6);
+    const iso = cutoff.toISOString().split("T")[0];
+    const recent = (steps||[]).filter(e => e.d >= iso && e.n > 0);
+    avgEl.innerHTML = recent.length
+      ? '7-day avg <b>'+Math.round(recent.reduce((s,e)=>s+e.n,0)/recent.length).toLocaleString()+'</b>'
+      : "";
+  }
+}
+
+(function wireSteps(){
+  const btn = document.getElementById("dash-st-save");
+  const inp = document.getElementById("dash-st-w");
+  if(!btn || !inp) return;
+  const save = () => {
+    const n = parseInt(inp.value, 10);
+    if (isNaN(n) || n < 0) return;
+    if (n > 200000) { toast("That looks too high — check the number"); return; }
+    logSteps(n);
+    inp.value = "";
+    renderSteps();
+    if(document.getElementById("tab-progress").classList.contains("on")) renderProgress();
+    toast(n >= stepGoal() ? "Step goal hit" : "Steps logged");
+  };
+  btn.addEventListener("click", save);
+  inp.addEventListener("keydown", e => { if(e.key === "Enter") save(); });
+})();
 
 // ── DASHBOARD WORKOUT (mirrors workout tab, shares state) ─────────────────────
 document.getElementById("dash-wk-prev").addEventListener("click", () => {
@@ -4381,10 +4534,41 @@ function renderAddList(){
   const allowed = musclesForDay(addTargetDay);
   let exs = [];
   if (addModalSearch){
-    // search only within groups valid for this day
+    // Match loosely. Typing "toes to bar" should find "Toes-to-Bar", and
+    // "db snatch" should find the dumbbell one — people don't type hyphens.
+    const norm = s => String(s||"").toLowerCase()
+      .replace(/[—–-]/g," ")        // hyphens and dashes become spaces
+      .replace(/[^a-z0-9 ]/g,"")    // drop punctuation
+      .replace(/\s+/g," ").trim();
+
+    const ALIAS = {
+      "db":"dumbbell", "bb":"barbell", "kb":"kettlebell",
+      "ttb":"toes to bar", "t2b":"toes to bar",
+      "c2b":"chest to bar", "hspu":"handstand push up",
+      "ohs":"overhead squat", "sdhp":"sumo deadlift high pull",
+      "du":"double under", "mu":"muscle up", "rdl":"romanian deadlift",
+      "ohp":"overhead press", "bp":"bench press", "cardio":"run",
+    };
+    // strip common endings so "running", "squats" and "curls" all match
+    const stem = w => w
+      .replace(/ing$/,"")      // running -> runn
+      .replace(/([a-z])\1$/,"$1")  // runn -> run
+      .replace(/s$/,"");       // squats -> squat
+
+    // expand each word, so "db snatch" becomes "dumbbell snatch"
+    const words = norm(addModalSearch).split(" ").filter(Boolean)
+      .flatMap(w => (ALIAS[w] || w).split(" "))
+      .map(w => w.length > 3 ? stem(w) : w);
+
+    const seen = new Set();
     allowed.forEach(mg=>{
       (EXERCISE_LIBRARY[mg]||[]).forEach(ex=>{
-        if (ex.n.toLowerCase().includes(addModalSearch)) exs.push({...ex, mg});
+        const name = norm(ex.n);
+        // every word typed has to appear somewhere in the name
+        if (words.length && words.every(w => name.includes(w)) && !seen.has(ex.n)){
+          seen.add(ex.n);
+          exs.push({...ex, mg});
+        }
       });
     });
   } else {
@@ -5921,6 +6105,8 @@ document.getElementById("recal-nudge-btn").addEventListener("click", ()=>{
 // ═══════════════════════════════════════════════════════════════════════
 const THEMES = [
   {id:"paper",    name:"Paper",    desc:"Light mode",        sw:["#f4f5f7","#ffffff","#059669"]},
+  {id:"rose",     name:"Rose",     desc:"Deep pink",         sw:["#120910","#231121","#ec4899"]},
+  {id:"blossom",  name:"Blossom",  desc:"Soft pink, light",  sw:["#fdf4f8","#ffffff","#db2777"]},
   {id:"midnight", name:"Midnight", desc:"Deep navy-black",   sw:["#080a10","#13161f","#10b981"]},
   {id:"carbon",   name:"Carbon",   desc:"Neutral, no cast",  sw:["#0b0b0c","#171718","#10b981"]},
   {id:"graphite", name:"Graphite", desc:"Softer warm grey",  sw:["#14151a","#212329","#10b981"]},

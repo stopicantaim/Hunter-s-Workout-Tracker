@@ -1,7 +1,7 @@
 {
-  "name": "STOPICANTGROW",
-  "short_name": "SICG",
-  "description": "Workout tracker with progression, rest timers and progress charts.",
+  "name": "GROWTH",
+  "short_name": "GROWTH",
+  "description": "Workout tracker with progression, rest timers, steps and progress charts.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
