@@ -1036,6 +1036,8 @@ canvas.scrubbable{touch-action:pan-y;cursor:crosshair}
 /* ── set tag button ── */
 .set-row{grid-template-columns:24px 1fr 1fr 32px 36px !important}
 .set-hdr{grid-template-columns:24px 1fr 1fr 32px 36px !important}
+.set-row.bw-only{grid-template-columns:24px 1fr 32px 36px !important}
+.set-hdr.bw-only{grid-template-columns:24px 1fr 32px 36px !important}
 .set-tag-btn{
   width:30px;height:34px;border-radius:7px;
   border:1px solid var(--border2);background:var(--bg);
@@ -2556,6 +2558,17 @@ const EXERCISE_LIBRARY={
   ],
 };
 
+// name-based lookup (not a precomputed cache — EXERCISE_LIBRARY["My Exercises"]
+// and ["Benchmark WODs"] get populated after this point, so scan fresh each call)
+function isBodyweightExercise(name){
+  if(!name) return false;
+  for(const mg in EXERCISE_LIBRARY){
+    const hit = (EXERCISE_LIBRARY[mg]||[]).find(e=>e.n===name);
+    if(hit) return hit.eq==="bodyweight";
+  }
+  return false;
+}
+
 // ─── WORKOUT TEMPLATES ───────────────────────────────────────────────────────
 const TEMPLATES=[
   {
@@ -3325,6 +3338,7 @@ function getSetCount(s){const m=s.match(/^(\d+)×/);return m?parseInt(m[1]):3;}
 function getDefaultReps(s){const m=s.match(/×(\d+)/);return m?parseInt(m[1]):8;}
 
 function renderSetLogger(ex,ck){
+  const bw = isBodyweightExercise(ex.n);
   const numSets=getSetCount(ex.s),defReps=getDefaultReps(ex.s);
   const sug = suggestNext(ex);                      // {w, r, note}
   const existing=setLogs[ck]||[];
@@ -3334,7 +3348,7 @@ function renderSetLogger(ex,ck){
   let prefilled=false;
   existing.forEach(st=>{
     if(!st.done){
-      if(st.w===""||st.w===null||st.w===undefined||+st.w===0){ st.w = sug.w; prefilled=true; }
+      if(!bw && (st.w===""||st.w===null||st.w===undefined||+st.w===0)){ st.w = sug.w; prefilled=true; }
       if(st.r===""||st.r===null||st.r===undefined||+st.r===0){ st.r = sug.r; prefilled=true; }
     }
   });
@@ -3349,8 +3363,8 @@ function renderSetLogger(ex,ck){
   const hint=document.createElement("div");
   hint.className="set-hint";
   hint.innerHTML =
-    '<span class="hint-last">' + (lastTxt || "First time — enter your working weight") + '</span>' +
-    (sug.note ? '<span class="hint-sug '+(sug.tone||"")+'">'+sug.note+'</span>' : '');
+    '<span class="hint-last">' + (lastTxt || (bw ? "First time — enter your reps" : "First time — enter your working weight")) + '</span>' +
+    (sug.note && !bw ? '<span class="hint-sug '+(sug.tone||"")+'">'+sug.note+'</span>' : '');
   wrap.appendChild(hint);
 
   const chipsHtml = exStatusChips(ex);
@@ -3361,15 +3375,17 @@ function renderSetLogger(ex,ck){
     wrap.appendChild(chipRow);
   }
 
-  const hdr=document.createElement("div");hdr.className="set-hdr";
-  hdr.innerHTML=`<span>#</span><span>Weight</span><span>Reps</span><span>Tag</span><span></span>`;
+  const hdr=document.createElement("div");hdr.className="set-hdr"+(bw?" bw-only":"");
+  hdr.innerHTML = bw
+    ? `<span>#</span><span>Reps</span><span>Tag</span><span></span>`
+    : `<span>#</span><span>Weight</span><span>Reps</span><span>Tag</span><span></span>`;
   wrap.appendChild(hdr);
   const rows=document.createElement("div");rows.className="set-rows";
   existing.forEach((st,si)=>{
-    const row=document.createElement("div");row.className="set-row";
+    const row=document.createElement("div");row.className="set-row"+(bw?" bw-only":"");
     const tag = st.tag || "";
     row.innerHTML=`<div class="set-num">${si+1}</div>
-      <input class="set-input" type="number" step="2.5" placeholder="lb" value="${st.w||""}" data-si="${si}" data-field="w"/>
+      ${bw ? "" : `<input class="set-input" type="number" step="2.5" placeholder="lb" value="${st.w||""}" data-si="${si}" data-field="w"/>`}
       <input class="set-input" type="number" placeholder="reps" value="${st.r||""}" data-si="${si}" data-field="r"/>
       <button class="set-tag-btn ${tag}" data-si="${si}" title="${TAG_LABEL[tag]||'Working set'}">${TAG_ICON[tag]||"–"}</button>
       <button class="set-done-btn${st.done?" done":""}" data-si="${si}">✓</button>`;
@@ -5162,8 +5178,9 @@ function strengthSeries(name){
 // every exercise with any strength history, from either source
 function strengthLifts(){
   const names = new Set();
-  (liftLogs||[]).forEach(l=>names.add(l.name));
+  (liftLogs||[]).forEach(l=>{ if(!isBodyweightExercise(l.name)) names.add(l.name); });
   Object.keys(exSessions||{}).forEach(n=>{
+    if(isBodyweightExercise(n)) return;   // e1RM is meaningless at bodyweight (w=0) — tracked via reps instead
     if((exSessions[n]||[]).some(s=>s && s.e1rm!=null)) names.add(n);
   });
   return [...names];
@@ -5938,7 +5955,8 @@ const MAX_SESSIONS = 12;
 
 function recordSession(exName, sets, week){
   if(!exName) return;
-  const done=(sets||[]).filter(s=>s&&s.done&&(parseFloat(s.w)||0)>0&&(parseInt(s.r)||0)>0);
+  const bw = isBodyweightExercise(exName);
+  const done=(sets||[]).filter(s=>s&&s.done&&(bw||(parseFloat(s.w)||0)>0)&&(parseInt(s.r)||0)>0);
   if(!done.length) return;
 
   // only untagged + failure sets count as working sets;
@@ -6128,6 +6146,7 @@ function lastTimeText(exName){
   if(!arr.length) return "";
   const h = arr[arr.length-1];
   const setStr = h.sets.map(s=>s.r + (s.tag ? s.tag.toLowerCase() : "")).join(", ");
+  if(isBodyweightExercise(exName)) return "Last: "+setStr+" reps  ·  W"+h.week;
   return "Last: "+h.topW+" lb × "+setStr+"  ·  W"+h.week;
 }
 
