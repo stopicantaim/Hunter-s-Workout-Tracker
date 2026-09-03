@@ -14,6 +14,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.__sbFailed=true"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+@property --ph{syntax:'<color>';inherits:true;initial-value:#10b981}
+@property --ph2{syntax:'<color>';inherits:true;initial-value:#059669}
+@property --ph-bg{syntax:'<color>';inherits:true;initial-value:#071f14}
+@property --ph-border{syntax:'<color>';inherits:true;initial-value:#0d3d26}
+@property --pct{syntax:'<number>';inherits:true;initial-value:100}
 :root{
   --bg:#080a10;--bg2:#0d1018;--card:#13161f;--card2:#191d29;
   --border:#1f2436;--border2:#2a3048;
@@ -298,6 +303,22 @@ body.t-paper .warn-box{background:#fdecec;border-color:#f3b7b7;color:#b91c1c}
 .rest-bar-fill{height:100%;background:var(--ph);border-radius:99px}
 .rest-bar-fill.low{background:#ef4444}
 .rest-bar-skip{background:none;border:none;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer;padding:0;margin-top:5px;display:block}
+
+/* circular rest timer ring — replaces the linear bar */
+.rest-bar-top2{display:flex;align-items:center;gap:12px}
+.rest-bar-info{flex:1;min-width:0}
+.rest-ring-wrap{position:relative;width:56px;height:56px;flex-shrink:0}
+.rest-ring{
+  --ring-c:var(--ph);
+  width:100%;height:100%;border-radius:50%;
+  background:conic-gradient(var(--ring-c) calc(var(--pct)*3.6deg), var(--mute) 0deg);
+}
+.rest-ring.low{--ring-c:#ef4444}
+.rest-ring-inner{
+  position:absolute;inset:5px;border-radius:50%;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+}
+.rest-ring-inner .rest-bar-time{font-size:12px}
 
 /* phase switcher */
 .phase-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px}
@@ -888,6 +909,15 @@ body.t-paper .warn-box{background:#fdecec;border-color:#f3b7b7;color:#b91c1c}
   100% { transform: scale(1); }
 }
 
+/* odometer-style digit roll used by animateNum — only digit characters flip,
+   punctuation/units stay static so "184.6 lb" doesn't jitter as a whole */
+.odo-ch{display:inline-block}
+@keyframes odoFlip{
+  0%{transform:translateY(-55%) scale(.9);opacity:0}
+  55%{transform:translateY(8%) scale(1.04);opacity:1}
+  100%{transform:translateY(0) scale(1)}
+}
+
 .day-done{transition:background .2s}
 .day-done.bump{animation:doneBump .35s cubic-bezier(.34,1.56,.64,1)}
 @keyframes doneBump{
@@ -922,6 +952,18 @@ body.t-paper .warn-box{background:#fdecec;border-color:#f3b7b7;color:#b91c1c}
 .pcard-sub{font-size:11px;font-weight:700;color:var(--sub);text-align:right}
 .pcard canvas{width:100%;display:block}
 .pchart-empty{text-align:center;padding:18px 6px;font-size:12px;color:var(--sub)}
+
+/* touch/drag scrubbing on trend charts */
+canvas.scrubbable{touch-action:pan-y;cursor:crosshair}
+.chart-scrub-tip{
+  position:fixed;z-index:999;pointer-events:none;
+  background:var(--card);color:var(--text);border:1px solid var(--border2);
+  border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;
+  box-shadow:0 6px 18px rgba(0,0,0,.3);
+  transform:translate(-50%,-125%);
+  opacity:0;transition:opacity .12s ease;white-space:nowrap;
+}
+.chart-scrub-tip.on{opacity:1}
 .pchart-legend{display:flex;gap:14px;margin-top:8px;font-size:10px;color:var(--sub);align-items:center}
 .pchart-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
 .lg-line{background:var(--ph)}
@@ -1129,6 +1171,7 @@ body.t-paper .warn-box{background:#fdecec;border-color:#f3b7b7;color:#b91c1c}
 .pcard.acc-strength{--accent:#3b82f6}
 .pcard.acc-volume  {--accent:#a78bfa}
 .pcard.acc-heat    {--accent:#f59f00}
+.pcard.acc-steps   {--accent:#06b6d4}
 .pcard.acc-pr      {--accent:#fbbf24}
 .pcard{border-top:1px solid var(--border);position:relative;overflow:hidden}
 .pcard::before{
@@ -1485,6 +1528,16 @@ body.mode-crossfit .lifting-only{display:none !important}
 
 @media (prefers-reduced-motion: no-preference){
 
+  /* ── phase switch (cut/bulk/maintain) tints the whole UI smoothly ── */
+  body{transition:--ph .6s cubic-bezier(.4,0,.2,1), --ph2 .6s cubic-bezier(.4,0,.2,1),
+                  --ph-bg .6s cubic-bezier(.4,0,.2,1), --ph-border .6s cubic-bezier(.4,0,.2,1)}
+
+  /* ── rest ring sweeps smoothly between 250ms ticks instead of jumping ── */
+  .rest-ring{transition:--pct .24s linear}
+
+  /* ── digit-roll for animateNum's odometer spans ── */
+  .odo-digit.odo-flip{animation:odoFlip .3s cubic-bezier(.2,.85,.3,1)}
+
   /* ── things you press push into the page ── */
   .btn{transition:transform .16s var(--press),opacity .15s,box-shadow .2s var(--press);
        box-shadow:0 2px 0 rgba(0,0,0,.28)}
@@ -1646,17 +1699,6 @@ body.mode-crossfit .lifting-only{display:none !important}
         <div class="hero-wi">
           <input type="number" step="0.1" id="dash-wi-w" class="hero-wi-input" placeholder="Log today's weight"/>
           <button class="hero-wi-btn" id="dash-wi-save">Log</button>
-        </div>
-        <div class="hero-wi">
-          <input type="number" step="100" id="dash-st-w" class="hero-wi-input" placeholder="Log today's steps"/>
-          <button class="hero-wi-btn" id="dash-st-save">Log</button>
-        </div>
-        <div class="steps-row" id="steps-row">
-          <div class="steps-bar"><div class="steps-fill" id="steps-fill"></div></div>
-          <div class="steps-meta">
-            <span id="steps-today">No steps logged today</span>
-            <span id="steps-avg"></span>
-          </div>
         </div>
         <div class="hero-prog-track">
           <div class="prog-fill" id="d-fill" style="width:0%"></div>
@@ -1903,6 +1945,27 @@ body.mode-crossfit .lifting-only{display:none !important}
           <span><i class="lg-line"></i>Your weight</span>
           <span><i class="lg-band"></i>Safe rate band</span>
         </div>
+      </div>
+
+      <!-- STEPS -->
+      <div class="pcard acc-steps">
+        <div class="pcard-hdr">
+          <span class="pcard-title">Steps</span>
+          <span class="pcard-sub" id="ps-sub"></span>
+        </div>
+        <div class="hero-wi">
+          <input type="number" step="100" id="prog-st-w" class="hero-wi-input" placeholder="Log today's steps"/>
+          <button class="hero-wi-btn" id="prog-st-save">Log</button>
+        </div>
+        <div class="steps-row" id="steps-row">
+          <div class="steps-bar"><div class="steps-fill" id="steps-fill"></div></div>
+          <div class="steps-meta">
+            <span id="steps-today">No steps logged today</span>
+            <span id="steps-avg"></span>
+          </div>
+        </div>
+        <canvas id="ps-canvas" height="120"></canvas>
+        <div class="pchart-empty" id="ps-empty" style="display:none">Log a few days of steps to see a trend.</div>
       </div>
 
       <!-- e1RM PROGRESSION -->
@@ -3053,6 +3116,12 @@ function renderDash(){
   const dayN=Math.max(1,Math.floor((now-startD)/864e5)+1);
   const len=plan.phase_length||60;
   document.getElementById("day-badge").textContent=`Day ${Math.min(dayN,len)} / ${len}`;
+  if(dayN>=len && !plan._phaseCelebrated){
+    plan._phaseCelebrated = true;
+    lsSet("plan", plan);
+    celebrate("phase");
+    toast(phase.toUpperCase()+" phase complete");
+  }
   const wkData=nutlog[week]||{};
   animateNum(document.getElementById("d-log"), wkData.c??0, {decimals:0, duration:500});
   animateNum(document.getElementById("d-prot"), wkData.p??0, {decimals:0, duration:500});
@@ -3221,14 +3290,14 @@ function paintRest(){
   if(!activeBarWrap || restEndsAt==null) return;
   const remain = Math.max(0, Math.round((restEndsAt - Date.now())/1000));
   const timeEl = activeBarWrap.querySelector(".rest-bar-time");
-  const fillEl = activeBarWrap.querySelector(".rest-bar-fill");
+  const fillEl = activeBarWrap.querySelector(".rest-ring");
   if(!timeEl || !fillEl) return;
   const m=Math.floor(remain/60), s=remain%60;
   timeEl.textContent = m+":"+String(s).padStart(2,"0");
   const low = remain<=10 && remain>0;
   timeEl.className="rest-bar-time"+(low?" low":"");
-  fillEl.style.width = ((remain/TOTAL_SECS)*100)+"%";
-  fillEl.className="rest-bar-fill"+(low?" low":"");
+  fillEl.style.setProperty("--pct", (remain/TOTAL_SECS)*100);
+  fillEl.className="rest-ring"+(low?" low":"");
 
   if(remain<=0){
     if(!restChimed){ restChimed=true; playDone(); }
@@ -3309,7 +3378,7 @@ function renderSetLogger(ex,ck){
       <button class="set-tag-btn ${tag}" data-si="${si}" title="${TAG_LABEL[tag]||'Working set'}">${TAG_ICON[tag]||"–"}</button>
       <button class="set-done-btn${st.done?" done":""}" data-si="${si}">✓</button>`;
     const restBar=document.createElement("div");restBar.className="rest-bar-wrap";
-    restBar.innerHTML=`<div class="rest-bar-top"><div class="rest-bar-label">Rest</div><div class="rest-bar-time">2:00</div></div><div class="rest-bar-track"><div class="rest-bar-fill" style="width:100%"></div></div><button class="rest-bar-skip">Skip rest</button>`;
+    restBar.innerHTML=`<div class="rest-bar-top2"><div class="rest-ring-wrap"><div class="rest-ring" style="--pct:100"></div><div class="rest-ring-inner"><div class="rest-bar-time">2:00</div></div></div><div class="rest-bar-info"><div class="rest-bar-label">Rest</div><button class="rest-bar-skip">Skip rest</button></div></div>`;
     restBar.querySelector(".rest-bar-skip").addEventListener("click",stopTimer);
     row._restBar=restBar;
     const frag=document.createDocumentFragment();frag.appendChild(row);frag.appendChild(restBar);rows.appendChild(frag);
@@ -3482,7 +3551,9 @@ document.getElementById("l-save").addEventListener("click",async()=>{
   renderLifts();renderDash();renderGoals();renderProgress();
   const allForLift=liftLogs.filter(l=>l.name===name),newE=e1rm(w,r);
   const prevBest=allForLift.length>1?Math.max(...allForLift.slice(0,-1).map(l=>e1rm(l.w,l.r))):0;
-  toast(newE>prevBest&&prevBest>0?"New PR — "+newE+" e1RM":"Saved");
+  const isPR=newE>prevBest&&prevBest>0;
+  toast(isPR?"New PR — "+newE+" e1RM":"Saved");
+  if(isPR) celebrate("pr");
 });
 
 // ── SETTINGS ──────────────────────────────────────────
@@ -3501,6 +3572,7 @@ function loadSettingsForm(){
 document.querySelectorAll(".ph-btn").forEach(btn=>{
   btn.addEventListener("click",async()=>{
     plan.phase=btn.dataset.phase;
+    plan._goalCelebrated=false; plan._phaseCelebrated=false;
     lsSet("plan",plan);
     applyPhase(plan.phase);renderDash();toast("Switched to "+plan.phase.toUpperCase());
   });
@@ -3510,6 +3582,7 @@ document.getElementById("p-save").addEventListener("click",async()=>{
   plan.start_weight=parseFloat(document.getElementById("p-sw").value);
   plan.goal_weight=parseFloat(document.getElementById("p-gw").value);
   plan.phase_length=parseInt(document.getElementById("p-len").value)||60;
+  plan._goalCelebrated=false; plan._phaseCelebrated=false;
   document.getElementById("plan-saving").textContent="Saving...";
   lsSet("plan",plan);
   week = computeCurrentWeek();
@@ -3760,6 +3833,20 @@ document.getElementById("dash-wi-save").addEventListener("click", async () => {
   renderRecalNudge();
   renderDash();
   toast("Weight logged");
+
+  // one-time celebration the day the goal is actually reached (cut/bulk only —
+  // maintain has no directional target)
+  const gwNow = (plan.goal_weight!=null && !isNaN(plan.goal_weight)) ? +plan.goal_weight : null;
+  const phaseNow = plan.phase || "cut";
+  if(gwNow!=null && phaseNow!=="maintain" && !plan._goalCelebrated){
+    const reached = phaseNow==="bulk" ? w>=gwNow : w<=gwNow;
+    if(reached){
+      plan._goalCelebrated = true;
+      lsSet("plan", plan);
+      celebrate("goal");
+      toast("Goal weight reached");
+    }
+  }
 });
 
 
@@ -3808,8 +3895,8 @@ function renderSteps(){
 }
 
 (function wireSteps(){
-  const btn = document.getElementById("dash-st-save");
-  const inp = document.getElementById("dash-st-w");
+  const btn = document.getElementById("prog-st-save");
+  const inp = document.getElementById("prog-st-w");
   if(!btn || !inp) return;
   const save = () => {
     const n = parseInt(inp.value, 10);
@@ -3817,8 +3904,7 @@ function renderSteps(){
     if (n > 200000) { toast("That looks too high — check the number"); return; }
     logSteps(n);
     inp.value = "";
-    renderSteps();
-    if(document.getElementById("tab-progress").classList.contains("on")) renderProgress();
+    renderPSteps();
     toast(n >= stepGoal() ? "Step goal hit" : "Steps logged");
   };
   btn.addEventListener("click", save);
@@ -3990,6 +4076,8 @@ function calcTrainingStreak(){
 function renderStreaks(){
   const ws=calcWeighInStreak();
   const ts=calcTrainingStreak();
+  checkStreakMilestone("weigh", ws);
+  checkStreakMilestone("train", ts);
 
   const wIcon=document.getElementById("streak-weigh-icon");
   const tIcon=document.getElementById("streak-train-icon");
@@ -4165,6 +4253,35 @@ function animateProgressBar(pct) {
 // number count-up for KPI values
 // ── NUMBER ANIMATION ENGINE ───────────────────────────────────────────────
 // animates any element's numeric text from its current value to a target
+// odometer-style renderer: splits a formatted number string into per-character
+// spans so only the digits that actually changed play a roll-in animation.
+// el.textContent still reads correctly afterward — the getter aggregates child spans.
+function renderOdometer(el, str){
+  const chars = str.split("");
+  const prev = el._odoChars;
+  if(prev && prev.length===chars.length && el.childNodes.length===chars.length){
+    for(let i=0;i<chars.length;i++){
+      if(prev[i]===chars[i]) continue;
+      const span = el.childNodes[i];
+      span.textContent = chars[i];
+      if(/[0-9]/.test(chars[i])){
+        span.classList.remove("odo-flip"); void span.offsetWidth; span.classList.add("odo-flip");
+      }
+    }
+  } else {
+    el.textContent = "";
+    const frag = document.createDocumentFragment();
+    chars.forEach(c=>{
+      const span=document.createElement("span");
+      span.className = "odo-ch"+(/[0-9]/.test(c)?" odo-digit odo-flip":"");
+      span.textContent = c;
+      frag.appendChild(span);
+    });
+    el.appendChild(frag);
+  }
+  el._odoChars = chars;
+}
+
 function animateNum(el, target, opts={}) {
   if (!el || target === null || target === undefined || isNaN(target)) return;
   const {
@@ -4180,7 +4297,7 @@ function animateNum(el, target, opts={}) {
   const parsed = parseFloat(String(el.textContent).replace(/[^0-9.\-]/g, ""));
   const from = isNaN(parsed) ? 0 : parsed;
   if (from === target) {                        // nothing to animate
-    el.textContent = prefix + (sign && target > 0 ? "+" : "") + target.toFixed(decimals) + suffix;
+    renderOdometer(el, prefix + (sign && target > 0 ? "+" : "") + target.toFixed(decimals) + suffix);
     return;
   }
 
@@ -4190,11 +4307,11 @@ function animateNum(el, target, opts={}) {
     const ease = 1 - Math.pow(1 - p, 3);        // ease-out cubic
     const val = from + (target - from) * ease;
     const shown = val.toFixed(decimals);
-    el.textContent = prefix + (sign && val > 0 ? "+" : "") + shown + suffix;
+    renderOdometer(el, prefix + (sign && val > 0 ? "+" : "") + shown + suffix);
     if (p < 1) el._numRaf = requestAnimationFrame(step);
     else {
       el._numRaf = null;
-      el.textContent = prefix + (sign && target > 0 ? "+" : "") + target.toFixed(decimals) + suffix;
+      renderOdometer(el, prefix + (sign && target > 0 ? "+" : "") + target.toFixed(decimals) + suffix);
       el.classList.remove("num-settle"); void el.offsetWidth; el.classList.add("num-settle");
     }
   }
@@ -4766,6 +4883,77 @@ function hiDPI(canvas, cssH){
   return {ctx, W, H};
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+//  CHART SCRUBBING — drag/tap a trend chart to inspect a specific point.
+//  Charts stay canvas-based; scrub just re-invokes each chart's own draw()
+//  with a hover index so the crosshair renders using identical math.
+// ═══════════════════════════════════════════════════════════════════════
+
+// same width math as hiDPI, but callable before any frame has drawn —
+// used to build the scrub hit-test points independent of rAF timing.
+function chartCssWidth(canvas){
+  const host = canvas.parentElement;
+  let W = 320;
+  if(host){
+    const cs = getComputedStyle(host);
+    W = (host.clientWidth || 320)
+        - (parseFloat(cs.paddingLeft)||0)
+        - (parseFloat(cs.paddingRight)||0);
+  }
+  return W>0 ? W : 320;
+}
+
+function ensureScrubTip(){
+  let tip = document.getElementById("chart-scrub-tip");
+  if(!tip){
+    tip = document.createElement("div");
+    tip.id = "chart-scrub-tip";
+    tip.className = "chart-scrub-tip";
+    document.body.appendChild(tip);
+  }
+  return tip;
+}
+
+// canvas._draw(prog, hoverIdx) and canvas._scrubPoints must be set by the
+// chart's own render function before this does anything useful.
+function wireChartScrub(canvas){
+  if(!canvas || canvas._scrubWired) return;
+  canvas._scrubWired = true;
+  canvas.classList.add("scrubbable");
+  const tip = ensureScrubTip();
+  let dragging = false, lastIdx = null;
+
+  const nearestIdx = (relX) => {
+    const pts = canvas._scrubPoints;
+    if(!pts || !pts.length) return null;
+    let best=0, bd=Infinity;
+    pts.forEach((p,i)=>{ const d=Math.abs(p.x-relX); if(d<bd){bd=d;best=i;} });
+    return best;
+  };
+  const show = (clientX, clientY) => {
+    if(!canvas._draw || !canvas._scrubPoints || !canvas._scrubPoints.length) return;
+    const rect = canvas.getBoundingClientRect();
+    const idx = nearestIdx(clientX - rect.left);
+    if(idx==null) return;
+    if(idx !== lastIdx){ if(navigator.vibrate) navigator.vibrate(5); lastIdx = idx; }
+    canvas._draw(1, idx);
+    const p = canvas._scrubPoints[idx];
+    tip.textContent = p.label + " · " + p.valueStr;
+    tip.classList.add("on");
+    tip.style.left = Math.min(window.innerWidth-8, Math.max(8, clientX)) + "px";
+    tip.style.top = rect.top + "px";
+  };
+  const hide = () => {
+    dragging=false; lastIdx=null;
+    tip.classList.remove("on");
+    if(canvas._draw) canvas._draw(1, null);
+  };
+
+  canvas.addEventListener("pointerdown", e=>{ dragging=true; show(e.clientX, e.clientY); });
+  canvas.addEventListener("pointermove", e=>{ if(!dragging) return; e.preventDefault(); show(e.clientX, e.clientY); });
+  ["pointerup","pointerleave","pointercancel"].forEach(ev=>canvas.addEventListener(ev, hide));
+}
+
 // ── 1. SUMMARY STRIP ────────────────────────────────────────────────────
 function renderPSummary(){
   const host = document.getElementById("psum-grid");
@@ -4820,6 +5008,7 @@ function renderPSummary(){
 function renderPWeightChart(){
   const canvas = document.getElementById("pw-canvas");
   if(!canvas) return;
+  wireChartScrub(canvas);
   const sorted = [...weighins].sort((a,b)=>a.d.localeCompare(b.d));
   const sub = document.getElementById("pw-sub");
 
@@ -4828,6 +5017,7 @@ function renderPWeightChart(){
     ctx.fillStyle=themeInk().sub; ctx.font="12px -apple-system,sans-serif"; ctx.textAlign="center";
     ctx.fillText("Log 2+ weigh-ins to see your trend", W/2, H/2);
     if(sub) sub.textContent="";
+    canvas._draw=null; canvas._scrubPoints=null;
     return;
   }
 
@@ -4847,7 +5037,7 @@ function renderPWeightChart(){
   let mn=Math.min(...all), mx=Math.max(...all);
   const padY=(mx-mn)*0.12||1; mn-=padY; mx+=padY;
 
-  animateDraw("weight", 900, (prog)=>{
+  function draw(prog, hoverIdx){
     const {ctx,W,H} = hiDPI(canvas,150);
     const X = t => pad.l + ((t-t0)/span)*(W-pad.l-pad.r);
     const Y = v => pad.t + ((mx-v)/(mx-mn))*(H-pad.t-pad.b);
@@ -4923,7 +5113,31 @@ function renderPWeightChart(){
     ctx.fillStyle=themeInk().sub; ctx.font="9px -apple-system,sans-serif";
     ctx.textAlign="left";  ctx.fillText(sorted[0].d.slice(5).replace("-","/"), pad.l, H-6);
     ctx.textAlign="right"; ctx.fillText(sorted[sorted.length-1].d.slice(5).replace("-","/"), W-pad.r, H-6);
-  });
+
+    // scrub crosshair
+    if(hoverIdx!=null && sorted[hoverIdx]){
+      const p=sorted[hoverIdx];
+      const x=X(new Date(p.d).getTime()), y=Y(+p.w);
+      ctx.save();
+      ctx.setLineDash([3,3]); ctx.strokeStyle=INK.sub; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,H-pad.b); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2);
+      ctx.fillStyle=INK.dot; ctx.fill();
+      ctx.lineWidth=2.5; ctx.strokeStyle="#10b981"; ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  animateDraw("weight", 900, (prog)=>draw(prog,null));
+  canvas._draw = draw;
+  const csw = chartCssWidth(canvas);
+  const Xs = t => pad.l + ((t-t0)/span)*(csw-pad.l-pad.r);
+  canvas._scrubPoints = sorted.map(p=>({
+    x: Xs(new Date(p.d).getTime()),
+    label: p.d.slice(5).replace("-","/"),
+    valueStr: (+p.w).toFixed(1)+" lb"
+  }));
 
   const diff = vals[vals.length-1]-vals[0];
   if(sub){
@@ -5105,12 +5319,15 @@ function renderPVolume(){
   const empty=document.getElementById("pv-empty");
   const sub=document.getElementById("pv-sub");
   if(!canvas) return;
+  wireChartScrub(canvas);
   const byWeek = computeWeeklyVolume();
   const weeks = Object.keys(byWeek).map(Number).sort((a,b)=>a-b);
 
   if(!weeks.length){
     canvas.style.display="none"; empty.style.display="block";
-    if(sub) sub.textContent=""; return;
+    if(sub) sub.textContent="";
+    canvas._draw=null; canvas._scrubPoints=null;
+    return;
   }
   canvas.style.display="block"; empty.style.display="none";
 
@@ -5121,7 +5338,7 @@ function renderPVolume(){
   const pad={l:38,r:8,t:10,b:18};
   const mx=Math.max(...series.map(s=>s.v),1);
 
-  animateDraw("volume", 800, (prog)=>{
+  function draw(prog, hoverIdx){
     const {ctx,W,H}=hiDPI(canvas,120);
     const bw=(W-pad.l-pad.r)/series.length;
 
@@ -5142,8 +5359,9 @@ function renderPVolume(){
       if(h<=0) return;
       const x=pad.l+i*bw+bw*0.18, y=H-pad.b-h, wpx=bw*0.64;
       const g=ctx.createLinearGradient(0,y,0,H-pad.b);
-      if(s.wk===week){ g.addColorStop(0,"#c4b5fd"); g.addColorStop(1,"#7c3aed"); }
-      else { g.addColorStop(0,"rgba(167,139,250,.75)"); g.addColorStop(1,"rgba(124,58,237,.35)"); }
+      const hovered = hoverIdx===i;
+      if(s.wk===week){ g.addColorStop(0,hovered?"#e9e0fe":"#c4b5fd"); g.addColorStop(1,"#7c3aed"); }
+      else { g.addColorStop(0,hovered?"rgba(167,139,250,.95)":"rgba(167,139,250,.75)"); g.addColorStop(1,"rgba(124,58,237,.35)"); }
       ctx.fillStyle=g;
       const r=Math.min(3,wpx/2);
       ctx.beginPath();
@@ -5151,6 +5369,7 @@ function renderPVolume(){
       ctx.quadraticCurveTo(x,y,x+r,y);
       ctx.lineTo(x+wpx-r,y); ctx.quadraticCurveTo(x+wpx,y,x+wpx,y+r);
       ctx.lineTo(x+wpx,y+h); ctx.closePath(); ctx.fill();
+      if(hovered){ ctx.strokeStyle="#a78bfa"; ctx.lineWidth=1.5; ctx.stroke(); }
       if(series.length<=12){
         ctx.fillStyle=s.wk===week?"#a78bfa":themeInk().sub;
         ctx.font=(s.wk===week?"bold ":"")+"8px -apple-system,sans-serif";
@@ -5158,11 +5377,109 @@ function renderPVolume(){
         ctx.fillText("W"+s.wk, x+wpx/2, H-5);
       }
     });
-  });
+  }
+
+  animateDraw("volume", 800, (prog)=>draw(prog,null));
+  canvas._draw = draw;
+  const csw = chartCssWidth(canvas);
+  const bwS = (csw-pad.l-pad.r)/series.length;
+  canvas._scrubPoints = series.map((s,i)=>({
+    x: pad.l+i*bwS+bwS*0.5,
+    label: "Week "+s.wk,
+    valueStr: (s.v>=1000?(s.v/1000).toFixed(1)+"k":s.v.toFixed(0))+" lb"
+  }));
 
   const total=series.reduce((a,s)=>a+s.v,0);
   const thisWk=byWeek[week]||0;
   if(sub) sub.textContent = (thisWk>=1000?(thisWk/1000).toFixed(1)+"k":thisWk.toFixed(0))+" lb this week";
+}
+
+// ── STEPS TREND ──────────────────────────────────────────────────────────
+function renderPSteps(){
+  renderSteps(); // today's bar + 7-day avg meta
+
+  const canvas=document.getElementById("ps-canvas");
+  const empty=document.getElementById("ps-empty");
+  const sub=document.getElementById("ps-sub");
+  if(!canvas) return;
+  wireChartScrub(canvas);
+
+  const goal = stepGoal();
+  const DAYS = 14;
+  const series = [];
+  for(let i=DAYS-1;i>=0;i--){
+    const dt=new Date(); dt.setDate(dt.getDate()-i);
+    const d=dt.toISOString().split("T")[0];
+    series.push({d, n:stepsOn(d)});
+  }
+  const logged = series.filter(s=>s.n>0);
+
+  if(!logged.length){
+    canvas.style.display="none"; if(empty) empty.style.display="block";
+    if(sub) sub.textContent="";
+    canvas._draw=null; canvas._scrubPoints=null;
+    return;
+  }
+  canvas.style.display="block"; if(empty) empty.style.display="none";
+
+  const pad={l:38,r:8,t:10,b:18};
+  const mx=Math.max(...series.map(s=>s.n), goal, 1);
+  const todayIso=today();
+
+  function draw(prog, hoverIdx){
+    const {ctx,W,H}=hiDPI(canvas,120);
+    const bw=(W-pad.l-pad.r)/series.length;
+
+    const INK=themeInk();
+    ctx.strokeStyle=INK.grid; ctx.lineWidth=1;
+    ctx.fillStyle=INK.sub; ctx.font="9px -apple-system,sans-serif"; ctx.textAlign="right";
+    for(let i=0;i<=2;i++){
+      const v=mx*(i/2), y=pad.t+((mx-v)/mx)*(H-pad.t-pad.b);
+      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+      ctx.fillText(v>=1000?(v/1000).toFixed(1)+"k":v.toFixed(0), pad.l-5, y+3);
+    }
+
+    // goal reference line
+    const gy=pad.t+((mx-goal)/mx)*(H-pad.t-pad.b);
+    ctx.setLineDash([3,3]);
+    ctx.strokeStyle="rgba(6,182,212,.5)"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,gy); ctx.lineTo(W-pad.r,gy); ctx.stroke();
+    ctx.setLineDash([]);
+
+    series.forEach((s,i)=>{
+      const delay=i/Math.max(series.length,1)*0.35;
+      const local=Math.max(0, Math.min(1,(prog-delay)/(1-delay||1)));
+      const h=(s.n/mx)*(H-pad.t-pad.b)*local;
+      if(h<=0) return;
+      const x=pad.l+i*bw+bw*0.18, y=H-pad.b-h, wpx=bw*0.64;
+      const g=ctx.createLinearGradient(0,y,0,H-pad.b);
+      const hovered = hoverIdx===i;
+      if(s.d===todayIso){ g.addColorStop(0,"#67e8f9"); g.addColorStop(1,"#0891b2"); }
+      else if(s.n>=goal){ g.addColorStop(0,hovered?"rgba(6,182,212,.95)":"rgba(6,182,212,.75)"); g.addColorStop(1,"rgba(8,145,178,.35)"); }
+      else { g.addColorStop(0,hovered?"rgba(148,163,184,.75)":"rgba(148,163,184,.55)"); g.addColorStop(1,"rgba(148,163,184,.25)"); }
+      ctx.fillStyle=g;
+      const r=Math.min(3,wpx/2);
+      ctx.beginPath();
+      ctx.moveTo(x,y+h); ctx.lineTo(x,y+r);
+      ctx.quadraticCurveTo(x,y,x+r,y);
+      ctx.lineTo(x+wpx-r,y); ctx.quadraticCurveTo(x+wpx,y,x+wpx,y+r);
+      ctx.lineTo(x+wpx,y+h); ctx.closePath(); ctx.fill();
+      if(hovered){ ctx.strokeStyle="#67e8f9"; ctx.lineWidth=1.5; ctx.stroke(); }
+    });
+  }
+
+  animateDraw("steps", 800, (prog)=>draw(prog,null));
+  canvas._draw = draw;
+  const csw = chartCssWidth(canvas);
+  const bwS = (csw-pad.l-pad.r)/series.length;
+  canvas._scrubPoints = series.map((s,i)=>({
+    x: pad.l+i*bwS+bwS*0.5,
+    label: s.d.slice(5).replace("-","/"),
+    valueStr: s.n.toLocaleString()+" steps"
+  }));
+
+  const avg = Math.round(logged.reduce((a,s)=>a+s.n,0)/logged.length);
+  if(sub) sub.textContent = avg.toLocaleString()+" avg / 14d";
 }
 
 // ── 5. CONSISTENCY HEATMAP ──────────────────────────────────────────────
@@ -5304,6 +5621,7 @@ function renderProgress(){
   }
   renderPSummary();
   renderPWeightChart();
+  renderPSteps();
   renderPStrength();
   renderPWod();
   renderPVolume();
@@ -5472,6 +5790,100 @@ function playSfx(name){
   if(!soundOn) return;
   if(silentSwitchMode){ playViaElement(name); return; }
   if(!playViaWebAudio(name)) playViaElement(name);   // fall back if unsupported
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  MILESTONE CELEBRATIONS — PRs, goal weight, streak milestones, phase complete.
+//  Haptic + sound always fire; the particle burst is skipped under
+//  prefers-reduced-motion so the feedback stays felt/heard but not seen.
+// ═══════════════════════════════════════════════════════════════════════
+const CELEBRATE_COLORS = {
+  pr:     ["#f59f00","#fbbf24","#fde68a","#fff7d6"],
+  goal:   ["#10b981","#34d399","#6ee7b7","#d1fae5"],
+  streak: ["#ec4899","#f472b6","#fbcfe8","#fdf2f8"],
+  phase:  ["#3b82f6","#60a5fa","#93c5fd","#dbeafe"]
+};
+function celebrate(type){
+  if(navigator.vibrate){
+    navigator.vibrate(type==="phase" ? [40,60,40,60,90] : type==="pr" ? [20,40,20] : [25,50,25]);
+  }
+  playSfx(type==="goal"||type==="phase" ? "dayDone" : "exDone");
+  if(typeof REDUCED!=="undefined" && REDUCED) return;   // haptic + sound still landed
+
+  let host = document.getElementById("celebrate-canvas");
+  if(!host){
+    host = document.createElement("canvas");
+    host.id = "celebrate-canvas";
+    host.style.cssText = "position:fixed;inset:0;z-index:9999;pointer-events:none;width:100vw;height:100vh";
+    document.body.appendChild(host);
+  }
+  const dpr = Math.min(2, window.devicePixelRatio||1);
+  const vw = window.innerWidth, vh = window.innerHeight;
+  host.width = vw*dpr; host.height = vh*dpr;
+  const ctx = host.getContext("2d");
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr,dpr);
+
+  const colors = CELEBRATE_COLORS[type] || CELEBRATE_COLORS.pr;
+  const cx = vw/2, cy = vh*0.34;
+  const N = 80;
+  const particles = Array.from({length:N}, ()=>{
+    const ang = Math.random()*Math.PI - Math.PI; // spread across the top half
+    const speed = 4 + Math.random()*7;
+    return {
+      x: cx + (Math.random()-0.5)*60,
+      y: cy,
+      vx: Math.cos(ang)*speed,
+      vy: -Math.abs(Math.sin(ang)*speed) - 3,
+      g: 0.32 + Math.random()*0.14,
+      size: 4 + Math.random()*5,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-0.5)*0.35,
+      color: colors[(Math.random()*colors.length)|0],
+      shape: Math.random()<0.5 ? "rect" : "circle"
+    };
+  });
+
+  if(host._raf) cancelAnimationFrame(host._raf);
+  const start = performance.now(), duration = 1500;
+  function frame(now){
+    const t = (now-start)/duration;
+    ctx.clearRect(0,0,vw,vh);
+    if(t>=1){ host._raf=null; return; }
+    const fade = Math.max(0, 1 - Math.pow(t,1.4));
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.rot+=p.vr;
+      ctx.save();
+      ctx.globalAlpha = fade;
+      ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      if(p.shape==="rect") ctx.fillRect(-p.size/2,-p.size*0.35,p.size,p.size*0.7);
+      else { ctx.beginPath(); ctx.arc(0,0,p.size*0.5,0,Math.PI*2); ctx.fill(); }
+      ctx.restore();
+    });
+    host._raf = requestAnimationFrame(frame);
+  }
+  host._raf = requestAnimationFrame(frame);
+}
+
+// crosses a streak milestone at most once per new personal best; seeds
+// silently on first-ever call so an existing streak doesn't fire on load.
+const STREAK_MILESTONES = [7,14,30,60,100,180,365];
+function checkStreakMilestone(kind, value){
+  const key = kind==="weigh" ? "_msWeigh" : "_msTrain";
+  if(plan[key]==null){
+    plan[key] = STREAK_MILESTONES.filter(m=>m<=value).pop() || 0;
+    lsSet("plan", plan);
+    return;
+  }
+  const prevBest = plan[key];
+  const hit = STREAK_MILESTONES.filter(m=>m<=value && m>prevBest).pop();
+  if(hit){
+    plan[key] = hit;
+    lsSet("plan", plan);
+    celebrate("streak");
+    toast(hit+"-day streak");
+  }
 }
 
 // keep the old call sites working
@@ -6673,8 +7085,7 @@ function renderWodLogger(ex, ck){
       bb ? "Best "+(isScaled?"scaled":"Rx")+": "+bb.label+"  ·  "+bb.date.slice(5).replace("-","/") : "";
     if(res.pr){
       wrap.classList.remove("wod-pr"); void wrap.offsetWidth; wrap.classList.add("wod-pr");
-      playSfx("exDone");
-      if(navigator.vibrate) navigator.vibrate([25,50,25]);
+      celebrate("pr");
       toast("New PR on "+ex.n);
     } else {
       toast("Result saved");
@@ -7054,7 +7465,7 @@ document.getElementById("qwod-save").addEventListener("click", ()=>{
   renderDash(); updateDashSubtitles();
   if(document.getElementById("tab-progress").classList.contains("on")) renderProgress();
   toast(res.pr ? "New PR on "+name : "Logged "+name);
-  if(res.pr){ playSfx("exDone"); if(navigator.vibrate) navigator.vibrate([25,50,25]); }
+  if(res.pr) celebrate("pr");
 });
 
 // ═══════════════════════════════════════════════════════════════════════
